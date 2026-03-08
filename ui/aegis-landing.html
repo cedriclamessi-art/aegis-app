@@ -4,9 +4,9 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>AEGIS — Votre e-commerce pilote par des agents IA</title>
-  <meta name="description" content="AEGIS automatise votre e-commerce de A a Z. 6 agents IA analysent vos produits, generent les creatives, lancent les campagnes et optimisent vos resultats 24h/24."/>
+  <meta name="description" content="AEGIS automatise votre e-commerce de A a Z. 75 agents IA analysent vos produits, generent les creatives, lancent les campagnes et optimisent vos resultats 24h/24."/>
   <meta property="og:title" content="AEGIS — IA E-Commerce Autonome"/>
-  <meta property="og:description" content="6 agents IA pilotent votre boutique. De l'analyse produit au scaling automatique."/>
+  <meta property="og:description" content="75 agents IA pilotent votre boutique. De l'analyse produit au scaling automatique."/>
   <meta property="og:type" content="website"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -132,20 +132,22 @@
 
     /* ── PRICING ────────────────────────────────────────── */
     #pricing{padding:var(--section-py) 0}
-    .pricing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;max-width:800px;margin:0 auto}
-    .pricing-card{padding:40px 32px;position:relative}
+    .pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1200px;margin:0 auto}
+    .pricing-card{padding:32px 24px;position:relative;display:flex;flex-direction:column}
     .pricing-featured{border:2px solid var(--aegis);box-shadow:0 0 60px var(--aegis-glow)}
-    .pricing-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:var(--font-m);font-size:10px;letter-spacing:.12em;padding:6px 18px;border-radius:100px;background:linear-gradient(135deg,var(--aegis),var(--aegis-bright));color:#fff}
-    .pricing-tier{font-family:var(--font-d);font-size:22px;font-weight:700;margin-bottom:16px}
-    .pricing-price{margin-bottom:12px}
-    .price-amount{font-family:var(--font-d);font-size:48px;font-weight:800;letter-spacing:-.03em}
-    .price-period{font-size:16px;color:var(--mist)}
-    .pricing-desc{font-size:14px;color:var(--ghost);margin-bottom:28px}
-    .pricing-features{list-style:none;margin-bottom:32px}
-    .pricing-features li{font-size:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:10px}
-    .pricing-features .included::before{content:'✓';color:var(--electric);font-weight:700;font-size:14px}
-    .pricing-features .excluded::before{content:'—';color:var(--smoke);font-size:14px}
+    .pricing-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:var(--font-m);font-size:10px;letter-spacing:.12em;padding:6px 18px;border-radius:100px;background:linear-gradient(135deg,var(--aegis),var(--aegis-bright));color:#fff;white-space:nowrap}
+    .pricing-tier{font-family:var(--font-d);font-size:20px;font-weight:700;margin-bottom:12px}
+    .pricing-price{margin-bottom:8px}
+    .price-amount{font-family:var(--font-d);font-size:40px;font-weight:800;letter-spacing:-.03em}
+    .price-period{font-size:14px;color:var(--mist)}
+    .pricing-trial{font-family:var(--font-m);font-size:11px;color:var(--electric);margin-bottom:12px;letter-spacing:.04em}
+    .pricing-desc{font-size:13px;color:var(--ghost);margin-bottom:20px}
+    .pricing-features{list-style:none;margin-bottom:24px;flex:1}
+    .pricing-features li{font-size:13px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:8px}
+    .pricing-features .included::before{content:'✓';color:var(--electric);font-weight:700;font-size:13px}
+    .pricing-features .excluded::before{content:'—';color:var(--smoke);font-size:13px}
     .pricing-features .excluded{color:var(--smoke)}
+    .pricing-commission{font-family:var(--font-m);font-size:11px;color:var(--gold);margin-top:12px;text-align:center;padding:8px;border-radius:8px;background:rgba(255,184,0,.06);border:1px solid rgba(255,184,0,.15)}
 
     /* ── FAQ ────────────────────────────────────────────── */
     #faq{padding:var(--section-py) 0}
@@ -184,7 +186,7 @@
       .features-grid{grid-template-columns:repeat(2,1fr)}
       .steps-row{flex-direction:column;align-items:center;gap:0}
       .step-connector{width:auto;height:40px;padding-top:0;transform:rotate(90deg)}
-      .pricing-grid{grid-template-columns:1fr;max-width:440px}
+      .pricing-grid{grid-template-columns:repeat(2,1fr);max-width:600px}
       .footer-grid{grid-template-columns:1fr 1fr}
     }
     @media(max-width:768px){
@@ -193,6 +195,7 @@
       .mobile-toggle{display:flex}
       .nav-links.mobile-open{display:flex;flex-direction:column;position:absolute;top:72px;left:0;right:0;background:rgba(4,4,8,.95);backdrop-filter:blur(16px);padding:24px;gap:16px;border-bottom:1px solid var(--grid)}
       .features-grid,.testimonials-grid{grid-template-columns:1fr}
+      .pricing-grid{grid-template-columns:1fr;max-width:400px}
       .stats-bar{flex-direction:column;gap:16px;padding:24px}
       .stat-divider{width:100%;height:1px}
       .hero-ctas{flex-direction:column;align-items:center}
@@ -237,7 +240,7 @@
     <div class="container hero-content">
       <div class="hero-badge">
         <span class="badge-dot"></span>
-        <span class="badge-text font-m">PROPULSE PAR 6 AGENTS IA</span>
+        <span class="badge-text font-m">PROPULSE PAR 75 AGENTS IA</span>
       </div>
       <h1 class="hero-title">
         Votre e-commerce<br/>pilote par des <span class="grad-text">agents IA</span>
@@ -247,7 +250,7 @@
         et optimise vos resultats &mdash; 24h/24, sans intervention humaine.
       </p>
       <div class="hero-ctas">
-        <a href="/register" class="btn btn-p btn-lg">Demarrer gratuitement <span style="font-size:20px">&#8594;</span></a>
+        <a href="/register" class="btn btn-p btn-lg">Essai gratuit 15 jours <span style="font-size:20px">&#8594;</span></a>
         <a href="#features" class="btn btn-s btn-lg">Voir les fonctionnalites</a>
       </div>
     </div>
@@ -258,7 +261,7 @@
     <div class="container">
       <div class="stats-bar glass reveal">
         <div class="stat-item">
-          <span class="stat-value" data-count="6">0</span>
+          <span class="stat-value" data-count="75">0</span>
           <span class="stat-label">Agents IA autonomes</span>
         </div>
         <div class="stat-divider"></div>
@@ -285,7 +288,7 @@
     <div class="container">
       <div class="section-header reveal">
         <span class="section-label">FONCTIONNALITES</span>
-        <h2 class="section-title">Six agents IA,<br/>un empire automatise</h2>
+        <h2 class="section-title">75 agents IA,<br/>un empire automatise</h2>
         <p class="section-desc">Chaque agent est specialise. Ensemble, ils pilotent votre business de A a Z.</p>
       </div>
 
@@ -457,37 +460,39 @@
       <div class="section-header reveal">
         <span class="section-label">TARIFS</span>
         <h2 class="section-title">Simple. Transparent.<br/>Sans surprise.</h2>
-        <p class="section-desc">Commencez gratuitement, passez Pro quand vous etes pret a scaler.</p>
+        <p class="section-desc">15 jours d'essai gratuit sur tous les plans. Sans engagement.</p>
       </div>
       <div class="pricing-grid reveal">
         <!-- Starter -->
         <div class="pricing-card glass">
           <div class="pricing-tier">Starter</div>
           <div class="pricing-price">
-            <span class="price-amount">0&#8364;</span>
+            <span class="price-amount">39,99&#8364;</span>
             <span class="price-period">/mois</span>
           </div>
-          <div class="pricing-desc">Pour decouvrir AEGIS et tester sur un premier produit.</div>
+          <div class="pricing-trial">15 jours d'essai gratuit</div>
+          <div class="pricing-desc">Pour lancer votre premier produit avec l'IA.</div>
           <ul class="pricing-features">
-            <li class="included">1 produit actif</li>
-            <li class="included">Analyse de marche basique</li>
-            <li class="included">5 creatives / mois</li>
-            <li class="included">Landing page template</li>
-            <li class="excluded">Campagnes automatisees</li>
-            <li class="excluded">Guardrails avances</li>
-            <li class="excluded">Multi-plateforme</li>
+            <li class="included">3 produits actifs</li>
+            <li class="included">Analyse de marche</li>
+            <li class="included">10 creatives / mois</li>
+            <li class="included">Landing page IA</li>
+            <li class="included">Guardrails basiques</li>
+            <li class="excluded">Campagnes auto Meta/TikTok</li>
+            <li class="excluded">Intelligence concurrentielle</li>
             <li class="excluded">Support prioritaire</li>
           </ul>
-          <a href="/register" class="btn btn-s btn-full">Commencer gratuitement</a>
+          <a href="/register" class="btn btn-s btn-full">Essai gratuit 15 jours</a>
         </div>
         <!-- Pro -->
         <div class="pricing-card glass pricing-featured">
           <div class="pricing-badge font-m">RECOMMANDE</div>
           <div class="pricing-tier">Pro</div>
           <div class="pricing-price">
-            <span class="price-amount">79&#8364;</span>
+            <span class="price-amount">99,99&#8364;</span>
             <span class="price-period">/mois</span>
           </div>
+          <div class="pricing-trial">15 jours d'essai gratuit</div>
           <div class="pricing-desc">Pour les entrepreneurs serieux qui veulent scaler.</div>
           <ul class="pricing-features">
             <li class="included">Produits illimites</li>
@@ -499,7 +504,50 @@
             <li class="included">Meta + TikTok + Shopify</li>
             <li class="included">Support prioritaire 24/7</li>
           </ul>
-          <a href="/register" class="btn btn-p btn-full">Demarrer l'essai gratuit <span style="font-size:18px">&#8594;</span></a>
+          <a href="/register" class="btn btn-p btn-full">Essai gratuit 15 jours &#8594;</a>
+        </div>
+        <!-- Business -->
+        <div class="pricing-card glass">
+          <div class="pricing-tier">Business</div>
+          <div class="pricing-price">
+            <span class="price-amount">499,99&#8364;</span>
+            <span class="price-period">/mois</span>
+          </div>
+          <div class="pricing-trial">15 jours d'essai gratuit</div>
+          <div class="pricing-desc">Pour les equipes et agences qui gerent plusieurs boutiques.</div>
+          <ul class="pricing-features">
+            <li class="included">Tout le plan Pro</li>
+            <li class="included">Multi-boutiques (illimite)</li>
+            <li class="included">75 agents IA actifs</li>
+            <li class="included">CEO Agent autonome</li>
+            <li class="included">Reporting avance</li>
+            <li class="included">API access complet</li>
+            <li class="included">Account manager dedie</li>
+            <li class="included">SLA 99.9% uptime</li>
+          </ul>
+          <a href="/register" class="btn btn-s btn-full">Essai gratuit 15 jours</a>
+          <div class="pricing-commission">+2% commission au-dela de 50k&#8364; CA</div>
+        </div>
+        <!-- Professionnel -->
+        <div class="pricing-card glass" style="border:1px solid var(--gold)">
+          <div class="pricing-tier" style="color:var(--gold)">Professionnel</div>
+          <div class="pricing-price">
+            <span class="price-amount" style="font-size:32px">Sur mesure</span>
+          </div>
+          <div class="pricing-trial" style="color:var(--gold)">Audit gratuit inclus</div>
+          <div class="pricing-desc">Solution sur mesure pour grands comptes et entreprises.</div>
+          <ul class="pricing-features">
+            <li class="included">Tout le plan Business</li>
+            <li class="included">Infrastructure dediee</li>
+            <li class="included">Agents IA personnalises</li>
+            <li class="included">Integration ERP / CRM</li>
+            <li class="included">Formation equipe incluse</li>
+            <li class="included">Support 24/7 telephone</li>
+            <li class="included">Contrat SLA personnalise</li>
+            <li class="included">Data residency EU</li>
+          </ul>
+          <a href="mailto:contact@aegis.io" class="btn btn-s btn-full" style="border-color:var(--gold);color:var(--gold)">Nous contacter</a>
+          <div class="pricing-commission">+2% commission au-dela de 50k&#8364; CA</div>
         </div>
       </div>
     </div>
@@ -515,7 +563,7 @@
       <div class="faq-list reveal">
         <div class="faq-item" onclick="this.classList.toggle('open')">
           <div class="faq-q"><span>Qu'est-ce qu'AEGIS exactement ?</span><span class="faq-icon">+</span></div>
-          <div class="faq-a"><p>AEGIS (Autonomous E-commerce Growth &amp; Intelligence System) est une plateforme qui utilise 6 agents IA specialises pour automatiser votre e-commerce : analyse produit, generation de creatives, lancement de campagnes, protection budget, creation de landing pages et synchronisation multi-plateforme.</p></div>
+          <div class="faq-a"><p>AEGIS (Autonomous E-commerce Growth &amp; Intelligence System) est une plateforme qui utilise 75 agents IA specialises pour automatiser votre e-commerce : analyse produit, generation de creatives, lancement de campagnes, protection budget, creation de landing pages et synchronisation multi-plateforme.</p></div>
         </div>
         <div class="faq-item" onclick="this.classList.toggle('open')">
           <div class="faq-q"><span>Combien de temps faut-il pour configurer AEGIS ?</span><span class="faq-icon">+</span></div>
@@ -548,8 +596,8 @@
       <div class="cta-content reveal">
         <h2>Pret a automatiser<br/>votre e-commerce ?</h2>
         <p>Rejoignez les entrepreneurs qui laissent l'IA faire le travail.</p>
-        <a href="/register" class="btn btn-p btn-lg">Demarrer gratuitement <span style="font-size:20px">&#8594;</span></a>
-        <div class="cta-sub">Aucune carte de credit requise &middot; Annulation a tout moment</div>
+        <a href="/register" class="btn btn-p btn-lg">Essai gratuit 15 jours <span style="font-size:20px">&#8594;</span></a>
+        <div class="cta-sub">Aucune carte de credit requise &middot; 15 jours gratuits &middot; Annulation a tout moment</div>
       </div>
     </div>
   </section>
