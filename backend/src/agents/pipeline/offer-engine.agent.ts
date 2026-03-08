@@ -126,10 +126,16 @@ export class OfferEngineAgent extends AgentBase {
       [task.tenantId, input.productId, JSON.stringify(offer)]
     );
 
-    // Notifie AGENT_LANDING_BUILDER
+    // Notifie AGENT_STORE_BUILDER pour generer la landing page
     await db.query(
-      `SELECT agents.send_message($1,'AGENT_LANDING_BUILDER','build.landing_page',$2,$3,4)`,
+      `SELECT agents.send_message($1,'AGENT_STORE_BUILDER','store.build_landing',$2,$3,4)`,
       [this.agentId, JSON.stringify({ productId: input.productId }), task.tenantId]
+    );
+
+    // Notifie AGENT_FUNNEL_ENGINE pour construire le funnel complet
+    await db.query(
+      `SELECT agents.send_message($1,'AGENT_FUNNEL_ENGINE','funnel.build_complete',$2,$3,5)`,
+      [this.agentId, JSON.stringify({ productId: input.productId, packs }), task.tenantId]
     );
 
     logger.info(`[OFFER_ENGINE] ${packs.length} packs générés pour ${name}`);

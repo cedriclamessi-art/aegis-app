@@ -97,8 +97,8 @@ const PIPELINE_STEPS_TEMPLATE: Array<{ id: string; name: string; agent: string }
   },
   {
     id: 'ANALYZE',
-    name: 'Analyse marche & detection winner',
-    agent: 'market-intel + winner-detector',
+    name: 'Analyse marche & psycho-marketing & detection winner',
+    agent: 'market-intel + psycho-marketing + winner-detector',
   },
   {
     id: 'VALIDATE',
@@ -107,13 +107,13 @@ const PIPELINE_STEPS_TEMPLATE: Array<{ id: string; name: string; agent: string }
   },
   {
     id: 'BUILD_OFFER',
-    name: 'Construction offre commerciale',
-    agent: 'offer-engine + money-model',
+    name: 'Construction offre commerciale + funnel',
+    agent: 'offer-engine + funnel-engine + money-model',
   },
   {
     id: 'BUILD_PAGE',
-    name: 'Creation landing page & contenu',
-    agent: 'creative-factory',
+    name: 'Creation landing page, copy & contenu',
+    agent: 'store-builder + copy-chief',
   },
   {
     id: 'CREATE_ADS',
@@ -127,8 +127,8 @@ const PIPELINE_STEPS_TEMPLATE: Array<{ id: string; name: string; agent: string }
   },
   {
     id: 'ANALYZE_RESULTS',
-    name: 'Analyse resultats & classification',
-    agent: 'dct-iteration + evaluator',
+    name: 'Analyse resultats 48h & classification CONDOR/TOF/BOF/DEAD',
+    agent: 'results-48h + dct-iteration + evaluator',
   },
   {
     id: 'SCALE',
