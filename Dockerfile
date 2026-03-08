@@ -3,8 +3,8 @@
 # Stage 1: Install deps + compile TypeScript
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY backend/package*.json backend/
-RUN cd backend && npm ci
+COPY backend/package.json backend/
+RUN cd backend && npm install --production=false
 COPY backend/ backend/
 RUN cd backend && npm run build
 
