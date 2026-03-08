@@ -1,0 +1,357 @@
+/* ================================================================
+   AEGIS — Design Tokens & CSS Variables
+   Version: 1.0.0 | Dark Intelligence Platform
+   Usage: import in globals.css or tailwind theme
+   ================================================================ */
+
+:root {
+
+  /* ── COLORS ────────────────────────────────────────────────── */
+
+  /* Brand */
+  --color-aegis-500:   #6E3DFF;
+  --color-aegis-400:   #8B5FFF;
+  --color-aegis-300:   #A07FFF;
+  --color-aegis-600:   #5428DD;
+  --color-aegis-700:   #3D1AB5;
+  --color-aegis-900:   #1A0A60;
+
+  /* Signal (electric teal — data, active states) */
+  --color-signal-500:  #00F5C8;
+  --color-signal-400:  #33F7D2;
+  --color-signal-600:  #00C9A4;
+
+  /* Danger (plasma red — alerts, stop-loss) */
+  --color-danger-500:  #FF3D6E;
+  --color-danger-400:  #FF6B8E;
+  --color-danger-600:  #CC1F4F;
+
+  /* Warning (gold — caution, revive) */
+  --color-warning-500: #FFB800;
+  --color-warning-400: #FFC733;
+  --color-warning-600: #CC9200;
+
+  /* Success (green) */
+  --color-success-500: #22C55E;
+  --color-success-400: #4ADE80;
+
+  /* Neutrals — Dark surfaces */
+  --color-void:        #040408;
+  --color-obsidian:    #0A0A12;
+  --color-carbon:      #0F0F1A;
+  --color-graphite:    #1A1A2E;
+  --color-grid:        #1E1E35;
+  --color-smoke:       #3A3A5C;
+  --color-mist:        #6B6B9A;
+  --color-ghost:       #9898C0;
+  --color-silver:      #C8C8E0;
+  --color-white:       #F0F0FF;
+
+  /* Semantic (UI states) */
+  --color-bg-primary:   var(--color-void);
+  --color-bg-surface:   var(--color-obsidian);
+  --color-bg-elevated:  var(--color-carbon);
+  --color-bg-overlay:   var(--color-graphite);
+
+  --color-border-subtle:  var(--color-grid);
+  --color-border-default: var(--color-smoke);
+  --color-border-strong:  var(--color-mist);
+
+  --color-text-primary:   var(--color-white);
+  --color-text-secondary: var(--color-silver);
+  --color-text-tertiary:  var(--color-ghost);
+  --color-text-disabled:  var(--color-mist);
+
+  --color-brand:       var(--color-aegis-500);
+  --color-brand-hover: var(--color-aegis-400);
+
+  --color-active-bg:    rgba(0, 245, 200, 0.1);
+  --color-active-text:  var(--color-signal-500);
+  --color-active-border: var(--color-signal-500);
+
+  --color-warning-bg:   rgba(255, 184, 0, 0.1);
+  --color-danger-bg:    rgba(255, 61, 110, 0.1);
+
+  /* ── TYPOGRAPHY ─────────────────────────────────────────────── */
+
+  --font-display:  'Syne', sans-serif;
+  --font-body:     'Syne', sans-serif;
+  --font-mono:     'Space Mono', monospace;
+  --font-accent:   'Instrument Serif', serif;
+
+  /* Scale (px → rem: divide by 16) */
+  --text-xs:   0.75rem;    /* 12px */
+  --text-sm:   0.875rem;   /* 14px */
+  --text-base: 1.0625rem;  /* 17px */
+  --text-lg:   1.125rem;   /* 18px */
+  --text-xl:   1.25rem;    /* 20px */
+  --text-2xl:  1.5rem;     /* 24px */
+  --text-3xl:  1.875rem;   /* 30px */
+  --text-4xl:  2.25rem;    /* 36px */
+  --text-5xl:  3rem;       /* 48px */
+  --text-6xl:  4rem;       /* 64px */
+  --text-hero: 5rem;       /* 80px */
+
+  /* Weights */
+  --font-regular:   400;
+  --font-medium:    500;
+  --font-semibold:  600;
+  --font-bold:      700;
+  --font-extrabold: 800;
+
+  /* Line heights */
+  --leading-tight:  0.95;
+  --leading-snug:   1.1;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  /* Letter spacing */
+  --tracking-tight:  -0.04em;
+  --tracking-snug:   -0.03em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.05em;
+  --tracking-wider:  0.1em;
+  --tracking-widest: 0.3em;
+
+  /* ── SPACING (base 8px) ─────────────────────────────────────── */
+
+  --space-0:    0px;
+  --space-px:   1px;
+  --space-0-5:  2px;
+  --space-1:    4px;
+  --space-2:    8px;
+  --space-3:    12px;
+  --space-4:    16px;
+  --space-5:    20px;
+  --space-6:    24px;
+  --space-8:    32px;
+  --space-10:   40px;
+  --space-12:   48px;
+  --space-16:   64px;
+  --space-20:   80px;
+  --space-24:   96px;
+  --space-32:   128px;
+
+  /* Section padding */
+  --section-padding-y:  120px;
+  --section-padding-x:  80px;
+  --container-max:      1280px;
+  --container-pad:      24px;
+
+  /* ── BORDERS & RADIUS ───────────────────────────────────────── */
+
+  --radius-none:  0px;
+  --radius-sm:    2px;
+  --radius-md:    4px;
+  --radius-lg:    8px;
+  --radius-xl:    12px;
+  --radius-full:  9999px;
+
+  /* Border widths */
+  --border-thin:    1px;
+  --border-default: 1px;
+  --border-thick:   2px;
+
+  /* ── SHADOWS ────────────────────────────────────────────────── */
+
+  --shadow-none:  none;
+  --shadow-sm:    0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md:    0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg:    0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-brand: 0 0 24px rgba(110, 61, 255, 0.3);
+  --shadow-signal: 0 0 16px rgba(0, 245, 200, 0.25);
+  --shadow-danger: 0 0 16px rgba(255, 61, 110, 0.25);
+
+  /* ── TRANSITIONS ────────────────────────────────────────────── */
+
+  --duration-fast:    150ms;
+  --duration-base:    250ms;
+  --duration-slow:    400ms;
+  --duration-slower:  600ms;
+
+  --ease-out:     cubic-bezier(0, 0, 0.2, 1);
+  --ease-in:      cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --transition-base:  all var(--duration-base) var(--ease-out);
+  --transition-fast:  all var(--duration-fast) var(--ease-out);
+
+  /* ── Z-INDEX ────────────────────────────────────────────────── */
+
+  --z-base:     0;
+  --z-raised:   10;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-overlay:  300;
+  --z-modal:    400;
+  --z-toast:    500;
+  --z-top:      999;
+
+  /* ── BREAKPOINTS (reference only — use in media queries) ─────── */
+  /* --bp-sm:  640px  */
+  /* --bp-md:  768px  */
+  /* --bp-lg:  1024px */
+  /* --bp-xl:  1280px */
+  /* --bp-2xl: 1536px */
+
+  /* ── GRID ────────────────────────────────────────────────────── */
+
+  --grid-cols-desktop: 12;
+  --grid-gap-desktop:  24px;
+  --grid-cols-mobile:  4;
+  --grid-gap-mobile:   16px;
+}
+
+/* ================================================================
+   COMPONENT TOKENS
+   ================================================================ */
+
+/* Buttons */
+:root {
+  --btn-primary-bg:           var(--color-aegis-500);
+  --btn-primary-bg-hover:     var(--color-aegis-400);
+  --btn-primary-text:         var(--color-white);
+  --btn-primary-padding:      14px 32px;
+  --btn-primary-font:         var(--font-display);
+  --btn-primary-weight:       var(--font-bold);
+  --btn-primary-tracking:     var(--tracking-wide);
+  --btn-primary-radius:       var(--radius-none);  /* Sharp edges — systemic */
+
+  --btn-secondary-bg:         transparent;
+  --btn-secondary-border:     1px solid var(--color-aegis-500);
+  --btn-secondary-text:       var(--color-aegis-300);
+  --btn-secondary-bg-hover:   rgba(110, 61, 255, 0.1);
+
+  --btn-ghost-text:           var(--color-ghost);
+  --btn-ghost-border:         1px solid var(--color-smoke);
+  --btn-ghost-bg-hover:       var(--color-graphite);
+
+  --btn-danger-bg:            rgba(255, 61, 110, 0.15);
+  --btn-danger-border:        1px solid var(--color-danger-500);
+  --btn-danger-text:          var(--color-danger-500);
+}
+
+/* Cards */
+:root {
+  --card-bg:            var(--color-carbon);
+  --card-border:        1px solid var(--color-grid);
+  --card-padding:       32px;
+  --card-radius:        var(--radius-none);
+  --card-bg-hover:      var(--color-graphite);
+  --card-border-hover:  1px solid var(--color-smoke);
+  --card-shadow:        none;
+  --card-shadow-hover:  var(--shadow-brand);
+}
+
+/* KPI Cards */
+:root {
+  --kpi-bg:             var(--color-carbon);
+  --kpi-border:         1px solid var(--color-grid);
+  --kpi-label-font:     var(--font-mono);
+  --kpi-label-size:     var(--text-xs);
+  --kpi-label-tracking: var(--tracking-widest);
+  --kpi-label-color:    var(--color-mist);
+  --kpi-value-font:     var(--font-display);
+  --kpi-value-weight:   var(--font-extrabold);
+  --kpi-value-size:     var(--text-3xl);
+  --kpi-value-color:    var(--color-signal-500);
+}
+
+/* Agent Status Badges */
+:root {
+  --badge-font:         var(--font-mono);
+  --badge-size:         var(--text-xs);
+  --badge-tracking:     var(--tracking-wider);
+  --badge-padding:      4px 12px;
+  --badge-radius:       var(--radius-none);
+
+  --badge-active-bg:    rgba(0, 245, 200, 0.08);
+  --badge-active-border: 1px solid var(--color-signal-500);
+  --badge-active-text:  var(--color-signal-500);
+
+  --badge-warning-bg:   rgba(255, 184, 0, 0.08);
+  --badge-warning-border: 1px solid var(--color-warning-500);
+  --badge-warning-text: var(--color-warning-500);
+
+  --badge-error-bg:     rgba(255, 61, 110, 0.08);
+  --badge-error-border: 1px solid var(--color-danger-500);
+  --badge-error-text:   var(--color-danger-500);
+
+  --badge-idle-bg:      transparent;
+  --badge-idle-border:  1px solid var(--color-smoke);
+  --badge-idle-text:    var(--color-ghost);
+}
+
+/* Inputs */
+:root {
+  --input-bg:           var(--color-graphite);
+  --input-border:       1px solid var(--color-smoke);
+  --input-border-focus: 1px solid var(--color-aegis-500);
+  --input-text:         var(--color-white);
+  --input-placeholder:  var(--color-mist);
+  --input-radius:       var(--radius-sm);
+  --input-padding:      12px 16px;
+  --input-font:         var(--font-body);
+}
+
+/* Sidebar */
+:root {
+  --sidebar-bg:         var(--color-obsidian);
+  --sidebar-width:      240px;
+  --sidebar-border:     1px solid var(--color-grid);
+  --sidebar-item-hover: var(--color-carbon);
+  --sidebar-item-active-bg: rgba(110, 61, 255, 0.12);
+  --sidebar-item-active-border: 2px solid var(--color-aegis-500);
+}
+
+/* Navigation */
+:root {
+  --nav-bg:             rgba(4, 4, 8, 0.9);
+  --nav-backdrop:       blur(20px);
+  --nav-border:         1px solid var(--color-grid);
+  --nav-height:         64px;
+}
+
+/* Charts */
+:root {
+  --chart-primary:      var(--color-aegis-500);
+  --chart-secondary:    var(--color-signal-500);
+  --chart-danger:       var(--color-danger-500);
+  --chart-warning:      var(--color-warning-500);
+  --chart-grid:         var(--color-grid);
+  --chart-text:         var(--color-mist);
+  --chart-bg:           var(--color-carbon);
+}
+
+/* ================================================================
+   TAILWIND CONFIG EXTENSION (tailwind.config.js reference)
+   ================================================================
+
+   theme: {
+     extend: {
+       colors: {
+         aegis: {
+           300: '#A07FFF', 400: '#8B5FFF', 500: '#6E3DFF',
+           600: '#5428DD', 700: '#3D1AB5', 900: '#1A0A60',
+         },
+         signal: { 400: '#33F7D2', 500: '#00F5C8', 600: '#00C9A4' },
+         plasma: { 400: '#FF6B8E', 500: '#FF3D6E', 600: '#CC1F4F' },
+         void: '#040408',
+         obsidian: '#0A0A12',
+         carbon: '#0F0F1A',
+         graphite: '#1A1A2E',
+         smoke: '#3A3A5C',
+         mist: '#6B6B9A',
+         ghost: '#9898C0',
+       },
+       fontFamily: {
+         display: ['Syne', 'sans-serif'],
+         mono: ['Space Mono', 'monospace'],
+         accent: ['Instrument Serif', 'serif'],
+       },
+       borderRadius: { none: '0px', sm: '2px', md: '4px', lg: '8px' },
+     }
+   }
+
+   ================================================================ */

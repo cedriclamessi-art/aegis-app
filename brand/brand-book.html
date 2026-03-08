@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS — Brand Identity System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #040408;
+    --obsidian: #0A0A12;
+    --carbon: #0F0F1A;
+    --graphite: #1A1A2E;
+    --grid: #1E1E35;
+    --aegis: #6E3DFF;
+    --aegis-bright: #8B5FFF;
+    --aegis-pale: #A07FFF;
+    --electric: #00F5C8;
+    --plasma: #FF3D6E;
+    --gold: #FFB800;
+    --smoke: #3A3A5C;
+    --mist: #6B6B9A;
+    --ghost: #9898C0;
+    --silver: #C8C8E0;
+    --white: #F0F0FF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    background: var(--void);
+    color: var(--white);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ── GRID LINES ── */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(110,61,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110,61,255,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .section {
+    position: relative;
+    padding: 120px 80px;
+    max-width: 1400px;
+    margin: 0 auto;
+    z-index: 1;
+  }
+
+  .section-full {
+    position: relative;
+    padding: 0;
+    z-index: 1;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 60px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover-orb {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(110,61,255,0.25) 0%, rgba(110,61,255,0.05) 40%, transparent 70%);
+    top: -200px;
+    right: -200px;
+    pointer-events: none;
+  }
+
+  .cover-orb2 {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,245,200,0.08) 0%, transparent 70%);
+    bottom: 100px;
+    left: 200px;
+    pointer-events: none;
+  }
+
+  .cover-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--mist);
+    text-transform: uppercase;
+  }
+
+  .cover-logo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .logo-hex {
+    width: 64px;
+    height: 64px;
+    position: relative;
+  }
+
+  .logo-hex svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-wordmark {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 72px;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, var(--aegis-pale) 50%, var(--electric) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cover-tagline {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ghost);
+    letter-spacing: 0.02em;
+    max-width: 500px;
+  }
+
+  .cover-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .cover-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--smoke);
+    line-height: 2;
+  }
+
+  .cover-scan {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--mist);
+    text-align: right;
+    line-height: 2;
+  }
+
+  /* ── SECTION LABELS ── */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--aegis);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section-label::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--aegis);
+  }
+
+  .section-title {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 60px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--grid) 20%, var(--smoke) 50%, var(--grid) 80%, transparent);
+    margin: 0 80px;
+  }
+
+  /* ── LOGO SECTION ── */
+  .logo-section-bg {
+    background: var(--obsidian);
+    padding: 100px 80px;
+  }
+
+  .logo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    margin-top: 60px;
+  }
+
+  .logo-variant {
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .lv-dark { background: var(--carbon); }
+  .lv-light { background: var(--white); }
+  .lv-purple { background: var(--aegis); }
+
+  .logo-variant-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    opacity: 0.5;
+    margin-top: 16px;
+  }
+
+  .logo-display {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 40px;
+    letter-spacing: -0.03em;
+  }
+
+  .logo-display.dark { color: var(--white); }
+  .logo-display.light { color: var(--obsidian); }
+  .logo-display.on-purple { color: var(--white); }
+
+  .logo-display .accent { color: var(--electric); }
+  .logo-display.light .accent { color: var(--aegis); }
+  .logo-display.on-purple .accent { color: var(--electric); }
+
+  .logo-icon-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ── SYMBOL ANATOMY ── */
+  .symbol-anatomy {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    margin-top: 60px;
+    align-items: center;
+  }
+
+  .symbol-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 80px;
+    background: var(--graphite);
+    border: 1px solid var(--grid);
+  }
+
+  .symbol-main svg {
+    width: 200px;
+    height: 200px;
+  }
+
+  .symbol-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .symbol-note {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .symbol-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  .symbol-note-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    color: var(--silver);
+  }
+
+  .symbol-note-text {
+    font-size: 13px;
+    color: var(--mist);
+    line-height: 1.6;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ── COLORS ── */
+  .color-section-bg {
+    background: var(--carbon);
+    padding: 100px 80px;
+  }
+
+  .color-primary-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    height: 200px;
+    margin-bottom: 2px;
+  }
+
+  .color-swatch {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: flex 0.3s ease;
+  }
+
+  .color-swatch:hover { flex: 1.5; }
+
+  .swatch-name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .swatch-hex {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  .swatch-tag {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    opacity: 0.5;
+    text-transform: uppercase;
+  }
+
+  .color-secondary-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    height: 120px;
+  }
+
+  .color-semantic-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: 100px;
+    margin-top: 2px;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .type-section-bg {
+    background: var(--obsidian);
+    padding: 100px 80px;
+  }
+
+  .type-specimen {
+    border-top: 1px solid var(--grid);
+    padding: 48px 0;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .type-meta {
+    padding-top: 8px;
+  }
+
+  .type-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--aegis);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .type-spec {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--mist);
+    line-height: 2;
+  }
+
+  .type-sample-display {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 80px;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    color: var(--white);
+  }
+
+  .type-sample-heading {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 48px;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .type-sample-body {
+    font-family: 'Syne', sans-serif;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ghost);
+    max-width: 600px;
+  }
+
+  .type-sample-mono {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--electric);
+  }
+
+  .type-sample-serif {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 36px;
+    color: var(--ghost);
+    line-height: 1.3;
+  }
+
+  /* ── TYPOGRAPHY SCALE ── */
+  .type-scale {
+    margin-top: 60px;
+    background: var(--graphite);
+    border: 1px solid var(--grid);
+  }
+
+  .scale-row {
+    display: flex;
+    align-items: baseline;
+    gap: 32px;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--grid);
+  }
+
+  .scale-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--mist);
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .scale-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  /* ── BRAND VOICE ── */
+  .voice-section-bg {
+    background: var(--carbon);
+    padding: 100px 80px;
+  }
+
+  .voice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 60px;
+  }
+
+  .voice-card {
+    background: var(--graphite);
+    padding: 48px;
+    border: 1px solid var(--grid);
+  }
+
+  .voice-card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .vc-do { border-top: 2px solid var(--electric); }
+  .vc-dont { border-top: 2px solid var(--plasma); }
+  .vc-do .voice-card-label { color: var(--electric); }
+  .vc-dont .voice-card-label { color: var(--plasma); }
+
+  .voice-example {
+    margin-bottom: 20px;
+  }
+
+  .voice-quote {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    color: var(--silver);
+  }
+
+  .voice-note {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--mist);
+  }
+
+  .voice-pillars {
+    margin-top: 60px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+  }
+
+  .voice-pillar {
+    background: var(--obsidian);
+    border: 1px solid var(--grid);
+    padding: 40px 32px;
+    text-align: center;
+  }
+
+  .pillar-icon {
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+
+  .pillar-name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+    color: var(--aegis-pale);
+  }
+
+  .pillar-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--mist);
+    line-height: 1.7;
+  }
+
+  /* ── MOTION ── */
+  .motion-section-bg {
+    background: var(--obsidian);
+    padding: 100px 80px;
+  }
+
+  .motion-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 60px;
+  }
+
+  .motion-demo {
+    background: var(--graphite);
+    border: 1px solid var(--grid);
+    padding: 48px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    cursor: pointer;
+  }
+
+  .motion-element {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* Pulse */
+  .m-pulse {
+    width: 20px;
+    height: 20px;
+    background: var(--electric);
+    border-radius: 50%;
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(0,245,200,0.6); transform: scale(1); }
+    70% { box-shadow: 0 0 0 20px rgba(0,245,200,0); transform: scale(1.05); }
+    100% { box-shadow: 0 0 0 0 rgba(0,245,200,0); transform: scale(1); }
+  }
+
+  /* Scan line */
+  .m-scan {
+    width: 60px;
+    height: 60px;
+    border: 1px solid var(--smoke);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .m-scan::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--aegis), transparent);
+    animation: scan 1.8s ease-in-out infinite;
+  }
+
+  @keyframes scan { 0%, 100% { top: 0; } 50% { top: calc(100% - 2px); } }
+
+  /* Blink */
+  .m-blink {
+    width: 2px;
+    height: 30px;
+    background: var(--aegis-bright);
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  .motion-name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--silver);
+  }
+
+  .motion-spec {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--mist);
+    text-align: center;
+    line-height: 1.8;
+  }
+
+  /* ── PHOTOGRAPHY / VISUAL DIRECTION ── */
+  .visual-section-bg {
+    background: var(--carbon);
+    padding: 100px 80px;
+  }
+
+  .visual-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+  }
+
+  .visual-card {
+    aspect-ratio: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 16px;
+  }
+
+  .vc1 {
+    background: linear-gradient(135deg, var(--graphite) 0%, var(--void) 100%);
+    border: 1px solid var(--grid);
+  }
+
+  .vc2 {
+    background: radial-gradient(circle at 30% 70%, rgba(110,61,255,0.3) 0%, var(--void) 60%);
+    border: 1px solid var(--grid);
+  }
+
+  .vc3 {
+    background: radial-gradient(circle at 70% 30%, rgba(0,245,200,0.15) 0%, var(--void) 60%);
+    border: 1px solid var(--grid);
+  }
+
+  .vc4 {
+    background: linear-gradient(225deg, rgba(255,61,110,0.15) 0%, var(--void) 60%);
+    border: 1px solid var(--grid);
+  }
+
+  .visual-content {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .grid-mini {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    width: 80%;
+  }
+
+  .grid-mini-cell {
+    aspect-ratio: 1;
+    background: rgba(110,61,255,0.15);
+    border: 1px solid rgba(110,61,255,0.3);
+  }
+
+  .grid-mini-cell.active {
+    background: var(--aegis);
+  }
+
+  .chart-mini {
+    width: 80%;
+    height: 80px;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+  }
+
+  .bar {
+    flex: 1;
+    background: var(--electric);
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+
+  .bar:hover { opacity: 1; }
+
+  .orbit-mini {
+    width: 100px;
+    height: 100px;
+    position: relative;
+  }
+
+  .orbit-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(110,61,255,0.4);
+  }
+
+  .or1 { inset: 0; }
+  .or2 { inset: 15px; border-color: rgba(0,245,200,0.3); }
+  .or3 { inset: 30px; border-color: rgba(255,61,110,0.3); }
+
+  .orbit-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--electric);
+    top: -3px;
+    left: calc(50% - 3px);
+    animation: orbit 3s linear infinite;
+    transform-origin: center 53px;
+  }
+
+  @keyframes orbit { to { transform: rotate(360deg); } }
+
+  .hex-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 24px);
+    gap: 3px;
+  }
+
+  .hex {
+    width: 24px;
+    height: 24px;
+    background: rgba(110,61,255,0.2);
+    clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+    transition: background 0.3s;
+  }
+
+  .hex:nth-child(odd) { background: rgba(110,61,255,0.4); }
+  .hex:nth-child(3n) { background: rgba(0,245,200,0.2); }
+
+  .visual-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--mist);
+    text-transform: uppercase;
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+  }
+
+  /* ── SPACING SYSTEM ── */
+  .spacing-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0;
+    margin-top: 60px;
+    background: var(--graphite);
+    border: 1px solid var(--grid);
+    padding: 40px;
+    align-items: flex-end;
+  }
+
+  .space-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px;
+  }
+
+  .space-bar {
+    background: var(--aegis);
+    width: 24px;
+    opacity: 0.8;
+  }
+
+  .space-token {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--mist);
+    text-align: center;
+  }
+
+  /* ── USAGE ── */
+  .usage-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    margin-top: 60px;
+  }
+
+  .usage-card {
+    background: var(--graphite);
+    border: 1px solid var(--grid);
+    overflow: hidden;
+  }
+
+  .usage-preview {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .button-preview {
+    background: var(--aegis);
+    color: white;
+    padding: 14px 32px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .button-preview::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .button-preview:hover::after { transform: translateX(0); }
+
+  .badge-preview {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .badge {
+    padding: 4px 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+
+  .badge-active { border-color: var(--electric); color: var(--electric); }
+  .badge-paused { border-color: var(--gold); color: var(--gold); }
+  .badge-error { border-color: var(--plasma); color: var(--plasma); }
+  .badge-default { border-color: var(--smoke); color: var(--ghost); }
+
+  .card-preview {
+    background: var(--carbon);
+    border: 1px solid var(--grid);
+    padding: 20px;
+    width: 200px;
+  }
+
+  .card-preview-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--mist);
+    margin-bottom: 8px;
+  }
+
+  .card-preview-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--electric);
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .card-preview-sub {
+    font-size: 11px;
+    color: var(--mist);
+  }
+
+  .usage-info {
+    padding: 24px;
+    border-top: 1px solid var(--grid);
+  }
+
+  .usage-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .usage-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--mist);
+    line-height: 1.7;
+  }
+
+  /* ── BACK COVER ── */
+  .back-cover {
+    min-height: 50vh;
+    background: var(--obsidian);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .back-cover-line {
+    width: 300px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--aegis), transparent);
+  }
+
+  .back-cover-text {
+    text-align: center;
+  }
+
+  .back-cover-brand {
+    font-weight: 800;
+    font-size: 48px;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, var(--white) 0%, var(--aegis-pale) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .back-cover-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--mist);
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  /* ── UTILITIES ── */
+  .mt-0 { margin-top: 0; }
+  .mt-40 { margin-top: 40px; }
+  .mt-60 { margin-top: 60px; }
+  .text-electric { color: var(--electric); }
+  .text-aegis { color: var(--aegis-pale); }
+  .text-ghost { color: var(--ghost); }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-orb"></div>
+  <div class="cover-orb2"></div>
+
+  <div class="cover-tag">BRAND IDENTITY SYSTEM — CONFIDENTIEL V1.0</div>
+
+  <div class="cover-logo">
+    <div class="logo-mark">
+      <div class="logo-hex">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="32,2 62,18 62,46 32,62 2,46 2,18" fill="none" stroke="#6E3DFF" stroke-width="1.5"/>
+          <polygon points="32,10 54,22 54,42 32,54 10,42 10,22" fill="rgba(110,61,255,0.1)" stroke="#6E3DFF" stroke-width="1"/>
+          <line x1="32" y1="10" x2="32" y2="54" stroke="rgba(110,61,255,0.4)" stroke-width="0.5"/>
+          <line x1="10" y1="22" x2="54" y2="42" stroke="rgba(0,245,200,0.3)" stroke-width="0.5"/>
+          <line x1="54" y1="22" x2="10" y2="42" stroke="rgba(0,245,200,0.3)" stroke-width="0.5"/>
+          <circle cx="32" cy="32" r="4" fill="#6E3DFF"/>
+          <circle cx="32" cy="32" r="2" fill="#00F5C8"/>
+        </svg>
+      </div>
+      <div class="logo-wordmark">AEGIS</div>
+    </div>
+    <div class="cover-tagline">The autonomous intelligence<br>that never sleeps.</div>
+  </div>
+
+  <div class="cover-bottom">
+    <div class="cover-meta">
+      DOCUMENT TYPE: Brand Identity System<br>
+      VERSION: 1.0.0<br>
+      CLASSIFICATION: Internal + Partners<br>
+      MARKET: EU / FR
+    </div>
+    <div class="cover-scan">
+      SECTIONS: 7<br>
+      PAGES: COMPLET<br>
+      STATUS: APPROVED<br>
+      © 2025 AEGIS SYSTEMS
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 01 — LOGO SYSTEM -->
+<div class="logo-section-bg">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="section-label">01 — Logo System</div>
+    <div class="section-title">L'identité<br><span class="text-aegis">visuelle</span> du système.</div>
+
+    <div class="logo-grid">
+      <!-- Dark -->
+      <div class="logo-variant lv-dark">
+        <div class="logo-icon-row">
+          <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
+            <polygon points="32,2 62,18 62,46 32,62 2,46 2,18" fill="none" stroke="#6E3DFF" stroke-width="1.5"/>
+            <polygon points="32,10 54,22 54,42 32,54 10,42 10,22" fill="rgba(110,61,255,0.1)" stroke="#6E3DFF" stroke-width="1"/>
+            <circle cx="32" cy="32" r="4" fill="#6E3DFF"/><circle cx="32" cy="32" r="2" fill="#00F5C8"/>
+          </svg>
+          <span class="logo-display dark">AEGIS</span>
+        </div>
+        <div class="logo-variant-label">FOND SOMBRE — PRIMAIRE</div>
+      </div>
+
+      <!-- Light -->
+      <div class="logo-variant lv-light">
+        <div class="logo-icon-row">
+          <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
+            <polygon points="32,2 62,18 62,46 32,62 2,46 2,18" fill="none" stroke="#5B2D8E" stroke-width="1.5"/>
+            <polygon points="32,10 54,22 54,42 32,54 10,42 10,22" fill="rgba(91,45,142,0.08)" stroke="#5B2D8E" stroke-width="1"/>
+            <circle cx="32" cy="32" r="4" fill="#5B2D8E"/><circle cx="32" cy="32" r="2" fill="#6E3DFF"/>
+          </svg>
+          <span class="logo-display light">AEGIS</span>
+        </div>
+        <div class="logo-variant-label" style="color:#999;">FOND CLAIR — SECONDAIRE</div>
+      </div>
+
+      <!-- Purple -->
+      <div class="logo-variant lv-purple">
+        <div class="logo-icon-row">
+          <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
+            <polygon points="32,2 62,18 62,46 32,62 2,46 2,18" fill="none" stroke="white" stroke-width="1.5"/>
+            <polygon points="32,10 54,22 54,42 32,54 10,42 10,22" fill="rgba(255,255,255,0.1)" stroke="white" stroke-width="1"/>
+            <circle cx="32" cy="32" r="4" fill="white"/><circle cx="32" cy="32" r="2" fill="#00F5C8"/>
+          </svg>
+          <span class="logo-display on-purple">AEGIS</span>
+        </div>
+        <div class="logo-variant-label">FOND BRAND — ACCENT</div>
+      </div>
+    </div>
+
+    <!-- Symbol Anatomy -->
+    <div style="margin-top:80px;">
+      <div class="section-label" style="margin-bottom:0;">Anatomie du symbole</div>
+      <div class="symbol-anatomy">
+        <div class="symbol-main">
+          <svg width="200" height="200" viewBox="0 0 64 64" fill="none">
+            <polygon points="32,2 62,18 62,46 32,62 2,46 2,18" fill="none" stroke="#6E3DFF" stroke-width="1"/>
+            <polygon points="32,10 54,22 54,42 32,54 10,42 10,22" fill="rgba(110,61,255,0.08)" stroke="#6E3DFF" stroke-width="0.75"/>
+            <line x1="32" y1="10" x2="32" y2="54" stroke="rgba(110,61,255,0.35)" stroke-width="0.5"/>
+            <line x1="10" y1="22" x2="54" y2="42" stroke="rgba(0,245,200,0.25)" stroke-width="0.5"/>
+            <line x1="54" y1="22" x2="10" y2="42" stroke="rgba(0,245,200,0.25)" stroke-width="0.5"/>
+            <circle cx="32" cy="32" r="5" fill="none" stroke="#6E3DFF" stroke-width="0.75"/>
+            <circle cx="32" cy="32" r="3" fill="#6E3DFF"/>
+            <circle cx="32" cy="32" r="1.5" fill="#00F5C8"/>
+            <!-- Annotation points -->
+            <circle cx="32" cy="2" r="2" fill="#FF3D6E" opacity="0.8"/>
+            <circle cx="62" cy="18" r="2" fill="#FFB800" opacity="0.8"/>
+            <circle cx="32" cy="32" r="2" fill="#00F5C8" opacity="0.8"/>
+          </svg>
+        </div>
+
+        <div class="symbol-notes">
+          <div class="symbol-note">
+            <div class="symbol-dot" style="background:var(--plasma);"></div>
+            <div>
+              <div class="symbol-note-title">Hexagone Externe</div>
+              <div class="symbol-note-text">Structure de défense périmétrique.<br>Représente les guardrails du système AEGIS.</div>
+            </div>
+          </div>
+          <div class="symbol-note">
+            <div class="symbol-dot" style="background:var(--gold);"></div>
+            <div>
+              <div class="symbol-note-title">Hexagone Interne</div>
+              <div class="symbol-note-text">Couche d'intelligence opérationnelle.<br>Les 23 agents en réseau concentrique.</div>
+            </div>
+          </div>
+          <div class="symbol-note">
+            <div class="symbol-dot" style="background:var(--electric);"></div>
+            <div>
+              <div class="symbol-note-title">Nœud Central</div>
+              <div class="symbol-note-text">AGENT_CEO — le cerveau décisionnel.<br>Point de convergence de toute l'intelligence.</div>
+            </div>
+          </div>
+          <div class="symbol-note">
+            <div class="symbol-dot" style="background:var(--aegis-pale);"></div>
+            <div>
+              <div class="symbol-note-title">Lignes Axiales</div>
+              <div class="symbol-note-text">Flux de communication inter-agents.<br>Signal électrique = décision autonome.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 02 — COLOR SYSTEM -->
+<div class="color-section-bg">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="section-label">02 — Color System</div>
+    <div class="section-title">Des couleurs qui<br><span class="text-electric">signalent</span>, pas qui décorent.</div>
+
+    <!-- Primary Colors -->
+    <div style="margin-top:60px;">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.3em;color:var(--mist);margin-bottom:12px;">COULEURS PRIMAIRES</div>
+      <div class="color-primary-row">
+        <div class="color-swatch" style="background:#6E3DFF;">
+          <div class="swatch-tag">PRIMARY</div>
+          <div class="swatch-name">Aegis Purple</div>
+          <div class="swatch-hex">#6E3DFF · RGB(110,61,255)</div>
+        </div>
+        <div class="color-swatch" style="background:#040408;">
+          <div class="swatch-tag">VOID</div>
+          <div class="swatch-name">Void Black</div>
+          <div class="swatch-hex">#040408</div>
+        </div>
+        <div class="color-swatch" style="background:#00F5C8;color:#040408;">
+          <div class="swatch-tag" style="color:rgba(0,0,0,0.4);">SIGNAL</div>
+          <div class="swatch-name">Electric Teal</div>
+          <div class="swatch-hex">#00F5C8</div>
+        </div>
+        <div class="color-swatch" style="background:#F0F0FF;color:#040408;">
+          <div class="swatch-tag" style="color:rgba(0,0,0,0.4);">TEXT</div>
+          <div class="swatch-name">Ghost White</div>
+          <div class="swatch-hex">#F0F0FF</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary Colors -->
+    <div style="margin-top:2px;">
+      <div class="color-secondary-row">
+        <div class="color-swatch" style="background:#8B5FFF;height:120px;">
+          <div class="swatch-name" style="font-size:12px;">Bright</div>
+          <div class="swatch-hex">#8B5FFF</div>
+        </div>
+        <div class="color-swatch" style="background:#4A1FD4;height:120px;">
+          <div class="swatch-name" style="font-size:12px;">Deep</div>
+          <div class="swatch-hex">#4A1FD4</div>
+        </div>
+        <div class="color-swatch" style="background:#1A1A2E;height:120px;">
+          <div class="swatch-name" style="font-size:12px;">Graphite</div>
+          <div class="swatch-hex">#1A1A2E</div>
+        </div>
+        <div class="color-swatch" style="background:#FF3D6E;height:120px;">
+          <div class="swatch-name" style="font-size:12px;">Plasma</div>
+          <div class="swatch-hex">#FF3D6E</div>
+        </div>
+        <div class="color-swatch" style="background:#FFB800;color:#040408;height:120px;">
+          <div class="swatch-name" style="font-size:12px;">Gold</div>
+          <div class="swatch-hex">#FFB800</div>
+        </div>
+        <div class="color-swatch" style="background:#3A3A5C;height:120px;">
+          <div class="swatch-name" style="font-size:12px;">Smoke</div>
+          <div class="swatch-hex">#3A3A5C</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semantic Colors -->
+    <div style="margin-top:40px;">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.3em;color:var(--mist);margin-bottom:12px;">COULEURS SÉMANTIQUES — Statut agents</div>
+      <div class="color-semantic-row">
+        <div class="color-swatch" style="background:rgba(0,245,200,0.15);border:1px solid var(--electric);height:100px;">
+          <div class="swatch-name" style="color:var(--electric);">ACTIVE</div>
+          <div class="swatch-hex" style="color:var(--electric);opacity:0.6;">Agent opérationnel</div>
+        </div>
+        <div class="color-swatch" style="background:rgba(255,184,0,0.1);border:1px solid var(--gold);height:100px;">
+          <div class="swatch-name" style="color:var(--gold);">WARNING</div>
+          <div class="swatch-hex" style="color:var(--gold);opacity:0.6;">Attention requise</div>
+        </div>
+        <div class="color-swatch" style="background:rgba(255,61,110,0.1);border:1px solid var(--plasma);height:100px;">
+          <div class="swatch-name" style="color:var(--plasma);">ERROR</div>
+          <div class="swatch-hex" style="color:var(--plasma);opacity:0.6;">Stop-loss déclenché</div>
+        </div>
+        <div class="color-swatch" style="background:rgba(58,58,92,0.5);border:1px solid var(--smoke);height:100px;">
+          <div class="swatch-name" style="color:var(--ghost);">IDLE</div>
+          <div class="swatch-hex" style="color:var(--mist);">Agent en veille</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 03 — TYPOGRAPHY -->
+<div class="type-section-bg">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="section-label">03 — Typography</div>
+    <div class="section-title">Des caractères<br>avec <span class="text-aegis">caractère</span>.</div>
+
+    <div class="type-specimen">
+      <div class="type-meta">
+        <div class="type-name">Display</div>
+        <div class="type-spec">Syne<br>800 Extra Bold<br>−4em tracking<br>0.95 line-height</div>
+      </div>
+      <div class="type-sample-display">THE SYSTEM<br>NEVER SLEEPS.</div>
+    </div>
+
+    <div class="type-specimen">
+      <div class="type-meta">
+        <div class="type-name">Heading</div>
+        <div class="type-spec">Syne<br>700 Bold<br>−3em tracking<br>1.1 line-height</div>
+      </div>
+      <div class="type-sample-heading">23 agents.<br>Une seule mission.</div>
+    </div>
+
+    <div class="type-specimen">
+      <div class="type-meta">
+        <div class="type-name">Body</div>
+        <div class="type-spec">Syne<br>400 Regular<br>0 tracking<br>1.7 line-height</div>
+      </div>
+      <div class="type-sample-body">AEGIS automatise chaque décision marketing — de l'acquisition à la rétention. Pendant que vous dormez, 23 agents analysent, optimisent et exécutent en votre nom.</div>
+    </div>
+
+    <div class="type-specimen">
+      <div class="type-meta">
+        <div class="type-name">Monospace</div>
+        <div class="type-spec">Space Mono<br>400 Regular<br>+15em tracking<br>1.8 line-height</div>
+      </div>
+      <div class="type-sample-mono">AGENT_META_TESTING → STATUS: ACTIVE<br>ROAS_30D: 3.47x · SPEND: €2,840 · CONVERSIONS: 142<br>STOP_LOSS: OK · LAST_SCAN: 14:32:07</div>
+    </div>
+
+    <div class="type-specimen">
+      <div class="type-meta">
+        <div class="type-name">Accent Serif</div>
+        <div class="type-spec">Instrument Serif<br>Italic<br>Rare usage<br>Contraste émotionnel</div>
+      </div>
+      <div class="type-sample-serif">"Intelligence without<br>human limitation."</div>
+    </div>
+
+    <!-- Scale -->
+    <div class="type-scale">
+      <div class="scale-row" style="background:rgba(110,61,255,0.1);">
+        <div class="scale-label">5XL · 48px</div>
+        <div class="scale-text" style="font-size:48px;letter-spacing:-0.04em;">AEGIS</div>
+      </div>
+      <div class="scale-row">
+        <div class="scale-label">4XL · 36px</div>
+        <div class="scale-text" style="font-size:36px;letter-spacing:-0.03em;">Automation Engine</div>
+      </div>
+      <div class="scale-row">
+        <div class="scale-label">3XL · 30px</div>
+        <div class="scale-text" style="font-size:30px;letter-spacing:-0.02em;">Agent Status Dashboard</div>
+      </div>
+      <div class="scale-row">
+        <div class="scale-label">2XL · 24px</div>
+        <div class="scale-text" style="font-size:24px;">Money Model Builder</div>
+      </div>
+      <div class="scale-row">
+        <div class="scale-label">XL · 20px</div>
+        <div class="scale-text" style="font-size:20px;font-weight:600;">Funnel Health Monitor</div>
+      </div>
+      <div class="scale-row">
+        <div class="scale-label">Base · 16px</div>
+        <div class="scale-text" style="font-size:16px;font-weight:400;color:var(--ghost);">23 agents actifs · ROAS 3.2x · Stop-loss : aucun déclenchement</div>
+      </div>
+      <div class="scale-row" style="border-bottom:none;">
+        <div class="scale-label">SM · 12px</div>
+        <div class="scale-text" style="font-size:12px;font-weight:400;color:var(--mist);font-family:'Space Mono',monospace;letter-spacing:0.1em;">DERNIÈRE SYNC: 14:47:22 · VERSION 3.0.1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 04 — BRAND VOICE -->
+<div class="voice-section-bg">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="section-label">04 — Brand Voice</div>
+    <div class="section-title">Ce qu'AEGIS<br><span class="text-electric">dit</span> et ne dit pas.</div>
+
+    <div class="voice-pillars">
+      <div class="voice-pillar">
+        <div class="pillar-icon">⚡</div>
+        <div class="pillar-name">PRÉCIS</div>
+        <div class="pillar-desc">Chaque mot compte.<br>Zéro superflu.<br>Des faits, pas des promesses.</div>
+      </div>
+      <div class="voice-pillar">
+        <div class="pillar-icon">🛡</div>
+        <div class="pillar-name">AUTORITAIRE</div>
+        <div class="pillar-desc">Confiant sans arrogance.<br>On ne demande pas. On affirme.<br>Le système décide.</div>
+      </div>
+      <div class="voice-pillar">
+        <div class="pillar-icon">◈</div>
+        <div class="pillar-name">TECHNIQUE</div>
+        <div class="pillar-desc">Les détails prouvent<br>la maîtrise.<br>Chiffres > adjectifs.</div>
+      </div>
+      <div class="voice-pillar">
+        <div class="pillar-icon">∞</div>
+        <div class="pillar-name">AUTONOME</div>
+        <div class="pillar-desc">AEGIS agit, pas AEGIS aide.<br>Language d'action,<br>pas de service.</div>
+      </div>
+    </div>
+
+    <div class="voice-grid" style="margin-top:2px;">
+      <div class="voice-card vc-do">
+        <div class="voice-card-label">On dit</div>
+        <div class="voice-example">
+          <div class="voice-quote">"23 agents ont généré 2.3× ROAS cette semaine."</div>
+          <div class="voice-note">→ Chiffre + action + résultat. Direct.</div>
+        </div>
+        <div class="voice-example">
+          <div class="voice-quote">"Stop-loss déclenché. Budget protégé. Analyse en cours."</div>
+          <div class="voice-note">→ Statut système. Ton opérationnel.</div>
+        </div>
+        <div class="voice-example">
+          <div class="voice-quote">"Le système a pausé 3 ads sous-performants à 6h02."</div>
+          <div class="voice-note">→ L'agent a agi. Pas demandé permission.</div>
+        </div>
+      </div>
+
+      <div class="voice-card vc-dont">
+        <div class="voice-card-label">On ne dit pas</div>
+        <div class="voice-example">
+          <div class="voice-quote">"Notre solution innovante vous aidera à améliorer vos résultats."</div>
+          <div class="voice-note">→ Vague. Servile. Corporate sans valeur.</div>
+        </div>
+        <div class="voice-example">
+          <div class="voice-quote">"N'hésitez pas à contacter notre équipe si vous avez des questions !"</div>
+          <div class="voice-note">→ Aucune agence d'intelligence ne parle comme ça.</div>
+        </div>
+        <div class="voice-example">
+          <div class="voice-quote">"AEGIS, votre partenaire de confiance en marketing digital."</div>
+          <div class="voice-note">→ Cliché. AEGIS est un système, pas un partenaire.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 05 — VISUAL DIRECTION -->
+<div class="visual-section-bg">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="section-label">05 — Direction Visuelle</div>
+    <div class="section-title">L'esthétique de<br>l'<span class="text-electric">intelligence</span> opérationnelle.</div>
+
+    <div class="visual-grid">
+      <div class="visual-card vc1">
+        <div class="visual-content" style="height:220px;">
+          <div class="grid-mini">
+            <div class="grid-mini-cell active"></div><div class="grid-mini-cell"></div><div class="grid-mini-cell active"></div><div class="grid-mini-cell"></div><div class="grid-mini-cell active"></div>
+            <div class="grid-mini-cell"></div><div class="grid-mini-cell active"></div><div class="grid-mini-cell active"></div><div class="grid-mini-cell"></div><div class="grid-mini-cell active"></div>
+            <div class="grid-mini-cell active"></div><div class="grid-mini-cell"></div><div class="grid-mini-cell"></div><div class="grid-mini-cell active"></div><div class="grid-mini-cell"></div>
+            <div class="grid-mini-cell"></div><div class="grid-mini-cell active"></div><div class="grid-mini-cell"></div><div class="grid-mini-cell active"></div><div class="grid-mini-cell active"></div>
+            <div class="grid-mini-cell active"></div><div class="grid-mini-cell active"></div><div class="grid-mini-cell"></div><div class="grid-mini-cell"></div><div class="grid-mini-cell active"></div>
+          </div>
+        </div>
+        <div class="visual-tag">GRID SYSTEM</div>
+      </div>
+
+      <div class="visual-card vc2">
+        <div class="visual-content" style="height:220px;">
+          <div class="chart-mini">
+            <div class="bar" style="height:40%"></div>
+            <div class="bar" style="height:65%"></div>
+            <div class="bar" style="height:45%"></div>
+            <div class="bar" style="height:80%"></div>
+            <div class="bar" style="height:55%"></div>
+            <div class="bar" style="height:90%"></div>
+            <div class="bar" style="height:70%"></div>
+            <div class="bar" style="height:100%;opacity:1"></div>
+          </div>
+        </div>
+        <div class="visual-tag">DATA VISUALIZATION</div>
+      </div>
+
+      <div class="visual-card vc3">
+        <div class="visual-content" style="height:220px;">
+          <div class="orbit-mini">
+            <div class="orbit-ring or1"></div>
+            <div class="orbit-ring or2"></div>
+            <div class="orbit-ring or3"></div>
+            <div class="orbit-dot"></div>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+              <div style="width:8px;height:8px;background:var(--electric);border-radius:50%;box-shadow:0 0 12px var(--electric);"></div>
+            </div>
+          </div>
+        </div>
+        <div class="visual-tag">AGENT NETWORK</div>
+      </div>
+
+      <div class="visual-card vc4">
+        <div class="visual-content" style="height:220px;">
+          <div class="hex-grid">
+            <div class="hex"></div><div class="hex"></div><div class="hex"></div>
+            <div class="hex"></div><div class="hex"></div><div class="hex"></div>
+            <div class="hex"></div><div class="hex"></div><div class="hex"></div>
+          </div>
+        </div>
+        <div class="visual-tag">STRUCTURAL MOTIF</div>
+      </div>
+    </div>
+
+    <!-- Motion -->
+    <div style="margin-top:80px;">
+      <div class="section-label">Motion & Animation</div>
+      <div class="motion-grid">
+        <div class="motion-demo">
+          <div class="motion-element" style="display:flex;align-items:center;justify-content:center;">
+            <div class="m-pulse"></div>
+          </div>
+          <div class="motion-name">Agent Pulse</div>
+          <div class="motion-spec">DURÉE: 2000ms<br>EASING: ease-out<br>USAGE: Agent actif</div>
+        </div>
+        <div class="motion-demo">
+          <div class="motion-element" style="display:flex;align-items:center;justify-content:center;">
+            <div class="m-scan"></div>
+          </div>
+          <div class="motion-name">System Scan</div>
+          <div class="motion-spec">DURÉE: 1800ms<br>EASING: ease-in-out<br>USAGE: Analyse en cours</div>
+        </div>
+        <div class="motion-demo">
+          <div class="motion-element" style="display:flex;align-items:center;justify-content:center;">
+            <div class="m-blink"></div>
+          </div>
+          <div class="motion-name">Data Cursor</div>
+          <div class="motion-spec">DURÉE: 1000ms<br>EASING: step-end<br>USAGE: Input, terminal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spacing -->
+    <div style="margin-top:80px;">
+      <div class="section-label">Spacing System — Base 8px</div>
+      <div class="spacing-grid">
+        <div class="space-unit">
+          <div class="space-bar" style="height:4px;"></div>
+          <div class="space-token">4px<br>--s-0.5</div>
+        </div>
+        <div class="space-unit">
+          <div class="space-bar" style="height:8px;"></div>
+          <div class="space-token">8px<br>--s-1</div>
+        </div>
+        <div class="space-unit">
+          <div class="space-bar" style="height:16px;"></div>
+          <div class="space-token">16px<br>--s-2</div>
+        </div>
+        <div class="space-unit">
+          <div class="space-bar" style="height:24px;"></div>
+          <div class="space-token">24px<br>--s-3</div>
+        </div>
+        <div class="space-unit">
+          <div class="space-bar" style="height:32px;"></div>
+          <div class="space-token">32px<br>--s-4</div>
+        </div>
+        <div class="space-unit">
+          <div class="space-bar" style="height:48px;"></div>
+          <div class="space-token">48px<br>--s-6</div>
+        </div>
+        <div class="space-unit">
+          <div class="space-bar" style="height:64px;"></div>
+          <div class="space-token">64px<br>--s-8</div>
+        </div>
+        <div class="space-unit">
+          <div class="space-bar" style="height:96px;background:var(--electric);"></div>
+          <div class="space-token">96px<br>--s-12</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 06 — COMPONENT USAGE -->
+<div class="logo-section-bg">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div class="section-label">06 — Composants</div>
+    <div class="section-title">Des éléments<br>systémiques,<br>pas <span class="text-aegis">décoratifs</span>.</div>
+
+    <div class="usage-grid">
+      <div class="usage-card">
+        <div class="usage-preview" style="background:var(--graphite);">
+          <button class="button-preview">DÉMARRER AEGIS →</button>
+        </div>
+        <div class="usage-info">
+          <div class="usage-title">Primary CTA Button</div>
+          <div class="usage-desc">Syne 700 · ALL CAPS · Purple bg<br>Hover: shimmer overlay<br>Radius: 0 (pas d'arrondi)</div>
+        </div>
+      </div>
+
+      <div class="usage-card">
+        <div class="usage-preview" style="background:var(--carbon);">
+          <div class="badge-preview">
+            <div class="badge badge-active">● ACTIVE</div>
+            <div class="badge badge-paused">⚠ WARNING</div>
+            <div class="badge badge-error">✕ STOPPED</div>
+            <div class="badge badge-default">◌ IDLE</div>
+          </div>
+        </div>
+        <div class="usage-info">
+          <div class="usage-title">Agent Status Badges</div>
+          <div class="usage-desc">Space Mono 10px · ALL CAPS<br>Border-only design<br>Couleur sémantique stricte</div>
+        </div>
+      </div>
+
+      <div class="usage-card">
+        <div class="usage-preview" style="background:var(--graphite);">
+          <div class="card-preview">
+            <div class="card-preview-label">EMPIRE INDEX</div>
+            <div class="card-preview-value">87.4</div>
+            <div class="card-preview-sub">↑ +3.2 ce mois</div>
+          </div>
+        </div>
+        <div class="usage-info">
+          <div class="usage-title">KPI Data Card</div>
+          <div class="usage-desc">Dark surface · Electric accent<br>Space Mono pour les labels<br>Syne 800 pour les valeurs</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BACK COVER -->
+<div class="back-cover">
+  <div class="back-cover-line"></div>
+  <div class="back-cover-text">
+    <div class="back-cover-brand">AEGIS</div>
+    <div class="back-cover-sub">Brand Identity System · V1.0 · 2025</div>
+  </div>
+  <div class="back-cover-line" style="background:linear-gradient(90deg,transparent,var(--electric));"></div>
+</div>
+
+</body>
+</html>

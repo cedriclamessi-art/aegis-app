@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>AEGIS — Connexion</title>
+  <meta name="description" content="Connectez-vous a AEGIS, votre plateforme e-commerce pilotee par l'IA."/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%237C3AED'/><text x='50' y='68' text-anchor='middle' fill='white' font-size='45' font-weight='bold'>AE</text></svg>"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #06070F;
+      --s1: #0B0C1A;
+      --s2: #111226;
+      --s3: #171830;
+      --border: rgba(139,92,246,.12);
+      --border2: rgba(139,92,246,.2);
+      --primary: #7C3AED;
+      --primary-light: #A78BFA;
+      --primary-glow: rgba(124,58,237,.25);
+      --emerald: #34D399;
+      --amber: #FBBF24;
+      --red: #F87171;
+      --text1: #F1F5F9;
+      --text2: #94A3B8;
+      --text3: #64748B;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text1);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated background */
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -20%, rgba(124,58,237,.15), transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 100%, rgba(52,211,153,.06), transparent 60%),
+        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(124,58,237,.08), transparent 50%);
+      animation: bgPulse 8s ease-in-out infinite alternate;
+    }
+    @keyframes bgPulse {
+      0% { opacity: .7; }
+      100% { opacity: 1; }
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .12;
+      animation: orbFloat 15s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    .orb-1 { width:400px; height:400px; background:#7C3AED; top:-100px; left:-100px; }
+    .orb-2 { width:300px; height:300px; background:#34D399; bottom:-80px; right:-80px; animation-delay:-5s; animation-duration:18s; }
+    .orb-3 { width:200px; height:200px; background:#A78BFA; top:50%; right:10%; animation-delay:-10s; }
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -20px) scale(1.05); }
+      100% { transform: translate(-20px, 30px) scale(.95); }
+    }
+
+    /* Login card */
+    .login-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      margin: 20px;
+      padding: 40px 36px;
+      background: rgba(17,18,38,.7);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      box-shadow:
+        0 0 0 1px rgba(139,92,246,.06),
+        0 8px 40px rgba(0,0,0,.4),
+        0 0 80px rgba(124,58,237,.06);
+      animation: cardIn .6s cubic-bezier(.4,0,.2,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity:0; transform: translateY(20px) scale(.97); }
+      to { opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    /* Logo */
+    .logo-block {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.5px;
+      box-shadow: 0 4px 16px rgba(124,58,237,.3);
+    }
+    .logo-text {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--text1), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logo-version {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--primary-light);
+      background: rgba(124,58,237,.15);
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-left: -4px;
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+
+    .login-title {
+      text-align: center;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text2);
+      margin-bottom: 28px;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 6px;
+    }
+    .input-wrapper {
+      position: relative;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--text3);
+      pointer-events: none;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      background: var(--s3);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      color: var(--text1);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .form-input::placeholder {
+      color: var(--text3);
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+    .eye-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      transition: color .2s;
+    }
+    .eye-toggle:hover { color: var(--text2); }
+
+    /* Error */
+    .error-msg {
+      display: none;
+      background: rgba(248,113,113,.1);
+      border: 1px solid rgba(248,113,113,.25);
+      color: var(--red);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      text-align: center;
+      animation: shake .4s ease-in-out;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-4px); }
+      40%, 80% { transform: translateX(4px); }
+    }
+
+    /* Button */
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .2s, opacity .2s;
+      box-shadow: 0 4px 20px rgba(124,58,237,.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-login:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(124,58,237,.4);
+    }
+    .btn-login:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    .btn-login:disabled {
+      opacity: .7;
+      cursor: not-allowed;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+      color: var(--text3);
+      font-size: 11px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Footer link */
+    .footer-link {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text3);
+    }
+    .footer-link a {
+      color: var(--primary-light);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color .2s;
+    }
+    .footer-link a:hover {
+      color: var(--primary);
+    }
+
+    /* Success animation */
+    .login-success {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    .success-check {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--emerald), #059669);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 28px;
+      animation: popIn .4s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .login-card { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="login-card">
+    <!-- Logo -->
+    <div class="logo-block">
+      <div class="logo-icon">AE</div>
+      <span class="logo-text">AEGIS</span>
+      <span class="logo-version">v7.0</span>
+    </div>
+
+    <div class="login-title">Connectez-vous pour acceder a votre dashboard</div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <div id="login-error" class="error-msg"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="login-email">Email</label>
+        <div class="input-wrapper">
+          <span class="input-icon" aria-hidden="true">&#9993;</span>
+          <input type="email" id="login-email" class="form-input" placeholder="votre@email.com" autocomplete="email" autofocus aria-required="true" aria-label="Adresse email"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="login-password">Mot de passe</label>
+        <div class="input-wrapper">
+          <span class="input-icon" aria-hidden="true">&#128274;</span>
+          <input type="password" id="login-password" class="form-input" placeholder="Votre mot de passe" autocomplete="current-password" aria-required="true" aria-label="Mot de passe"/>
+          <button type="button" class="eye-toggle" onclick="togglePassword()" id="eye-btn" title="Afficher le mot de passe" aria-label="Afficher ou masquer le mot de passe">&#128065;</button>
+        </div>
+      </div>
+
+      <button class="btn-login" id="login-btn" onclick="login()" aria-label="Se connecter">
+        Se connecter
+      </button>
+
+      <div class="divider">ou</div>
+
+      <div class="footer-link">
+        Pas encore de compte ? <a href="/register">Creer un compte</a>
+      </div>
+    </div>
+
+    <!-- Success state -->
+    <div id="login-success" class="login-success">
+      <div class="success-check">&#10003;</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:6px">Connexion reussie</div>
+      <div style="font-size:13px;color:var(--text2)">Redirection vers le dashboard...</div>
+    </div>
+  </div>
+
+  <script>
+    const AEGIS_API = window.AEGIS_API_URL || '';
+
+    // Check if already logged in
+    (function() {
+      const token = localStorage.getItem('aegis_token');
+      if (token) {
+        // Verify token is still valid
+        fetch(AEGIS_API + '/api/auth/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        }).then(r => {
+          if (r.ok) window.location.href = '/ui/dashboard.html';
+        }).catch(() => {});
+      }
+    })();
+
+    function togglePassword() {
+      const input = document.getElementById('login-password');
+      const btn = document.getElementById('eye-btn');
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '&#128064;';
+      } else {
+        input.type = 'password';
+        btn.innerHTML = '&#128065;';
+      }
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('login-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.style.animation = 'none';
+      el.offsetHeight; // trigger reflow
+      el.style.animation = 'shake .4s ease-in-out';
+    }
+
+    async function login() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const errorEl = document.getElementById('login-error');
+      const btn = document.getElementById('login-btn');
+
+      errorEl.style.display = 'none';
+
+      if (!email || !password) {
+        showError('Email et mot de passe requis');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Connexion...';
+
+      try {
+        const res = await fetch(AEGIS_API + '/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Identifiants invalides');
+          btn.disabled = false;
+          btn.innerHTML = 'Se connecter';
+          return;
+        }
+
+        // Store token and user
+        localStorage.setItem('aegis_token', data.token);
+        localStorage.setItem('aegis_user', JSON.stringify(data.user));
+
+        // Show success animation
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('login-success').style.display = 'block';
+
+        // Redirect after animation
+        setTimeout(() => {
+          window.location.href = '/ui/dashboard.html';
+        }, 1000);
+      } catch (err) {
+        showError('Erreur de connexion au serveur');
+        btn.disabled = false;
+        btn.innerHTML = 'Se connecter';
+      }
+    }
+
+    // Enter key triggers login
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') login();
+    });
+  </script>
+</body>
+</html>

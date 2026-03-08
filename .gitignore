@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.npm
+
+# Build output
+dist/
+*.js.map
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.pid
+logs/
+
+# Docker volumes
+.docker/
+
+# Vercel
+.vercel/
+
+# Temp
+tmp/
+.tmp/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Python (scraper)
+__pycache__/
+.venv/
+*.pyc

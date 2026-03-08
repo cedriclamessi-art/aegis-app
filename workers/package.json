@@ -1,0 +1,21 @@
+{
+  "name": "aegis-workers",
+  "version": "3.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/engines/agent-scheduler.ts",
+    "build": "tsc",
+    "start": "node dist/engines/agent-scheduler.js"
+  },
+  "dependencies": {
+    "pg": "^8.11.5",
+    "pino": "^8.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.5",
+    "@types/pg": "^8.11.5",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
+  }
+}

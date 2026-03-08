@@ -1,0 +1,404 @@
+/**
+ * ============================================================
+ * AEGIS — AGENT_GUARDRAILS
+ * ============================================================
+ * Orchestrateur des 5 garde-fous structurels.
+ * Tourne toutes les 15 minutes. Ne peut pas être désactivé.
+ *
+ * GARDE-FOU 1 (basic+)     → Empire Index formula + alertes
+ * GARDE-FOU 2 (basic+)     → Complexity Budget (max 1 deploy/semaine)
+ * GARDE-FOU 3 (hedge_fund+) → Circuit Breaker (auto-downgrade si EI < seuil 3j)
+ * GARDE-FOU 4 (hedge_fund+) → Silence Window (48h shadow post-déploiement)
+ * GARDE-FOU 5 (full_org)   → Data Quality Gate (cross-tenant patterns)
+ *                          → Complexity Score dashboard (blocage > 7/10)
+ *
+ * RÈGLE MÉTA : cet agent ne peut pas modifier sa propre config.
+ * La formule Empire Index est verrouillée en SQL.
+ * ============================================================
+ */
+
+import { AgentBase, AgentTask, AgentResult } from '../base/agent.base';
+import { db } from '../../utils/db';
+import logger from '../../utils/logger';
+
+// ─── Types ───────────────────────────────────────────────────
+
+type AgentMode = 'basic' | 'hedge_fund' | 'full_organism';
+
+interface GuardrailsContext {
+  tenantId: string;
+  agentMode: AgentMode;
+  empireIndex: number;
+  empireStatus: 'HEALTHY' | 'WARNING' | 'CRITICAL' | 'AUTO_DOWNGRADE';
+  circuitBreakerActive: boolean;
+  silenceWindowActive: boolean;
+  complexityScore: number;
+}
+
+interface DeployRequest {
+  tenantId: string;
+  agentId: string;
+  fromMode: string;
+  toMode: string;
+  deployedBy?: string;
+  reason?: string;
+}
+
+interface PatternSubmission {
+  tenantId: string;
+  patternType: 'creative_angle' | 'offer_structure' | 'timing' | 'audience';
+  patternKey: string;
+  niche: string;
+  budgetTier: 'micro' | 'growth' | 'scale';
+  patternData: Record<string, unknown>;
+  spendEur: number;
+  confidenceScore: number;
+}
+
+// ─── Agent ───────────────────────────────────────────────────
+
+export class GuardrailsAgent extends AgentBase {
+  readonly agentId = 'AGENT_GUARDRAILS';
+  readonly taskTypes = [
+    'guardrails.run_all',
+    'guardrails.check_deploy',
+    'guardrails.register_deploy',
+    'guardrails.submit_pattern',
+    'guardrails.get_status',
+    'guardrails.circuit_breaker_resolve',
+  ];
+
+  async run(task: AgentTask): Promise<AgentResult> {
+    switch (task.taskType) {
+      case 'guardrails.run_all':              return this.runAllTenants();
+      case 'guardrails.check_deploy':         return this.checkDeploy(task.input as DeployRequest);
+      case 'guardrails.register_deploy':      return this.registerDeploy(task.input as DeployRequest);
+      case 'guardrails.submit_pattern':       return this.submitPattern(task.input as PatternSubmission);
+      case 'guardrails.get_status':           return this.getStatus(task.input.tenantId as string);
+      case 'guardrails.circuit_breaker_resolve': return this.resolveCircuitBreaker(task.input.tenantId as string);
+      default: return { success: false, error: `Unknown task: ${task.taskType}` };
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // SCAN COMPLET — tous les tenants actifs
+  // ─────────────────────────────────────────────────────────
+
+  private async runAllTenants(): Promise<AgentResult> {
+    const tenants = await db.query<{ id: string; agent_mode: AgentMode }>(
+      `SELECT id, agent_mode FROM saas.tenants WHERE deleted_at IS NULL AND suspended_at IS NULL`
+    );
+
+    const results: Record<string, unknown>[] = [];
+
+    for (const tenant of tenants.rows) {
+      try {
+        const ctx = await this.buildContext(tenant.id, tenant.agent_mode);
+        const actions = await this.evaluateGuardrails(ctx);
+        results.push({ tenantId: tenant.id, ...actions });
+      } catch (err) {
+        logger.error({ tenantId: tenant.id, err }, 'Guardrails scan error');
+      }
+    }
+
+    return {
+      success: true,
+      output: { tenantsScanned: tenants.rows.length, results, scanAt: new Date().toISOString() },
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // CONTEXT — état guardrails du tenant
+  // ─────────────────────────────────────────────────────────
+
+  private async buildContext(tenantId: string, agentMode: AgentMode): Promise<GuardrailsContext> {
+    const [eiRow, cbRow, swRow, csRow] = await Promise.all([
+      db.query(`SELECT empire_index, status FROM guardrails.empire_index_live WHERE tenant_id = $1`, [tenantId]),
+      db.query(`SELECT id FROM guardrails.circuit_breaker_log WHERE tenant_id = $1 AND resolved_at IS NULL AND stabilize_until > now() LIMIT 1`, [tenantId]),
+      db.query(`SELECT id FROM guardrails.deployment_log WHERE tenant_id = $1 AND silence_active = TRUE AND silence_until > now() LIMIT 1`, [tenantId]),
+      db.query(`SELECT score FROM guardrails.compute_complexity($1)`, [tenantId]),
+    ]);
+
+    return {
+      tenantId,
+      agentMode,
+      empireIndex:           eiRow.rows[0]?.empire_index ?? 1.0,
+      empireStatus:          eiRow.rows[0]?.status ?? 'HEALTHY',
+      circuitBreakerActive:  cbRow.rows.length > 0,
+      silenceWindowActive:   swRow.rows.length > 0,
+      complexityScore:       csRow.rows[0]?.score ?? 1,
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // EVALUATE — appliquer les garde-fous selon le niveau
+  // ─────────────────────────────────────────────────────────
+
+  private async evaluateGuardrails(ctx: GuardrailsContext): Promise<Record<string, unknown>> {
+    const actions: string[] = [];
+    const warnings: string[] = [];
+
+    // GF1 — Empire Index (tous niveaux)
+    if (ctx.empireStatus === 'WARNING') {
+      warnings.push(`Empire Index ${ctx.empireIndex.toFixed(3)} — ATTENTION`);
+      await this.createAlert(ctx.tenantId, 'EMPIRE_WARNING',
+        `Empire Index à ${ctx.empireIndex.toFixed(3)} — vigilance requise.`, 'warning');
+    }
+    if (ctx.empireStatus === 'CRITICAL') {
+      warnings.push(`Empire Index ${ctx.empireIndex.toFixed(3)} — CRITIQUE`);
+      await this.createAlert(ctx.tenantId, 'EMPIRE_CRITICAL',
+        `Empire Index à ${ctx.empireIndex.toFixed(3)} — stabilisation requise avant toute action.`, 'critical');
+    }
+
+    // GF3 — Circuit Breaker (hedge_fund+)
+    if (ctx.agentMode !== 'basic' && ctx.empireStatus === 'AUTO_DOWNGRADE') {
+      const cb = await db.query(`SELECT * FROM guardrails.eval_circuit_breaker($1)`, [ctx.tenantId]);
+      const { should_trigger, consecutive_days, recommended_mode } = cb.rows[0] ?? {};
+      if (should_trigger) {
+        await this.triggerCircuitBreaker(ctx.tenantId, ctx.agentMode, recommended_mode, ctx.empireIndex, consecutive_days);
+        actions.push(`circuit_breaker: ${ctx.agentMode} → ${recommended_mode}`);
+      }
+    }
+
+    // GF5 — Complexity Score (full_organism — mais alerte pour tous)
+    if (ctx.complexityScore > 7) {
+      warnings.push(`Complexité ${ctx.complexityScore.toFixed(1)}/10 — nouvelles activations BLOQUÉES`);
+      await this.createAlert(ctx.tenantId, 'COMPLEXITY_BLOCKED',
+        `Score de complexité ${ctx.complexityScore.toFixed(1)}/10 dépasse le seuil. Désactiver des agents avant tout nouveau déploiement.`, 'warning');
+    }
+
+    // Snapshot quotidien
+    await this.snapshotEmpireIndex(ctx);
+
+    return { actions, warnings };
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // GF2 + GF4 — CHECK DEPLOY
+  // ─────────────────────────────────────────────────────────
+
+  async checkDeploy(req: DeployRequest): Promise<AgentResult> {
+    // Vérification SQL (budget hebdo + silence window)
+    const check = await db.query(
+      `SELECT allowed, reason, next_slot FROM guardrails.can_deploy($1, $2)`,
+      [req.tenantId, req.agentId]
+    );
+    if (!check.rows[0]?.allowed) {
+      return { success: false, output: { allowed: false, ...check.rows[0], guardrail: 'DEPLOYMENT_GATE' } };
+    }
+
+    // Complexity score
+    const cs = await db.query(`SELECT score, blocks FROM guardrails.compute_complexity($1)`, [req.tenantId]);
+    if (cs.rows[0]?.blocks) {
+      return {
+        success: false,
+        output: {
+          allowed: false,
+          reason: `Complexité trop élevée (${cs.rows[0].score?.toFixed(1)}/10 > 7). Désactiver des agents d'abord.`,
+          guardrail: 'COMPLEXITY_SCORE',
+        },
+      };
+    }
+
+    // Circuit breaker
+    const cb = await db.query(
+      `SELECT stabilize_until FROM guardrails.circuit_breaker_log WHERE tenant_id = $1 AND resolved_at IS NULL AND stabilize_until > now() LIMIT 1`,
+      [req.tenantId]
+    );
+    if (cb.rows.length > 0) {
+      return {
+        success: false,
+        output: {
+          allowed: false,
+          reason: `Circuit Breaker actif — stabilisation jusqu'au ${new Date(cb.rows[0].stabilize_until).toLocaleDateString('fr-FR')}.`,
+          guardrail: 'CIRCUIT_BREAKER',
+        },
+      };
+    }
+
+    return { success: true, output: { allowed: true, complexityScore: cs.rows[0]?.score } };
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // GF2 + GF4 — REGISTER DEPLOY
+  // ─────────────────────────────────────────────────────────
+
+  async registerDeploy(req: DeployRequest): Promise<AgentResult> {
+    const check = await this.checkDeploy(req);
+    if (!check.success || !(check.output as Record<string, unknown>).allowed) return check;
+
+    await db.query(
+      `INSERT INTO guardrails.deployment_log (tenant_id, agent_id, from_mode, to_mode, deployed_by, reason)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [req.tenantId, req.agentId, req.fromMode, req.toMode, req.deployedBy ?? null, req.reason ?? null]
+    );
+
+    logger.info({ ...req }, 'GUARDRAILS: Déploiement enregistré — silence window 48h');
+
+    return {
+      success: true,
+      output: {
+        registered: true,
+        silenceWindowUntil: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+        message: 'Shadow mode 48h — aucune action autonome pendant la fenêtre de stabilisation.',
+      },
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // GF5 — SUBMIT PATTERN (data quality gate, full_organism)
+  // ─────────────────────────────────────────────────────────
+
+  async submitPattern(sub: PatternSubmission): Promise<AgentResult> {
+    const tenant = await db.query(`SELECT agent_mode FROM saas.tenants WHERE id = $1`, [sub.tenantId]);
+    if (tenant.rows[0]?.agent_mode !== 'full_organism') {
+      return { success: false, output: { reason: 'Cross-tenant learning — mode full_organism requis.' } };
+    }
+
+    const result = await db.query(
+      `INSERT INTO guardrails.cross_tenant_patterns
+        (pattern_type, pattern_key, niche, budget_tier, pattern_data, tenant_count, total_spend_eur, confidence)
+       VALUES ($1, $2, $3, $4, $5, 1, $6, $7)
+       ON CONFLICT (pattern_type, pattern_key, niche, budget_tier) DO UPDATE SET
+         tenant_count    = LEAST(guardrails.cross_tenant_patterns.tenant_count + 1, 999),
+         total_spend_eur = guardrails.cross_tenant_patterns.total_spend_eur + EXCLUDED.total_spend_eur,
+         confidence      = (guardrails.cross_tenant_patterns.confidence + EXCLUDED.confidence) / 2,
+         pattern_data    = guardrails.cross_tenant_patterns.pattern_data || EXCLUDED.pattern_data,
+         expires_at      = now() + interval '90 days'
+       RETURNING id, status, tenant_count, total_spend_eur, confidence`,
+      [sub.patternType, sub.patternKey, sub.niche, sub.budgetTier,
+       JSON.stringify(sub.patternData), sub.spendEur, sub.confidenceScore]
+    );
+
+    const row = result.rows[0];
+    return {
+      success: true,
+      output: {
+        patternId: row.id,
+        status: row.status,
+        qualified: row.status === 'QUALIFIED',
+        tenantCount: row.tenant_count,
+        totalSpend: row.total_spend_eur,
+        confidence: row.confidence,
+        message: row.status === 'QUALIFIED'
+          ? 'Pattern qualifié — disponible dans le pool cross-tenant.'
+          : `En attente : ${row.tenant_count}/3 tenants · ${row.total_spend_eur}€/1000€ · conf ${parseFloat(row.confidence).toFixed(2)}/0.70`,
+      },
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // GET STATUS
+  // ─────────────────────────────────────────────────────────
+
+  async getStatus(tenantId: string): Promise<AgentResult> {
+    const tenant = await db.query(`SELECT agent_mode FROM saas.tenants WHERE id = $1`, [tenantId]);
+    if (!tenant.rows[0]) return { success: false, error: 'Tenant not found' };
+
+    const [ctx, guardrailsRow, lastDeploy, cs] = await Promise.all([
+      this.buildContext(tenantId, tenant.rows[0].agent_mode),
+      db.query(`SELECT * FROM guardrails.active_guardrails_by_tenant WHERE tenant_id = $1`, [tenantId]),
+      db.query(`SELECT agent_id, deployed_at, silence_until, silence_active FROM guardrails.deployment_log WHERE tenant_id = $1 ORDER BY deployed_at DESC LIMIT 1`, [tenantId]),
+      db.query(`SELECT score, status, blocks, breakdown FROM guardrails.compute_complexity($1)`, [tenantId]),
+    ]);
+
+    return {
+      success: true,
+      output: {
+        tenantId,
+        agentMode: ctx.agentMode,
+        guardrails: guardrailsRow.rows[0] ?? {},
+        empireIndex: { value: ctx.empireIndex, status: ctx.empireStatus },
+        complexity: { score: cs.rows[0]?.score, status: cs.rows[0]?.status, blocks: cs.rows[0]?.blocks, breakdown: cs.rows[0]?.breakdown },
+        circuitBreaker: { active: ctx.circuitBreakerActive },
+        silenceWindow: { active: ctx.silenceWindowActive },
+        lastDeployment: lastDeploy.rows[0] ?? null,
+        computedAt: new Date().toISOString(),
+      },
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // CIRCUIT BREAKER — trigger
+  // ─────────────────────────────────────────────────────────
+
+  private async triggerCircuitBreaker(
+    tenantId: string, fromMode: AgentMode, toMode: string,
+    empireIndex: number, consecutiveDays: number
+  ): Promise<void> {
+    await db.query(`UPDATE saas.tenants SET agent_mode = $1 WHERE id = $2`, [toMode, tenantId]);
+    await db.query(
+      `INSERT INTO guardrails.circuit_breaker_log
+        (tenant_id, trigger_reason, empire_index_at_trigger, from_agent_mode, to_agent_mode)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [tenantId, `Empire Index < seuil pendant ${consecutiveDays} jours consécutifs`, empireIndex, fromMode, toMode]
+    );
+    await this.createAlert(tenantId, 'CIRCUIT_BREAKER_TRIGGERED',
+      `Circuit Breaker déclenché. ${fromMode} → ${toMode}. Empire Index: ${empireIndex.toFixed(3)}. Stabilisation 72h.`, 'critical');
+    logger.warn({ tenantId, fromMode, toMode, empireIndex, consecutiveDays }, 'GUARDRAILS: Circuit Breaker déclenché');
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // CIRCUIT BREAKER — resolve
+  // ─────────────────────────────────────────────────────────
+
+  async resolveCircuitBreaker(tenantId: string): Promise<AgentResult> {
+    const [ei, cfg] = await Promise.all([
+      db.query(`SELECT empire_index FROM guardrails.empire_index_live WHERE tenant_id = $1`, [tenantId]),
+      db.query(`SELECT threshold_warning FROM guardrails.empire_index_config WHERE is_active = TRUE LIMIT 1`),
+    ]);
+
+    const currentIndex = ei.rows[0]?.empire_index ?? 0;
+    const threshold = cfg.rows[0]?.threshold_warning ?? 0.40;
+
+    if (currentIndex < threshold) {
+      return {
+        success: false,
+        output: {
+          resolved: false,
+          reason: `Empire Index trop bas (${currentIndex.toFixed(3)} < ${threshold}). Stabiliser d'abord.`,
+        },
+      };
+    }
+
+    await db.query(
+      `UPDATE guardrails.circuit_breaker_log
+       SET resolved_at = now(), resolved_empire_index = $1, resolved_by = 'MANUAL'
+       WHERE tenant_id = $2 AND resolved_at IS NULL`,
+      [currentIndex, tenantId]
+    );
+
+    return {
+      success: true,
+      output: {
+        resolved: true,
+        empireIndexAtResolution: currentIndex,
+        message: 'Circuit Breaker résolu. Remonter de tier manuellement.',
+      },
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────────────────────────
+
+  private async snapshotEmpireIndex(ctx: GuardrailsContext): Promise<void> {
+    await db.query(
+      `INSERT INTO guardrails.empire_index_daily (tenant_id, snapshot_date, empire_index, status, agent_mode)
+       VALUES ($1, CURRENT_DATE, $2, $3, $4)
+       ON CONFLICT (tenant_id, snapshot_date) DO UPDATE SET
+         empire_index = EXCLUDED.empire_index, status = EXCLUDED.status`,
+      [ctx.tenantId, ctx.empireIndex, ctx.empireStatus, ctx.agentMode]
+    ).catch(() => {});
+  }
+
+  private async createAlert(tenantId: string, alertType: string, message: string, severity: string): Promise<void> {
+    await db.query(
+      `INSERT INTO ops.alerts (tenant_id, alert_type, message, source_agent, severity)
+       VALUES ($1, $2, $3, 'AGENT_GUARDRAILS', $4) ON CONFLICT DO NOTHING`,
+      [tenantId, alertType, message, severity]
+    ).catch(() => {});
+  }
+}
+
+export default GuardrailsAgent;

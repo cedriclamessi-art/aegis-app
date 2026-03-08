@@ -1,0 +1,18 @@
+{
+  "name": "AEGIS — E-Commerce Intelligence",
+  "short_name": "AEGIS",
+  "description": "Autonomous E-Commerce Intelligence System",
+  "start_url": "/ui/dashboard.html",
+  "display": "standalone",
+  "background_color": "#06070F",
+  "theme_color": "#7C3AED",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [
+    { "src": "screenshots/dashboard.png", "sizes": "1280x720", "type": "image/png", "platform": "wide" }
+  ]
+}

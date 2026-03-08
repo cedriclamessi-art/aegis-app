@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEGIS — Progression des Paliers</title>
+<style>
+:root {
+  --bg: #0d0d1a; --card: #1a1a2e; --border: #2a2a4a;
+  --accent: #e94560; --green: #22c55e; --yellow: #eab308;
+  --blue: #60a5fa; --purple: #a78bfa; --text: #e8e8f0; --muted: #6b7280;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif; min-height:100vh; padding:24px 20px 60px; }
+
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
+.logo { font-size:22px; font-weight:800; letter-spacing:-0.5px; }
+.logo span { color:var(--accent); }
+.tier-badge { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+.tier-1 { background:#1e2a40; color:var(--blue); }
+.tier-2 { background:#1e3a20; color:#4ade80; }
+.tier-3 { background:#3b2500; color:#fb923c; }
+.tier-4 { background:#3b0d15; color:#f87171; }
+.tier-5 { background:#2d1654; color:#c084fc; }
+
+/* Progress track */
+.tier-track { display:flex; align-items:center; gap:0; margin-bottom:32px; padding:20px; background:var(--card); border:1px solid var(--border); border-radius:16px; }
+.tier-node { display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; }
+.tier-circle { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; transition:all 0.3s; border:2px solid transparent; }
+.tier-circle.done { background:var(--green); color:#000; }
+.tier-circle.active { background:var(--accent); color:#fff; box-shadow:0 0 20px rgba(233,69,96,0.5); border-color:rgba(233,69,96,0.3); }
+.tier-circle.locked { background:#1a1a2e; color:var(--muted); border-color:var(--border); }
+.tier-label { font-size:10px; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); text-align:center; }
+.tier-connector { flex:1; height:2px; background:var(--border); margin-bottom:22px; }
+.tier-connector.done { background:var(--green); }
+
+/* Active tier card */
+.active-tier-card { background:linear-gradient(135deg,#1a1a2e,#0f1545); border:1px solid #2a2a5a; border-radius:16px; padding:20px; margin-bottom:20px; }
+.tier-name-big { font-size:28px; font-weight:800; letter-spacing:-1px; margin-bottom:4px; }
+.tier-desc { font-size:14px; color:var(--muted); line-height:1.5; }
+
+/* Metrics */
+.metrics-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+.metric-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; }
+.metric-label { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px; }
+.metric-val { font-size:22px; font-weight:800; }
+.metric-target { font-size:11px; color:var(--muted); margin-top:2px; }
+.metric-bar { height:4px; border-radius:2px; background:var(--border); margin-top:8px; overflow:hidden; }
+.metric-bar-fill { height:100%; border-radius:2px; transition:width 0.5s; }
+.ok { color:var(--green); } .warn { color:var(--yellow); } .bad { color:var(--accent); }
+
+/* Next tier conditions */
+.conditions-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:20px; }
+.conditions-title { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:14px; }
+.condition { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+.condition:last-child { border-bottom:none; }
+.cond-icon { font-size:16px; width:24px; text-align:center; }
+.cond-text { flex:1; }
+.cond-name { font-size:13px; font-weight:600; }
+.cond-progress { font-size:11px; color:var(--muted); margin-top:2px; }
+.cond-status { font-size:11px; font-weight:700; }
+
+/* Agent table */
+.agents-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:20px; }
+.agent-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(42,42,74,0.5); }
+.agent-row:last-child { border-bottom:none; }
+.agent-name { font-size:12px; font-family:monospace; color:var(--blue); }
+.mode-badge { font-size:10px; padding:3px 8px; border-radius:10px; font-weight:700; text-transform:uppercase; }
+.mode-auto     { background:#1a2e1a; color:#4ade80; }
+.mode-semi_auto{ background:#2a1a00; color:#fb923c; }
+.mode-suggest  { background:#1e2050; color:#818cf8; }
+.mode-shadow   { background:#1a1a30; color:#6b7280; }
+.mode-observe  { background:#1a1a30; color:#4b5563; }
+.mode-disabled { background:#1a0d0d; color:#374151; }
+
+/* Inbox */
+.inbox-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; }
+.inbox-item { padding:14px; background:#0d0d1a; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; }
+.inbox-agent { font-size:10px; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+.inbox-narrative { font-size:13px; line-height:1.4; margin-bottom:8px; }
+.inbox-actions { display:flex; gap:8px; }
+.btn-approve { background:var(--green); color:#000; border:none; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; }
+.btn-reject  { background:transparent; color:var(--muted); border:1px solid var(--border); padding:6px 14px; border-radius:8px; font-size:12px; cursor:pointer; }
+.empty-state { text-align:center; color:var(--muted); padding:20px; font-size:13px; }
+
+.section-title { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:12px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">AE<span>GIS</span> — Paliers</div>
+  <div class="tier-badge tier-1" id="tier-badge">Palier 1</div>
+</div>
+
+<!-- TIER TRACK -->
+<div class="tier-track">
+  <div class="tier-node">
+    <div class="tier-circle" id="tc-1">1</div>
+    <div class="tier-label">Démarrage</div>
+  </div>
+  <div class="tier-connector" id="conn-1"></div>
+  <div class="tier-node">
+    <div class="tier-circle locked" id="tc-2">2</div>
+    <div class="tier-label">Validation</div>
+  </div>
+  <div class="tier-connector" id="conn-2"></div>
+  <div class="tier-node">
+    <div class="tier-circle locked" id="tc-3">3</div>
+    <div class="tier-label">Croissance</div>
+  </div>
+  <div class="tier-connector" id="conn-3"></div>
+  <div class="tier-node">
+    <div class="tier-circle locked" id="tc-4">4</div>
+    <div class="tier-label">Scale</div>
+  </div>
+  <div class="tier-connector" id="conn-4"></div>
+  <div class="tier-node">
+    <div class="tier-circle locked" id="tc-5">5</div>
+    <div class="tier-label">Empire</div>
+  </div>
+</div>
+
+<!-- ACTIVE TIER -->
+<div class="active-tier-card">
+  <div class="tier-name-big" id="tier-name">Palier 1 — Démarrage</div>
+  <div class="tier-desc" id="tier-desc">AEGIS observe tout. Aucune exécution automatique.</div>
+</div>
+
+<!-- METRICS -->
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-label">Shadow Rate</div>
+    <div class="metric-val" id="shadow-rate">—</div>
+    <div class="metric-target">Cible Palier 2: ≥75%</div>
+    <div class="metric-bar"><div class="metric-bar-fill" id="bar-shadow" style="width:0%;background:var(--blue)"></div></div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">ROAS 30j</div>
+    <div class="metric-val" id="roas-30">—</div>
+    <div class="metric-target">Cible Palier 3: ≥2.5×</div>
+    <div class="metric-bar"><div class="metric-bar-fill" id="bar-roas" style="width:0%;background:var(--green)"></div></div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">Jours sans anomalie</div>
+    <div class="metric-val" id="days-clean">—</div>
+    <div class="metric-target">Cible Palier 3: ≥14j</div>
+    <div class="metric-bar"><div class="metric-bar-fill" id="bar-clean" style="width:0%;background:var(--yellow)"></div></div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">ROI attribué</div>
+    <div class="metric-val" id="roi-total">—</div>
+    <div class="metric-target">Cible Palier 4: ≥€5 000</div>
+    <div class="metric-bar"><div class="metric-bar-fill" id="bar-roi" style="width:0%;background:var(--accent)"></div></div>
+  </div>
+</div>
+
+<!-- NEXT TIER CONDITIONS -->
+<div class="conditions-card" id="conditions-section">
+  <div class="conditions-title" id="conditions-title">Conditions pour le Palier 2</div>
+  <div id="conditions-list"><div class="empty-state">Chargement…</div></div>
+</div>
+
+<!-- AGENT MODES -->
+<div class="agents-card">
+  <div class="section-title">Agents actifs — modes au Palier courant</div>
+  <div id="agents-list"><div class="empty-state">Chargement…</div></div>
+</div>
+
+<!-- INBOX -->
+<div class="inbox-card">
+  <div class="section-title">Suggestions en attente de validation <span id="inbox-count" style="color:var(--accent)"></span></div>
+  <div id="inbox-list"><div class="empty-state">Aucune suggestion en attente. ✓</div></div>
+</div>
+
+<script>
+const API   = '';
+const token = localStorage.getItem('aegis_token') || '';
+const shopId= localStorage.getItem('aegis_shop_id') || '';
+
+const TIER_COLORS = ['','#60a5fa','#4ade80','#fb923c','#f87171','#c084fc'];
+const TIER_NAMES  = ['','Démarrage','Validation','Croissance','Scale','Empire'];
+const TIER_DESCS  = [
+  '',
+  'AEGIS observe tout. Aucune exécution automatique. Le shadow mode mesure la fiabilité des décisions.',
+  'AEGIS coupe automatiquement les campagnes perdantes. Toutes les autres actions requièrent votre validation.',
+  'AEGIS exécute les décisions à impact ≤ €200/j de façon autonome. Suggère les actions plus importantes.',
+  'AEGIS est en plein automatique sur toutes les plateformes, budget illimité dans les guardrails constitutionnels.',
+  'Mode Empire activé. Autonomie totale. AEGIS opère comme un CMO autonome.',
+];
+
+async function api(path) {
+  const r = await fetch(`${API}${path}`, { headers: { Authorization: `Bearer ${token}` } });
+  return r.json();
+}
+
+async function load() {
+  try {
+    const [status, agents, inbox] = await Promise.all([
+      api(`/api/shops/${shopId}/orchestrator/tier-status`),
+      api(`/api/shops/${shopId}/orchestrator/tier-config`),
+      api(`/api/shops/${shopId}/orchestrator/inbox`),
+    ]);
+    renderTier(status.data ?? {});
+    renderAgents(agents.data?.agents ?? []);
+    renderInbox(inbox.data?.inbox ?? []);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function renderTier(d) {
+  const t = d.current_tier ?? 1;
+
+  // Badge
+  document.getElementById('tier-badge').textContent = `Palier ${t}`;
+  document.getElementById('tier-badge').className   = `tier-badge tier-${t}`;
+
+  // Track
+  for (let i=1; i<=5; i++) {
+    const c = document.getElementById(`tc-${i}`);
+    if (i < t)  { c.className = 'tier-circle done'; c.textContent = '✓'; }
+    else if (i===t) {
+      c.className = 'tier-circle active';
+      c.style.borderColor = TIER_COLORS[t];
+      c.style.background  = TIER_COLORS[t];
+      c.style.color       = '#000';
+    } else c.className = 'tier-circle locked';
+    if (i < 5) document.getElementById(`conn-${i}`).className = `tier-connector${i < t ? ' done':''}`;
+  }
+
+  document.getElementById('tier-name').textContent = `Palier ${t} — ${TIER_NAMES[t]}`;
+  document.getElementById('tier-name').style.color = TIER_COLORS[t];
+  document.getElementById('tier-desc').textContent = TIER_DESCS[t];
+
+  // Metrics
+  const m = d.metrics ?? {};
+  const sr = m.shadow_agreement_rate ?? 0;
+  const roas = m.avg_roas_30d ?? 0;
+  const clean = Math.min(m.days_no_critical_anomaly ?? 0, 60);
+  const roi   = m.total_revenue_aegis ?? 0;
+
+  document.getElementById('shadow-rate').textContent = `${(sr*100).toFixed(0)}%`;
+  document.getElementById('shadow-rate').className = `metric-val ${sr>=0.75?'ok':sr>=0.5?'warn':'bad'}`;
+  document.getElementById('bar-shadow').style.width = Math.min(sr*100,100)+'%';
+
+  document.getElementById('roas-30').textContent = `${(roas).toFixed(2)}×`;
+  document.getElementById('roas-30').className = `metric-val ${roas>=2.5?'ok':roas>=1.5?'warn':'bad'}`;
+  document.getElementById('bar-roas').style.width = Math.min(roas/3.5*100,100)+'%';
+
+  document.getElementById('days-clean').textContent = `${clean}j`;
+  document.getElementById('days-clean').className = `metric-val ${clean>=14?'ok':clean>=7?'warn':'bad'}`;
+  document.getElementById('bar-clean').style.width = Math.min(clean/60*100,100)+'%';
+
+  document.getElementById('roi-total').textContent = `€${Math.round(roi).toLocaleString('fr-FR')}`;
+  document.getElementById('roi-total').className = `metric-val ${roi>=5000?'ok':roi>=1000?'warn':'bad'}`;
+  document.getElementById('bar-roi').style.width = Math.min(roi/20000*100,100)+'%';
+
+  // Next conditions
+  if (t < 5) {
+    document.getElementById('conditions-title').textContent = `Conditions pour le Palier ${t+1} — ${TIER_NAMES[t+1]}`;
+    const conds = d.next_conditions ?? [];
+    document.getElementById('conditions-list').innerHTML = conds.length
+      ? conds.map(c => {
+          const current = parseFloat(c.current_value ?? 0);
+          const target  = parseFloat(c.threshold);
+          const met     = eval(`${current} ${c.operator} ${target}`);
+          return `<div class="condition">
+            <div class="cond-icon">${met ? '✅' : c.mandatory ? '🔴' : '🟡'}</div>
+            <div class="cond-text">
+              <div class="cond-name">${c.description}</div>
+              <div class="cond-progress">Actuel: ${current} — Cible: ${c.operator} ${target}</div>
+            </div>
+            <div class="cond-status ${met?'ok':'bad'}">${met?'OK':'—'}</div>
+          </div>`;
+        }).join('')
+      : '<div class="empty-state">Toutes les conditions remplies ✓</div>';
+  } else {
+    document.getElementById('conditions-section').style.display = 'none';
+  }
+}
+
+function renderAgents(agents) {
+  const el = document.getElementById('agents-list');
+  if (!agents.length) { el.innerHTML = '<div class="empty-state">Aucun agent configuré.</div>'; return; }
+  el.innerHTML = agents.map(a => `
+    <div class="agent-row">
+      <span class="agent-name">${a.agent_name}</span>
+      <span class="mode-badge mode-${a.mode}">${a.mode}</span>
+    </div>`).join('');
+}
+
+function renderInbox(inbox) {
+  const el  = document.getElementById('inbox-list');
+  const cnt = document.getElementById('inbox-count');
+  cnt.textContent = inbox.length ? `(${inbox.length})` : '';
+  if (!inbox.length) { el.innerHTML = '<div class="empty-state">Aucune suggestion en attente. ✓</div>'; return; }
+  el.innerHTML = inbox.map(item => `
+    <div class="inbox-item" id="item-${item.id}">
+      <div class="inbox-agent">${item.agent_name}</div>
+      <div class="inbox-narrative">${item.narrative_fr ?? item.decision_type}</div>
+      <div class="inbox-actions">
+        <button class="btn-approve" onclick="approve('${item.id}')">✓ Approuver</button>
+        <button class="btn-reject"  onclick="reject('${item.id}')">✗ Ignorer</button>
+      </div>
+    </div>`).join('');
+}
+
+async function approve(id) {
+  await fetch(`${API}/api/shops/${shopId}/orchestrator/approve`, {
+    method:'POST', headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+    body: JSON.stringify({ decision_id: id }),
+  });
+  document.getElementById(`item-${id}`)?.remove();
+}
+
+async function reject(id) {
+  await fetch(`${API}/api/shops/${shopId}/orchestrator/reject`, {
+    method:'POST', headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+    body: JSON.stringify({ decision_id: id, reason: 'rejected via dashboard' }),
+  });
+  document.getElementById(`item-${id}`)?.remove();
+}
+
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>

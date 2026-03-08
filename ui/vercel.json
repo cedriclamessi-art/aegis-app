@@ -1,0 +1,11 @@
+{
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "framework": null,
+  "rewrites": [
+    { "source": "/", "destination": "/aegis-landing.html" },
+    { "source": "/landing", "destination": "/aegis-landing.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/dashboard/(.*)", "destination": "/dashboard.html" }
+  ]
+}

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AEGIS">
+<meta name="theme-color" content="#1a1a2e">
+<link rel="manifest" href="/manifest.json">
+<title>AEGIS</title>
+<style>
+  :root {
+    --bg:      #0d0d1a;
+    --card:    #1a1a2e;
+    --border:  #2a2a4a;
+    --accent:  #e94560;
+    --green:   #22c55e;
+    --yellow:  #eab308;
+    --text:    #e8e8f0;
+    --muted:   #6b7280;
+    --radius:  16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif; }
+  body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+
+  /* ── Login ── */
+  #login { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; padding:32px; gap:16px; }
+  #login h1 { font-size:32px; font-weight:800; letter-spacing:-1px; }
+  #login .sub { color:var(--muted); font-size:14px; }
+  #login input { width:100%; padding:14px 16px; background:var(--card); border:1px solid var(--border); border-radius:12px; color:var(--text); font-size:16px; outline:none; }
+  #login button { width:100%; padding:14px; background:var(--accent); border:none; border-radius:12px; color:#fff; font-size:16px; font-weight:700; cursor:pointer; }
+
+  /* ── App shell ── */
+  #app { display:none; flex-direction:column; height:100vh; overflow:hidden; }
+  #app.visible { display:flex; }
+
+  /* Header */
+  .header { padding:16px 20px 0; display:flex; justify-content:space-between; align-items:center; }
+  .header .logo { font-size:20px; font-weight:800; letter-spacing:-0.5px; }
+  .header .logo span { color:var(--accent); }
+  .header .status { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+  .status-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* Scrollable content */
+  .content { flex:1; overflow-y:auto; padding:16px 20px 100px; display:flex; flex-direction:column; gap:12px; }
+
+  /* Cards */
+  .card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; }
+  .card-label { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px; }
+
+  /* Empire Index card */
+  .empire-card { background: linear-gradient(135deg, var(--card), #0f1545); }
+  .empire-index { font-size:56px; font-weight:900; letter-spacing:-2px; line-height:1; }
+  .empire-index.aggressive { color:#22c55e; }
+  .empire-index.balanced   { color:#60a5fa; }
+  .empire-index.conservative { color:#eab308; }
+  .empire-mode { font-size:13px; text-transform:uppercase; letter-spacing:2px; margin-top:4px; opacity:0.7; }
+
+  /* KPI row */
+  .kpi-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .kpi-val { font-size:26px; font-weight:800; }
+  .kpi-val.good { color:var(--green); }
+  .kpi-val.bad  { color:var(--accent); }
+
+  /* Activity feed */
+  .feed-item { padding:12px 0; border-bottom:1px solid var(--border); }
+  .feed-item:last-child { border-bottom:none; }
+  .feed-agent { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--accent); margin-bottom:3px; }
+  .feed-narrative { font-size:14px; line-height:1.4; }
+  .feed-time { font-size:11px; color:var(--muted); margin-top:3px; }
+
+  /* Alerts */
+  .alert { border-radius:12px; padding:14px; display:flex; align-items:flex-start; gap:10px; }
+  .alert.critical { background:#3b0d15; border:1px solid #7f1d1d; }
+  .alert.warning  { background:#3b2a0a; border:1px solid #78350f; }
+  .alert-icon { font-size:18px; flex-shrink:0; }
+  .alert-title { font-size:14px; font-weight:700; }
+  .alert-body  { font-size:13px; color:var(--muted); margin-top:2px; }
+
+  /* Seasonal */
+  .season-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+  .season-row:last-child { border-bottom:none; }
+  .season-name { font-size:14px; font-weight:600; }
+  .season-days { font-size:12px; color:var(--muted); }
+  .phase-badge { font-size:10px; padding:3px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:1px; font-weight:700; }
+  .phase-badge.preparation  { background:#1e3a5f; color:#60a5fa; }
+  .phase-badge.acceleration { background:#3b1f00; color:#f97316; }
+  .phase-badge.peak         { background:#3b0d15; color:#ef4444; }
+  .phase-badge.deceleration { background:#1a2e1a; color:#4ade80; }
+
+  /* Bottom nav */
+  .nav { position:fixed; bottom:0; left:0; right:0;
+         background:rgba(13,13,26,0.95); backdrop-filter:blur(20px);
+         border-top:1px solid var(--border);
+         padding:12px 0 max(12px, env(safe-area-inset-bottom));
+         display:grid; grid-template-columns:repeat(4,1fr); }
+  .nav-btn { display:flex; flex-direction:column; align-items:center; gap:3px;
+             background:none; border:none; color:var(--muted); cursor:pointer; padding:4px 0; }
+  .nav-btn.active { color:var(--accent); }
+  .nav-btn svg { width:22px; height:22px; }
+  .nav-btn span { font-size:10px; }
+
+  /* Loading */
+  .loading { display:flex; align-items:center; justify-content:center; height:200px; color:var(--muted); }
+  .spinner { width:24px; height:24px; border:2px solid var(--border); border-top-color:var(--accent);
+             border-radius:50%; animation:spin 0.8s linear infinite; margin-right:10px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* Tabs */
+  .tab { display:none; }
+  .tab.active { display:block; }
+
+  .refresh-btn { background:none; border:1px solid var(--border); color:var(--muted); padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div style="font-size:48px;">⚡</div>
+  <h1>AE<span style="color:#e94560">GIS</span></h1>
+  <div class="sub">Intelligence Platform</div>
+  <input type="email" id="email" placeholder="Email" autocomplete="email">
+  <input type="password" id="password" placeholder="Mot de passe" autocomplete="current-password">
+  <button onclick="login()">Connexion</button>
+  <div id="login-error" style="color:#e94560;font-size:13px;display:none;"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="header">
+    <div class="logo">AE<span>GIS</span></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="refresh-btn" onclick="refresh()">↻</button>
+      <div class="status"><div class="status-dot"></div><span id="last-update">—</span></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- TAB: Dashboard -->
+    <div class="tab active" id="tab-home">
+      <div id="world-state-card" class="card empire-card">
+        <div class="card-label">Empire Index</div>
+        <div class="empire-index" id="empire-index">—</div>
+        <div class="empire-mode" id="empire-mode">chargement…</div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="card">
+          <div class="card-label">ROAS 24h</div>
+          <div class="kpi-val" id="roas">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label">CPA 24h</div>
+          <div class="kpi-val" id="cpa">—</div>
+        </div>
+      </div>
+
+      <div class="kpi-row">
+        <div class="card">
+          <div class="card-label">Dépense aujourd'hui</div>
+          <div class="kpi-val" id="spend">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Revenus aujourd'hui</div>
+          <div class="kpi-val good" id="revenue">—</div>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div id="alerts-container"></div>
+
+      <!-- Constitution status -->
+      <div class="card">
+        <div class="card-label">Conseil Constitutionnel</div>
+        <div id="council-status" style="font-size:13px;color:#6b7280;">Chargement…</div>
+      </div>
+    </div>
+
+    <!-- TAB: Activity -->
+    <div class="tab" id="tab-activity">
+      <div class="card">
+        <div class="card-label">Décisions récentes</div>
+        <div id="activity-feed"><div class="loading"><div class="spinner"></div>Chargement…</div></div>
+      </div>
+    </div>
+
+    <!-- TAB: Seasonal -->
+    <div class="tab" id="tab-seasonal">
+      <div class="card">
+        <div class="card-label">Prochains événements</div>
+        <div id="seasonal-events"><div class="loading"><div class="spinner"></div>Chargement…</div></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Stock critique</div>
+        <div id="stock-alerts"><div style="color:var(--muted);font-size:13px;">Aucune alerte stock.</div></div>
+      </div>
+    </div>
+
+    <!-- TAB: Health -->
+    <div class="tab" id="tab-health">
+      <div class="card">
+        <div class="card-label">Health Probes</div>
+        <div id="probe-status"><div class="loading"><div class="spinner"></div>Chargement…</div></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Pixel Santé</div>
+        <div id="pixel-health"><div style="color:var(--muted);font-size:13px;">Chargement…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="nav">
+    <button class="nav-btn active" id="nav-home" onclick="switchTab('home')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Accueil</span>
+    </button>
+    <button class="nav-btn" id="nav-activity" onclick="switchTab('activity')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Activité</span>
+    </button>
+    <button class="nav-btn" id="nav-seasonal" onclick="switchTab('seasonal')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Saisons</span>
+    </button>
+    <button class="nav-btn" id="nav-health" onclick="switchTab('health')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      <span>Santé</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+const API = '';  // same origin
+let token = localStorage.getItem('aegis_token') || '';
+let shopId = localStorage.getItem('aegis_shop_id') || '';
+let currentTab = 'home';
+
+// ── Init ──────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  if (token && shopId) showApp();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+});
+
+// ── Auth ──────────────────────────────────────────────────
+async function login() {
+  const email    = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const err      = document.getElementById('login-error');
+  try {
+    const res  = await fetch(`${API}/api/auth/login`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) { err.textContent = data.error || 'Erreur de connexion'; err.style.display='block'; return; }
+    token  = data.token;
+    shopId = data.shops?.[0]?.id;
+    localStorage.setItem('aegis_token', token);
+    localStorage.setItem('aegis_shop_id', shopId);
+    showApp();
+  } catch {
+    err.textContent = 'Erreur réseau'; err.style.display = 'block';
+  }
+}
+
+function showApp() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  loadAll();
+  // Auto-refresh every 60s
+  setInterval(loadAll, 60000);
+  // WebSocket for real-time
+  connectWS();
+}
+
+// ── Data loading ──────────────────────────────────────────
+async function api(path) {
+  const res = await fetch(`${API}${path}`, { headers: { Authorization: `Bearer ${token}` } });
+  if (res.status === 401) { localStorage.clear(); location.reload(); }
+  return res.json();
+}
+
+async function loadAll() {
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  await Promise.allSettled([loadWorldState(), loadActivity(), loadSeasonal(), loadHealth()]);
+}
+
+async function loadWorldState() {
+  try {
+    const d = await api(`/api/shops/${shopId}/world-state`);
+    const ei = d.empire_index ?? 0;
+    const el = document.getElementById('empire-index');
+    el.textContent = Math.round(ei);
+    el.className   = `empire-index ${d.empire_mode ?? 'balanced'}`;
+    document.getElementById('empire-mode').textContent = (d.empire_mode ?? '—').toUpperCase();
+
+    const roas = parseFloat(d.roas_24h ?? 0);
+    const cpa  = parseFloat(d.cpa_24h  ?? 0);
+    document.getElementById('roas').textContent = roas.toFixed(2) + '×';
+    document.getElementById('roas').className   = `kpi-val ${roas >= 2.5 ? 'good' : 'bad'}`;
+    document.getElementById('cpa').textContent  = '€' + cpa.toFixed(0);
+    document.getElementById('cpa').className    = `kpi-val ${cpa <= 35 ? 'good' : 'bad'}`;
+    document.getElementById('spend').textContent   = '€' + parseFloat(d.spend_today ?? 0).toFixed(0);
+    document.getElementById('revenue').textContent = '€' + parseFloat(d.revenue_today ?? 0).toFixed(0);
+
+    // Council
+    const council = await api(`/api/shops/${shopId}/constitution/status`);
+    const vetoed  = council.last_24h?.vetoed ?? 0;
+    const approved= council.last_24h?.approved ?? 0;
+    const cs = document.getElementById('council-status');
+    cs.innerHTML = `<span style="color:var(--green)">✓ ${approved} approuvées</span>${vetoed > 0 ? ` &nbsp; <span style="color:var(--accent)">✗ ${vetoed} vetoes</span>` : ''}<br><span style="color:var(--muted);font-size:11px;">v${council.constitution_version ?? '1.0.0'} · 5 articles actifs</span>`;
+
+    // Anomaly alerts
+    loadAlerts(d.active_anomalies ?? []);
+  } catch {}
+}
+
+function loadAlerts(anomalies) {
+  const c = document.getElementById('alerts-container');
+  if (!anomalies.length) { c.innerHTML = ''; return; }
+  c.innerHTML = anomalies.slice(0,3).map(a => `
+    <div class="alert ${a.severity === 'critical' ? 'critical' : 'warning'}">
+      <div class="alert-icon">${a.severity === 'critical' ? '🚨' : '⚠️'}</div>
+      <div><div class="alert-title">${a.title}</div><div class="alert-body">${a.message ?? ''}</div></div>
+    </div>`).join('');
+}
+
+async function loadActivity() {
+  try {
+    const d = await api(`/api/shops/${shopId}/decisions/feed`);
+    const feed = d.feed ?? [];
+    const el   = document.getElementById('activity-feed');
+    if (!feed.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0;">Aucune décision récente.</div>'; return; }
+    el.innerHTML = feed.slice(0,15).map(f => `
+      <div class="feed-item">
+        <div class="feed-agent">${f.agent_name}</div>
+        <div class="feed-narrative">${f.narrative_fr ?? f.decision_type}</div>
+        <div class="feed-time">${relTime(f.created_at)}</div>
+      </div>`).join('');
+  } catch {}
+}
+
+async function loadSeasonal() {
+  try {
+    const d  = await api(`/api/shops/${shopId}/seasonal/upcoming`);
+    const ev = d.upcoming ?? [];
+    const el = document.getElementById('seasonal-events');
+    if (!ev.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;">Aucun événement à venir.</div>'; return; }
+    el.innerHTML = ev.map(e => `
+      <div class="season-row">
+        <div>
+          <div class="season-name">${e.event_name}</div>
+          <div class="season-days">J-${e.days_until_peak}</div>
+        </div>
+        ${e.current_phase ? `<div class="phase-badge ${e.current_phase}">${e.current_phase}</div>` : ''}
+      </div>`).join('');
+
+    // Stock alerts
+    const s  = await api(`/api/shops/${shopId}/replenishment/alerts`);
+    const sa = (s.alerts ?? []).filter((a) => a.alert_type === 'reorder_now');
+    const sel = document.getElementById('stock-alerts');
+    if (!sa.length) { sel.innerHTML = '<div style="color:var(--green);font-size:13px;">✓ Tous les stocks sont suffisants.</div>'; return; }
+    sel.innerHTML = sa.map(a => `
+      <div class="alert critical" style="margin-top:8px;">
+        <div class="alert-icon">📦</div>
+        <div><div class="alert-title">${a.product_name}</div>
+        <div class="alert-body">Rupture dans ${parseFloat(a.days_until_stockout).toFixed(0)}j — commander ${a.recommended_order_qty} unités</div></div>
+      </div>`).join('');
+  } catch {}
+}
+
+async function loadHealth() {
+  try {
+    const d  = await api(`/api/shops/${shopId}/health-probes`);
+    const pr = d.probes ?? [];
+    const el = document.getElementById('probe-status');
+    const failed = pr.filter(p => !p.last_passed);
+    if (!pr.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;">Aucun probe configuré.</div>'; return; }
+    el.innerHTML = `<div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+      <span style="color:var(--green);font-size:14px;">✓ ${pr.length - failed.length}/${pr.length} passent</span>
+      ${failed.length ? `<span style="color:var(--accent);font-size:14px;">✗ ${failed.length} échoués</span>` : ''}
+    </div>` +
+    failed.map(p => `<div class="alert critical" style="margin-bottom:8px;">
+      <div class="alert-icon">🔴</div>
+      <div><div class="alert-title">${p.probe_name}</div>
+      <div class="alert-body">${p.last_output ?? 'Erreur inconnue'}</div></div>
+    </div>`).join('');
+
+    const ph = await api(`/api/shops/${shopId}/pixel/health`);
+    const health = ph.health ?? [];
+    const phel   = document.getElementById('pixel-health');
+    phel.innerHTML = health.map(h => `
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:14px;">${h.platform.toUpperCase()}</span>
+        <span style="font-size:14px;color:${h.health_score>=80?'var(--green)':h.health_score>=50?'var(--yellow)':'var(--accent)'};">${h.health_score}/100 ${h.status}</span>
+      </div>`).join('') || '<div style="color:var(--muted);font-size:13px;">Aucune donnée pixel.</div>';
+  } catch {}
+}
+
+// ── Tab switching ─────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.getElementById(`nav-${tab}`).classList.add('active');
+  currentTab = tab;
+}
+
+function refresh() { loadAll(); }
+
+// ── WebSocket ─────────────────────────────────────────────
+function connectWS() {
+  const ws = new WebSocket(`${location.origin.replace('http','ws')}/ws?token=${token}`);
+  ws.onmessage = (e) => {
+    try {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'agent_decision') loadActivity();
+      if (msg.type === 'anomaly_critical') loadWorldState();
+      if (msg.type === 'stock_critical') loadSeasonal();
+    } catch {}
+  };
+  ws.onclose = () => setTimeout(connectWS, 5000);
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function relTime(iso) {
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return 'à l\'instant';
+  if (diff < 3600) return `il y a ${Math.round(diff/60)}min`;
+  if (diff < 86400) return `il y a ${Math.round(diff/3600)}h`;
+  return `il y a ${Math.round(diff/86400)}j`;
+}
+</script>
+</body>
+</html>
