@@ -1096,7 +1096,7 @@ Analyse cette erreur et extrait la r\u00e8gle \u00e0 ne plus r\u00e9p\u00e9ter :
     3: 'Empire multi-marques \u2014 30 000\u20ac/jour + expansion internationale',
   }[p] ?? '');
 
-  private async callLLM(opts: { system: string; user: string; maxTokens: number }): Promise<string> {
+  protected async callLLM(opts: { system: string; user: string; maxTokens: number }): Promise<string> {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

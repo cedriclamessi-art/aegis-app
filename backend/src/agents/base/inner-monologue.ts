@@ -207,7 +207,7 @@ class InnerMonologueEngine {
   updatePersona(agentId: string, field: string, newValue: string, reason: string): boolean {
     const persona = this.getPersona(agentId);
 
-    const oldValue = (persona as Record<string, unknown>)[field] as string || '';
+    const oldValue = (persona as unknown as Record<string, unknown>)[field] as string || '';
 
     // Record update
     persona.updateHistory.push({
@@ -226,7 +226,7 @@ class InnerMonologueEngine {
 
     // Apply update
     if (field === 'expertise' || field === 'style') {
-      (persona as Record<string, unknown>)[field] = newValue;
+      (persona as unknown as Record<string, unknown>)[field] = newValue;
     }
 
     persona.version++;

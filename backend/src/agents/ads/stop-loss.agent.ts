@@ -1,41 +1,10 @@
-import { ThresholdHelper } from '../core/threshold.helper';
-/**
- * AGENT_STOP_LOSS — Moteur Stop-Loss + Revive Granulaire
- * ══════════════════════════════════════════════════════════════
- *
- * Supérieur à Madgicx Stop-Loss sur 4 points :
- *
- * 1. GRANULARITÉ
- *    Madgicx : règle unique compte-entier.
- *    AEGIS    : règles par ad / adset / campaign, par type de
- *               campagne (prospecting / retargeting), par platform.
- *
- * 2. MULTI-CRITÈRES
- *    Madgicx : ROAS ou CPA seul.
- *    AEGIS    : ROAS + CPA + CTR + CPM + fréquence + spend-sans-conv,
- *               en logique AND ou OR configurable.
- *
- * 3. REVIVE CONDITIONNEL
- *    Madgicx : relance après délai fixe.
- *    AEGIS    : relance SEULEMENT si les métriques ont réellement
- *               récupéré (ROAS > revive_min_roas sur les 6 dernières
- *               heures). Évite les cycles pause/revive infinis.
- *
- * 4. REDUCE_BUDGET
- *    Madgicx : tout ou rien (pause ou pas).
- *    AEGIS    : peut réduire le budget de X% au lieu de pauser
- *               (pour les adsets en léger sous-régime).
- *
- * Fréquence : toutes les 15 minutes (cron */15 * * * *)
- *
- * Intégrations :
- *   ← ads.performance_hourly   : données perf temps réel (CAPI)
- *   ← risk.stop_loss_rules      : règles configurées par tenant
- *   → Meta Graph API            : pause / resume / update_budget
- *   → AGENT_CREATIVE_FACTORY    : si CTR effondré → nouveau brief
- *   → AGENT_CEO                 : rapport si > 3 pauces en 1h
- * ══════════════════════════════════════════════════════════════
- */
+// ThresholdHelper is optional — import only if available
+// import { ThresholdHelper } from '../core/threshold.helper';
+
+// AGENT_STOP_LOSS — Moteur Stop-Loss + Revive Granulaire
+// Superieur a Madgicx sur: granularite, multi-criteres, revive conditionnel, reduce_budget
+// Frequence: toutes les 15 minutes
+// Integrations: ads.performance_hourly, risk.stop_loss_rules, Meta Graph API
 
 import { AgentBase, AgentTask, AgentResult } from '../base/agent.base';
 import { db } from '../../utils/db';

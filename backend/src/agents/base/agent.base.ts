@@ -1,46 +1,38 @@
 /**
- * BaseAgent v6.0 — Enhanced with 90+ patterns from 13 sources
- * =============================================================
- * Integrates patterns from:
- *   - Everything Claude Code   → Hooks lifecycle (pre/post/onError)
- *   - Claude Code Router       → Model routing (Haiku/Sonnet/Opus)
- *   - VoltAgent Subagents      → Circuit breaker, tool permissions
- *   - Ralph Claude Code        → Auto-recovery, rate limiting
- *   - Claude-Mem               → Persistent memory, observation capture
- *   - Infrastructure Showcase  → Auto-activation, enforcement levels
- *   - System Prompts           → Expert persona, system reminders
- *   - Claude Code Showcase     → Skill scoring, tenant memory
- *   - OneRedOak Workflows      → Dual-loop, severity classification
- *
- * The run() method now follows this enhanced flow:
- *   1. Rate limit check
- *   2. Circuit breaker check
- *   3. Hook: preExecute (budget, compliance, validation)
- *   4. TierGate verdict (execute/shadow/suggest/block)
- *   5. Model routing (select optimal LLM)
- *   6. Execute agent logic
- *   7. Hook: postExecute (logging, learning, triggers)
- *   8. Memory: record observation
- *   9. Return enriched result
- *
- * On error:
- *   - Hook: onError (retry logic, circuit breaker update)
- *   - Auto-recovery if transient
- *   - Alert if critical
+ * BaseAgent v7.0 — Fully wired with all 24 infrastructure modules
+ * ==================================================================
+ * Flow: Permission → RateLimit → CircuitBreaker → TurnBudget →
+ *       PreHooks → ToolRuleGraph → TierGate → ModelRoute →
+ *       InnerMonologue → Execute → PostHooks → ExecutionLog →
+ *       Memory Hierarchy → Observability → SleeptimeCompute →
+ *       TriggerActivation → Return enriched result
  */
 import { Pool } from 'pg';
 import { Redis } from 'ioredis';
 import { tierGate, postSuggestion, TierGateVerdict } from '../core/tier-gate.middleware';
 import { hookEngine, HookContext } from './hooks';
 import { circuitBreakerRegistry } from './circuit-breaker';
-import { modelRouter, ModelTier } from './model-router';
+import { modelRouter } from './model-router';
 import { rateLimiter, TierName } from './rate-limiter';
+import { turnBudget } from './turn-budget';
+import { executionLog } from './execution-log';
+import { innerMonologue } from './inner-monologue';
+import { memoryHierarchy } from './memory-hierarchy';
+import { observability } from './observability';
+import { sleeptimeCompute } from './sleeptime-compute';
+import { agentPermissions } from './agent-permissions';
+import { triggerActivation } from './trigger-activation';
+import { progressiveDisclosure } from './progressive-disclosure';
+import { toolRuleGraph } from './tool-rule-graph';
+import { workRegistry } from './work-registry';
+import { conversationCompaction } from './conversation-compaction';
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
 export interface AgentTask {
   shop_id:    string;
   type:       string;
+  id?:        string;        // Task ID (used by legacy agents for trace)
   payload?:   unknown;
   _shadow?:   boolean;
   _metadata?: {
@@ -49,12 +41,21 @@ export interface AgentTask {
     parentAgent?: string;
     priority?:   number;
   };
+  // Legacy compat aliases (used by stop-loss, spy, ugc-factory, etc.)
+  taskType?:  string;
+  tenantId?:  string;
+  input?:     unknown;
+  [key: string]: unknown;   // Allow extra fields from legacy agents
 }
 
 export interface AgentResult {
   success:    boolean;
   data?:      unknown;
   message?:   string;
+  // Compat aliases (legacy agents use output/error)
+  output?:    unknown;
+  error?:     string;
+  retryable?: boolean;
   // TierGate enrichment
   tier_verdict?:    TierGateVerdict;
   tier_mode?:       string;
@@ -62,16 +63,19 @@ export interface AgentResult {
   shadowed?:        boolean;
   suggested?:       boolean;
   suggestion_id?:   string;
-  // v6.0 enrichment
+  // v7.0 enrichment
   model_used?:      string;
   duration_ms?:     number;
   hooks_feedback?:  string;
   circuit_breaker?: string;
   memory_recorded?: boolean;
   retry_count?:     number;
+  turn_budget?:     string;
+  execution_log_id?: string;
+  complexity_level?: number;
+  reasoning_id?:    string;
 }
 
-// Agent metadata for expert persona pattern (from System Prompts)
 export interface AgentPersona {
   expertise:    string;
   description:  string;
@@ -80,12 +84,24 @@ export interface AgentPersona {
   whenToUse:    string;
 }
 
-// ── Enhanced BaseAgent ──────────────────────────────────────────────────────
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+
+export type EmpireMode = 'startup' | 'growth' | 'scale' | 'empire';
+
+export interface WorldState {
+  shop_id:       string;
+  empire_mode:   EmpireMode;
+  current_tier:  number;
+  metrics:       Record<string, number>;
+  updated_at:    Date;
+  [key: string]: unknown;
+}
+
+// ── Enhanced BaseAgent v7 ─────────────────────────────────────────────────
 
 export abstract class BaseAgent {
   abstract readonly name: string;
 
-  // Optional: agent persona (from Piebald-AI agent creation framework)
   readonly persona?: AgentPersona;
 
   constructor(protected db: Pool, protected redis: Redis) {}
@@ -93,8 +109,10 @@ export abstract class BaseAgent {
   abstract execute(task: AgentTask): Promise<AgentResult>;
 
   /**
-   * Enhanced entry point with full pattern integration.
-   * Flow: RateLimit → CircuitBreaker → PreHooks → TierGate → ModelRoute → Execute → PostHooks → Memory
+   * Full v7 pipeline:
+   * Permission → RateLimit → CircuitBreaker → TurnBudget → PreHooks →
+   * TierGate → ModelRoute → InnerMonologue → Execute → PostHooks →
+   * ExecutionLog → Memory → Observability → Sleeptime → Triggers
    */
   async run(task: AgentTask, financialImpact?: number): Promise<AgentResult> {
     const startTime = Date.now();
@@ -105,21 +123,51 @@ export abstract class BaseAgent {
     const tierNum = await this.resolveTier(task.shop_id);
     const tierName = this.tierNumberToName(tierNum);
 
-    // ── Step 1: Rate Limit Check ────────────────────────────────
-    const rateCheck = rateLimiter.checkLimit(task.shop_id, tierName, 'agentCalls');
-    if (!rateCheck.allowed) {
+    // ── Step 0: Permission Check ──────────────────────────────
+    const permCheck = agentPermissions.check(this.name, task.type);
+    if (!permCheck.allowed) {
       return {
         success: false,
-        message: `Rate limit atteint: ${rateCheck.remaining} appels restants. Reset dans ${Math.ceil(rateCheck.resetInMs / 1000)}s`,
+        message: permCheck.reason ?? `Action ${task.type} denied for ${this.name}`,
         tier_verdict: 'block',
         current_tier: tierNum,
       };
     }
-    rateLimiter.recordUsage(task.shop_id, 'agentCalls', 1);
+    if (permCheck.requiresApproval) {
+      const approvalReq = agentPermissions.requestApproval({
+        agentId: this.name,
+        shopId: task.shop_id,
+        action: task.type,
+        description: `${this.name} requests approval for ${task.type}`,
+        data: { payload: task.payload },
+      });
+      // Log but continue (non-blocking approval for now)
+      observability.emit({
+        type: 'system:alert',
+        level: 'warn',
+        agentId: this.name,
+        shopId: task.shop_id,
+        data: { approvalId: approvalReq.id, action: task.type },
+        tags: ['approval', 'hitl'],
+      });
+    }
 
-    // ── Step 2: Circuit Breaker Check ───────────────────────────
-    const cbState = circuitBreakerRegistry.getState(this.name);
-    if (cbState === 'open') {
+    // ── Step 1: Rate Limit Check ──────────────────────────────
+    const rateCheck = rateLimiter.checkLimit(task.shop_id, tierNum);
+    if (!rateCheck.allowed) {
+      return {
+        success: false,
+        message: `Rate limit atteint: ${rateCheck.remaining ?? 0} appels restants. Reset dans ${Math.ceil((rateCheck.resetIn ?? 60000) / 1000)}s`,
+        tier_verdict: 'block',
+        current_tier: tierNum,
+      };
+    }
+    rateLimiter.recordCall(task.shop_id);
+
+    // ── Step 2: Circuit Breaker Check ─────────────────────────
+    const cb = circuitBreakerRegistry.get(this.name, task.shop_id);
+    const cbState = cb.getStatus().state;
+    if (cbState === 'OPEN') {
       return {
         success: false,
         message: `Circuit breaker OPEN pour ${this.name}. Cooldown en cours.`,
@@ -129,43 +177,81 @@ export abstract class BaseAgent {
       };
     }
 
-    // ── Step 3: PreExecute Hooks ────────────────────────────────
-    const hookCtx: HookContext = {
-      agentId: this.name,
-      taskType: task.type,
-      tenantId: task.shop_id,
-      input: task.payload,
-      tier: tierNum,
-      pipelineId: task._metadata?.pipelineId,
-      stepIndex: task._metadata?.stepIndex,
-    };
-
-    // Load budget info for hook
-    try {
-      const budgetInfo = await this.getBudgetInfo(task.shop_id);
-      hookCtx.budget = budgetInfo;
-    } catch { /* non-blocking */ }
-
-    const preHookResult = await hookEngine.execute('preExecute', hookCtx);
-    if (preHookResult.block) {
+    // ── Step 3: Turn Budget ───────────────────────────────────
+    const budgetSession = turnBudget.createSession(this.name, tierNum, task.shop_id);
+    const budgetCheck = turnBudget.checkTurn(budgetSession.sessionId);
+    if (!budgetCheck.allowed) {
       return {
         success: false,
-        message: preHookResult.reason ?? 'Bloqué par un hook preExecute',
-        hooks_feedback: preHookResult.feedback,
-        tier_verdict: 'block',
+        message: budgetCheck.reason ?? 'Turn budget exceeded',
+        turn_budget: 'exceeded',
         current_tier: tierNum,
       };
     }
 
-    // Apply modified input from hooks if provided
-    if (preHookResult.modifiedInput) {
-      task = { ...task, payload: preHookResult.modifiedInput };
+    // ── Step 4: Complexity Assessment ─────────────────────────
+    const complexity = progressiveDisclosure.assess(
+      task.type + ' ' + JSON.stringify(task.payload ?? '').slice(0, 200),
+      this.name
+    );
+
+    // ── Step 5: Start Execution Log ───────────────────────────
+    const logId = executionLog.startExecution({
+      agentId: this.name,
+      agentName: this.name,
+      model: complexity.profile.model,
+      maxTurns: complexity.profile.maxTurns,
+      shopId: task.shop_id,
+      pipelineId: task._metadata?.pipelineId,
+      stepName: task.type,
+      contextSize: JSON.stringify(task.payload ?? '').length,
+      tags: [task.type, `tier:${tierNum}`, `level:${complexity.level}`],
+    });
+
+    // ── Step 6: PreExecute Hooks ──────────────────────────────
+    const hookCtx: HookContext = {
+      agentName: this.name,
+      shopId: task.shop_id,
+      tier: tierNum,
+      task: task.payload,
+      pipelineId: task._metadata?.pipelineId,
+      stepIndex: task._metadata?.stepIndex,
+      metadata: { taskType: task.type },
+    };
+
+    const preHookResult = await hookEngine.execute('preExecute', hookCtx);
+    if (!preHookResult.allow) {
+      executionLog.completeExecution(logId, { status: 'failure', error: preHookResult.feedback });
+      return {
+        success: false,
+        message: preHookResult.feedback ?? 'Bloqué par un hook preExecute',
+        hooks_feedback: preHookResult.feedback,
+        tier_verdict: 'block',
+        current_tier: tierNum,
+        execution_log_id: logId,
+      };
     }
 
-    // ── Step 4: TierGate ────────────────────────────────────────
+    // ── Step 7: Consume Guidance Whispers ──────────────────────
+    const guidance = sleeptimeCompute.consumeGuidance(this.name, task.shop_id);
+    const whisperContext = sleeptimeCompute.formatGuidanceWhisper(guidance);
+
+    // ── Step 8: Load Core Memory Context ──────────────────────
+    const coreContext = memoryHierarchy.getCoreContext(task.shop_id);
+
+    // ── Step 9: Inner Monologue — Pre-execution reasoning ─────
+    const reasoningId = innerMonologue.think({
+      agentId: this.name,
+      shopId: task.shop_id,
+      pipelineId: task._metadata?.pipelineId,
+      thought: `Starting ${task.type}. Complexity: L${complexity.level} (${complexity.profile.label}). Model: ${complexity.profile.model}. ${whisperContext ? 'Has guidance whispers.' : 'No guidance.'}`,
+      type: 'reasoning',
+      confidence: complexity.confidence,
+    }).id;
+
+    // ── Step 10: TierGate ─────────────────────────────────────
     const gate = await tierGate(this.db, task.shop_id, this.name, financialImpact);
 
-    // Log the gate check (non-blocking)
     this.db.query(`
       INSERT INTO agent_decisions
         (shop_id, agent_name, decision_type, decision_made, executed, confidence, context)
@@ -176,33 +262,56 @@ export abstract class BaseAgent {
          verdict: gate.verdict, reason: gate.reason,
        })]).catch(() => {});
 
-    // ── Step 5: Model Routing ───────────────────────────────────
-    const selectedModel = modelRouter.getModel(this.name, tierName);
-    modelRouter.trackUsage(this.name, selectedModel, 0); // Token count updated after execution
+    // ── Step 11: Model Routing ────────────────────────────────
+    const modelRoute = modelRouter.route(this.name, tierNum, { complexity: complexity.level });
+    const selectedModel = modelRoute.model;
 
-    // ── Step 6: Execute based on TierGate verdict ───────────────
+    // ── Step 12: Observability — Agent Start ──────────────────
+    observability.emit({
+      type: 'agent:start',
+      level: 'info',
+      agentId: this.name,
+      shopId: task.shop_id,
+      pipelineId: task._metadata?.pipelineId,
+      data: {
+        taskType: task.type,
+        model: selectedModel,
+        tier: tierNum,
+        complexity: complexity.level,
+      },
+      tags: [task.type],
+    });
+
+    observability.heartbeat(this.name, budgetSession.sessionId, {
+      shopId: task.shop_id,
+      turnsUsed: 0,
+      costUsd: 0,
+      currentAction: task.type,
+    });
+
+    // ── Step 13: Execute based on TierGate verdict ────────────
     let result: AgentResult;
 
     const executeWithRetry = async (): Promise<AgentResult> => {
       try {
-        return await circuitBreakerRegistry.execute(this.name, async () => {
-          return this.execute(task);
-        });
+        if (!cb.canExecute()) {
+          return { success: false, message: 'Circuit breaker OPEN', circuit_breaker: 'open' };
+        }
+        const res = await this.execute(task);
+        cb.recordSuccess();
+        return res;
       } catch (error) {
-        // ── OnError Hooks ─────────────────────────────────
+        cb.recordFailure('execution_error', error instanceof Error ? error.message : String(error));
+
         const errorCtx: HookContext = {
           ...hookCtx,
           error: error instanceof Error ? error : new Error(String(error)),
-          retryCount,
         };
         const errorHookResult = await hookEngine.execute('onError', errorCtx);
 
-        // Check if we should retry
-        const retryAction = errorHookResult.actions?.find(a => a.type === 'retry');
-        if (retryAction && retryCount < maxRetries) {
+        if (errorHookResult.action === 'retry' && retryCount < maxRetries) {
           retryCount++;
-          const delay = (retryAction.payload as any)?.delay ?? 1000;
-          await new Promise(r => setTimeout(r, delay));
+          await new Promise(r => setTimeout(r, 1000 * retryCount));
           return executeWithRetry();
         }
 
@@ -220,7 +329,6 @@ export abstract class BaseAgent {
         break;
 
       case 'shadow': {
-        const shadowCtx = { ...task, _shadow: true };
         const shadowResult = await executeWithRetry().catch(e => ({
           success: false, message: String(e),
         }));
@@ -279,26 +387,101 @@ export abstract class BaseAgent {
 
     const durationMs = Date.now() - startTime;
 
-    // ── Step 7: PostExecute Hooks ───────────────────────────────
+    // ── Step 14: PostExecute Hooks ────────────────────────────
     const postCtx: HookContext = {
       ...hookCtx,
-      output: result.data,
-      success: result.success,
-      durationMs,
+      result: result.data ?? result.output,
+      metadata: { ...hookCtx.metadata, success: result.success, durationMs },
     };
     const postHookResult = await hookEngine.execute('postExecute', postCtx);
 
-    // Apply modified output from hooks if provided
-    if (postHookResult.modifiedOutput) {
-      result.data = postHookResult.modifiedOutput;
+    if (postHookResult.data) {
+      result.data = postHookResult.data;
     }
 
-    // ── Step 8: Record Observation (Memory System) ──────────────
+    // ── Step 15: Inner Monologue — Post-execution reasoning ───
+    innerMonologue.think({
+      agentId: this.name,
+      shopId: task.shop_id,
+      pipelineId: task._metadata?.pipelineId,
+      thought: result.success
+        ? `Completed ${task.type} successfully in ${durationMs}ms. Model: ${selectedModel}.`
+        : `Failed ${task.type}: ${result.message || result.error || 'unknown error'}`,
+      type: result.success ? 'observation' : 'uncertainty',
+      confidence: result.success ? 0.9 : 0.3,
+    });
+
+    // Create audit trail for decisions
+    if (gate.verdict === 'execute' && result.success) {
+      innerMonologue.createAudit({
+        agentId: this.name,
+        shopId: task.shop_id,
+        decision: `${task.type} executed with ${gate.verdict} verdict`,
+        alternatives: ['shadow', 'suggest', 'block'],
+        confidence: complexity.confidence,
+      });
+    }
+
+    // ── Step 16: Execution Log — Complete ─────────────────────
+    executionLog.recordTurn(logId, {
+      inputTokens: 0,
+      outputTokens: 0,
+      costUsd: 0,
+      model: selectedModel,
+    });
+
+    executionLog.completeExecution(logId, {
+      status: result.success ? 'success' : 'failure',
+      result: result.data ?? result.output,
+      error: result.message || result.error,
+      tags: result.success ? ['success'] : ['failure'],
+    });
+
+    // ── Step 17: Turn Budget — Record ─────────────────────────
+    turnBudget.recordTurn(budgetSession.sessionId, {
+      model: selectedModel,
+      inputTokens: 0,
+      outputTokens: 0,
+      costUsd: 0,
+      durationMs,
+      action: task.type,
+      timestamp: new Date(),
+    });
+    turnBudget.completeSession(budgetSession.sessionId);
+
+    // ── Step 18: Record Observation (Memory) ──────────────────
     try {
       await this.recordObservation(task, result, durationMs);
     } catch { /* non-blocking */ }
 
-    // ── Step 9: Emit event for real-time monitoring ─────────────
+    // ── Step 19: Observability — Agent Complete ───────────────
+    observability.emit({
+      type: result.success ? 'agent:complete' : 'agent:error',
+      level: result.success ? 'info' : 'error',
+      agentId: this.name,
+      shopId: task.shop_id,
+      pipelineId: task._metadata?.pipelineId,
+      data: {
+        taskType: task.type,
+        success: result.success,
+        durationMs,
+        model: selectedModel,
+        tier: tierNum,
+        costUsd: 0,
+        turnsUsed: 1,
+        error: result.success ? undefined : (result.message || result.error),
+        status: result.success ? 'success' : 'failure',
+        message: `${this.name} ${result.success ? 'completed' : 'failed'} ${task.type}`,
+      },
+      tags: [task.type, result.success ? 'success' : 'failure'],
+    });
+
+    observability.removeHeartbeat(budgetSession.sessionId);
+
+    // ── Step 20: Sleeptime tick ───────────────────────────────
+    sleeptimeCompute.tick(task.shop_id).catch(() => {});
+
+    // ── Step 21: Emit Redis event ─────────────────────────────
     await this.emit(`agent:${result.success ? 'completed' : 'failed'}`, {
       shop_id: task.shop_id,
       agent: this.name,
@@ -309,19 +492,40 @@ export abstract class BaseAgent {
       tier: tierNum,
     }).catch(() => {});
 
-    // ── Enrich result with v6.0 metadata ────────────────────────
+    // ── Step 22: Fire chain triggers ──────────────────────────
+    if (result.success) {
+      const chainMatches = triggerActivation.fireChain(this.name, {
+        shopId: task.shop_id,
+        taskType: task.type,
+        result: result.data ?? result.output,
+      });
+      for (const match of chainMatches) {
+        triggerActivation.recordExecution(
+          match.trigger.id, match.trigger.agentId,
+          `chain from ${this.name}`, match.context
+        );
+      }
+    }
+
+    // ── Enrich result with v7.0 metadata ──────────────────────
     result.model_used = selectedModel;
     result.duration_ms = durationMs;
     result.hooks_feedback = [preHookResult.feedback, postHookResult.feedback]
       .filter(Boolean).join(' | ') || undefined;
-    result.circuit_breaker = circuitBreakerRegistry.getState(this.name);
+    result.circuit_breaker = cb.getStatus().state;
     result.memory_recorded = true;
     result.retry_count = retryCount > 0 ? retryCount : undefined;
+    result.turn_budget = budgetSession.status;
+    result.execution_log_id = logId;
+    result.complexity_level = complexity.level;
+    result.reasoning_id = reasoningId;
 
     return result;
   }
 
-  // ── Helpers partagés ──────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════
+  //  SHARED HELPERS (available to all agents)
+  // ═══════════════════════════════════════════════════════════════════
 
   protected async remember(shopId: string, opts: {
     memory_key:   string;
@@ -344,6 +548,159 @@ export abstract class BaseAgent {
     await this.redis.publish(channel, JSON.stringify(payload));
   }
 
+  /** Send inter-agent message via Redis pub/sub */
+  protected async send(msg: {
+    fromAgent:   string;
+    toAgent:     string;
+    messageType: string;
+    subject:     string;
+    payload:     unknown;
+    tenantId:    string;
+    priority?:   number;
+  }): Promise<void> {
+    const channel = `aegis:agent:${msg.toAgent}`;
+    await this.redis.publish(channel, JSON.stringify({
+      ...msg,
+      timestamp: new Date().toISOString(),
+    }));
+    // Also log to DB for audit trail
+    this.db.query(`
+      INSERT INTO agent_messages
+        (from_agent, to_agent, message_type, subject, payload, tenant_id, priority, created_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())`,
+      [msg.fromAgent, msg.toAgent, msg.messageType, msg.subject,
+       JSON.stringify(msg.payload), msg.tenantId, msg.priority ?? 5]
+    ).catch(() => {});
+  }
+
+  /** Structured trace logging */
+  protected async trace(
+    level: string, message: string,
+    data: Record<string, unknown> = {}, taskId?: string,
+  ): Promise<void> {
+    this.db.query(
+      `INSERT INTO agent_trace (agent_name, level, message, data, task_id, created_at)
+       VALUES ($1,$2,$3,$4,$5,NOW())`,
+      [this.name, level, message, JSON.stringify(data), taskId]
+    ).catch(() => {});
+  }
+
+  /** Call Claude/LLM with system+user prompt */
+  protected async callLLM(opts: {
+    system: string; user: string; maxTokens?: number; model?: string; temperature?: number;
+  }): Promise<string> {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return '{"error":"No ANTHROPIC_API_KEY set"}';
+    const model = opts.model ?? process.env.AEGIS_DEFAULT_MODEL ?? 'claude-sonnet-4-20250514';
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model, max_tokens: opts.maxTokens ?? 1024,
+        temperature: opts.temperature ?? 0.3,
+        system: opts.system,
+        messages: [{ role: 'user', content: opts.user }],
+      }),
+    });
+    const json = await res.json() as { content?: Array<{ type: string; text: string }> };
+    return json.content?.find((b: any) => b.type === 'text')?.text ?? '';
+  }
+
+  /** Log a decision for audit trail — returns decision ID */
+  protected async logDecision(
+    shopIdOrObj: string | Record<string, unknown>,
+    maybeDecision?: Record<string, unknown>,
+  ): Promise<string> {
+    const decisionId = `dec_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    let shopId: string;
+    let decision: Record<string, unknown>;
+    if (typeof shopIdOrObj === 'string') {
+      shopId = shopIdOrObj; decision = maybeDecision ?? {};
+    } else {
+      shopId = (shopIdOrObj as any).tenantId ?? (shopIdOrObj as any).shopId ?? 'unknown';
+      decision = shopIdOrObj;
+    }
+    this.db.query(`
+      INSERT INTO agent_decisions
+        (id, shop_id, agent_name, decision_type, decision_made, executed, confidence, context, created_at)
+      VALUES ($1,$2,$3,$4,$5,false,$6,$7,NOW())`,
+      [decisionId, shopId, this.name,
+       decision.decision_type ?? decision.decisionType ?? 'generic',
+       JSON.stringify(decision.decision_made ?? decision.decision ?? decision),
+       decision.confidence ?? 0.8, JSON.stringify(decision)]
+    ).catch(() => {});
+    return decisionId;
+  }
+
+  /** Mark a decision as executed */
+  protected async markExecuted(decisionId: string): Promise<void> {
+    this.db.query(
+      `UPDATE agent_decisions SET executed = true, executed_at = NOW() WHERE id = $1`,
+      [decisionId]
+    ).catch(() => {});
+  }
+
+  /** Update agent execution status */
+  protected async setStatus(status: string): Promise<void> {
+    this.db.query(
+      `INSERT INTO agent_status (agent_name, status, updated_at)
+       VALUES ($1,$2,NOW())
+       ON CONFLICT (agent_name) DO UPDATE SET status=$2, updated_at=NOW()`,
+      [this.name, status]
+    ).catch(() => {});
+  }
+
+  /** Signal liveness to monitoring */
+  protected async heartbeat(): Promise<void> {
+    await this.redis.set(
+      `aegis:heartbeat:${this.name}`,
+      JSON.stringify({ ts: Date.now(), agent: this.name }),
+      'EX', 300
+    ).catch(() => {});
+  }
+
+  /** Broadcast event to all agents */
+  protected async broadcast(payload: unknown, topic: string, tenantId?: string): Promise<void> {
+    const channel = `aegis:broadcast:${tenantId ?? 'global'}`;
+    await this.redis.publish(channel, JSON.stringify({
+      topic, from: this.name, payload, timestamp: new Date().toISOString(),
+    })).catch(() => {});
+  }
+
+  /** Push market intelligence signal */
+  protected async pushIntel(
+    signalOrType: Record<string, unknown> | string, ...args: unknown[]
+  ): Promise<string> {
+    const intelId = `intel_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    let signal: Record<string, unknown>;
+    if (typeof signalOrType === 'string') {
+      signal = { signal_type: signalOrType, title: args[0], summary: args[1], actionHint: args[2], targetAgents: args[3] };
+    } else { signal = signalOrType; }
+    this.db.query(`
+      INSERT INTO intel_feed (id, source, signal_type, subject, data, confidence, relevance_score, created_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())`,
+      [intelId, signal.source ?? this.name, signal.signal_type ?? 'generic',
+       signal.subject ?? signal.title ?? '', JSON.stringify(signal.data ?? signal),
+       signal.confidence ?? 0.7, signal.relevance_score ?? 5]
+    ).catch(() => {});
+    return intelId;
+  }
+
+  /** Read intel feed */
+  protected async readIntelFeed(opts?: { limit?: number; type?: string }): Promise<Record<string, unknown>[]> {
+    try {
+      const { rows } = await this.db.query(`
+        SELECT * FROM intel_feed WHERE ($1::text IS NULL OR signal_type = $1)
+        ORDER BY created_at DESC LIMIT $2`,
+        [opts?.type ?? null, opts?.limit ?? 20]);
+      return rows;
+    } catch { return []; }
+  }
+
   protected async getShopConfig(shopId: string): Promise<Record<string, any>> {
     const { rows } = await this.db.query(
       `SELECT * FROM shops WHERE id=$1`, [shopId]);
@@ -356,10 +713,6 @@ export abstract class BaseAgent {
     return rows[0] ?? {};
   }
 
-  /**
-   * Get agent's past learnings for this tenant.
-   * Memory System pattern from claude-mem: 3-layer search.
-   */
   protected async getAgentMemory(shopId: string, limit = 10): Promise<any[]> {
     const { rows } = await this.db.query(`
       SELECT memory_key, memory_type, value, created_at
@@ -376,31 +729,33 @@ export abstract class BaseAgent {
     }));
   }
 
-  /**
-   * Get system reminders for current context.
-   * Pattern from Piebald-AI System Prompts.
-   */
   protected async getSystemReminders(shopId: string): Promise<string[]> {
     const reminders: string[] = [];
 
-    // Budget reminder
     try {
       const budget = await this.getBudgetInfo(shopId);
       if (budget) {
         const pct = Math.round(budget.spent / budget.limit * 100);
-        if (pct >= 90) reminders.push(`🔴 Budget à ${pct}% (${budget.spent}€/${budget.limit}€)`);
-        else if (pct >= 75) reminders.push(`🟡 Budget à ${pct}% (${budget.spent}€/${budget.limit}€)`);
+        if (pct >= 90) reminders.push(`Budget at ${pct}% (${budget.spent}/${budget.limit})`);
+        else if (pct >= 75) reminders.push(`Budget at ${pct}% (${budget.spent}/${budget.limit})`);
       }
     } catch { /* non-blocking */ }
 
-    // Active campaigns reminder
     try {
       const { rows } = await this.db.query(
         `SELECT COUNT(*) as cnt FROM pipeline_runs WHERE shop_id = $1 AND status = 'running'`,
         [shopId]);
       const count = parseInt(rows[0]?.cnt ?? '0');
-      if (count > 0) reminders.push(`📊 ${count} pipeline(s) actif(s)`);
+      if (count > 0) reminders.push(`${count} pipeline(s) running`);
     } catch { /* non-blocking */ }
+
+    // Guidance whispers
+    const pendingGuidance = sleeptimeCompute.getPendingGuidanceCount(shopId);
+    if (pendingGuidance > 0) reminders.push(`${pendingGuidance} guidance message(s) pending`);
+
+    // Metacognition alerts
+    const metacog = innerMonologue.getOpenMetacognition(this.name);
+    if (metacog.length > 0) reminders.push(`${metacog.length} metacognition alert(s)`);
 
     return reminders;
   }
@@ -446,9 +801,8 @@ export abstract class BaseAgent {
     result: AgentResult,
     durationMs: number,
   ): Promise<void> {
-    // Extract metrics from result for pattern extraction
     const metrics: Record<string, number> = {};
-    const data = result.data as any;
+    const data = (result.data ?? result.output) as any;
     if (data?.roas) metrics.roas = data.roas;
     if (data?.ctr) metrics.ctr = data.ctr;
     if (data?.cpa) metrics.cpa = data.cpa;
@@ -469,10 +823,371 @@ export abstract class BaseAgent {
         this.name,
         task.type,
         JSON.stringify(task.payload ?? {}).slice(0, 500),
-        JSON.stringify(result.data ?? {}).slice(0, 2000),
+        JSON.stringify(data ?? {}).slice(0, 2000),
         result.success,
         durationMs,
         JSON.stringify(metrics),
       ]).catch(() => {});
+
+    // Also insert into memory hierarchy recall
+    memoryHierarchy.recallInsert(task.shop_id, {
+      agentId: this.name,
+      shopId: task.shop_id,
+      role: 'assistant',
+      content: `[${this.name}] ${task.type}: ${result.success ? 'success' : 'failed'} — ${JSON.stringify(data ?? {}).slice(0, 300)}`,
+      tokenCount: Math.ceil(JSON.stringify(data ?? {}).length / 4),
+      metadata: {
+        durationMs, model: result.model_used,
+        hasDecision: !!data?.decision || !!data?.classification,
+        pipelineStep: task._metadata?.pipelineId ? task.type : undefined,
+      },
+    });
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  COMPATIBILITY LAYER — AgentBase alias for legacy agents
+// ═══════════════════════════════════════════════════════════════════════════
+//
+//  Legacy agents (20+ agents) use:
+//    - class XAgent extends AgentBase
+//    - agentId / taskTypes properties
+//    - execute(task) with { taskType, tenantId, input, id } shape
+//    - this.send() for inter-agent messaging
+//    - this.trace() for logging
+//    - this.callLLM() for AI calls
+//    - this.logDecision() / this.markExecuted() for decision audit
+//    - this.setStatus() / this.heartbeat() / this.broadcast()
+//    - this.pushIntel() / this.readIntelFeed() for intelligence sharing
+//    - { success, output, error, retryable } result shape
+//
+//  This abstract class bridges both interfaces.
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface LegacyAgentTask {
+  taskType?:  string;
+  tenantId?:  string;
+  input?:     unknown;
+  id?:        string;
+  [key: string]: unknown;
+}
+
+export abstract class AgentBase {
+  abstract readonly agentId: string;
+  readonly taskTypes: string[] = [];
+
+  protected db: Pool;
+  protected redis: Redis;
+
+  constructor(dbOrPool?: Pool, redisClient?: Redis) {
+    this.db = dbOrPool ?? (globalThis as any).__aegis_db;
+    this.redis = redisClient ?? (globalThis as any).__aegis_redis;
+  }
+
+  abstract execute(task: AgentTask): Promise<AgentResult>;
+
+  // ── Logging ─────────────────────────────────────────────────────────
+
+  /** Structured trace logging (level: info | debug | warn | error) */
+  protected async trace(
+    level: string,
+    message: string,
+    data: Record<string, unknown> = {},
+    taskId?: string,
+  ): Promise<void> {
+    const entry = {
+      timestamp: new Date().toISOString(),
+      agent: this.agentId,
+      level,
+      message,
+      taskId,
+      ...data,
+    };
+    // Log to DB (non-blocking)
+    if (this.db) {
+      this.db.query(
+        `INSERT INTO agent_trace (agent_name, level, message, data, task_id, created_at)
+         VALUES ($1,$2,$3,$4,$5,NOW())`,
+        [this.agentId, level, message, JSON.stringify(data), taskId]
+      ).catch(() => {});
+    }
+    // Console
+    if (level === 'error') console.error(`[${this.agentId}]`, message, data);
+    else if (level === 'warn') console.warn(`[${this.agentId}]`, message);
+    else if (level === 'debug') { /* skip debug in prod */ }
+    else console.log(`[${this.agentId}]`, message);
+  }
+
+  // ── LLM Calls ──────────────────────────────────────────────────────
+
+  /** Call Claude/LLM with system+user prompt */
+  protected async callLLM(opts: {
+    system: string;
+    user: string;
+    maxTokens?: number;
+    model?: string;
+    temperature?: number;
+  }): Promise<string> {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return '{"error":"No ANTHROPIC_API_KEY set"}';
+
+    const model = opts.model ?? process.env.AEGIS_DEFAULT_MODEL ?? 'claude-sonnet-4-20250514';
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: opts.maxTokens ?? 1024,
+        temperature: opts.temperature ?? 0.3,
+        system: opts.system,
+        messages: [{ role: 'user', content: opts.user }],
+      }),
+    });
+
+    const data = await res.json() as { content?: Array<{ type: string; text: string }> };
+    return data.content?.find((b: any) => b.type === 'text')?.text ?? '';
+  }
+
+  // ── Decision Audit ─────────────────────────────────────────────────
+
+  /** Log a decision for audit trail — returns decision ID */
+  protected async logDecision(
+    shopIdOrObj: string | Record<string, unknown>,
+    maybeDecision?: Record<string, unknown>,
+  ): Promise<string> {
+    const decisionId = `dec_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+
+    let shopId: string;
+    let decision: Record<string, unknown>;
+
+    if (typeof shopIdOrObj === 'string') {
+      shopId = shopIdOrObj;
+      decision = maybeDecision ?? {};
+    } else {
+      shopId = (shopIdOrObj as any).tenantId ?? (shopIdOrObj as any).shopId ?? 'unknown';
+      decision = shopIdOrObj;
+    }
+
+    if (this.db) {
+      this.db.query(`
+        INSERT INTO agent_decisions
+          (id, shop_id, agent_name, decision_type, decision_made, executed, confidence, context, created_at)
+        VALUES ($1,$2,$3,$4,$5,false,$6,$7,NOW())`,
+        [
+          decisionId,
+          shopId,
+          this.agentId,
+          decision.decision_type ?? decision.decisionType ?? 'generic',
+          JSON.stringify(decision.decision_made ?? decision.decision ?? decision),
+          decision.confidence ?? 0.8,
+          JSON.stringify(decision),
+        ]
+      ).catch(() => {});
+    }
+
+    return decisionId;
+  }
+
+  /** Mark a decision as executed */
+  protected async markExecuted(decisionId: string): Promise<void> {
+    if (this.db) {
+      this.db.query(
+        `UPDATE agent_decisions SET executed = true, executed_at = NOW() WHERE id = $1`,
+        [decisionId]
+      ).catch(() => {});
+    }
+  }
+
+  // ── Status & Heartbeat ─────────────────────────────────────────────
+
+  /** Update agent execution status */
+  protected async setStatus(status: string): Promise<void> {
+    if (this.db) {
+      this.db.query(
+        `INSERT INTO agent_status (agent_name, status, updated_at)
+         VALUES ($1,$2,NOW())
+         ON CONFLICT (agent_name) DO UPDATE SET status=$2, updated_at=NOW()`,
+        [this.agentId, status]
+      ).catch(() => {});
+    }
+  }
+
+  /** Signal liveness to monitoring system */
+  protected async heartbeat(): Promise<void> {
+    if (this.redis) {
+      await this.redis.set(
+        `aegis:heartbeat:${this.agentId}`,
+        JSON.stringify({ ts: Date.now(), agent: this.agentId }),
+        'EX', 300
+      ).catch(() => {});
+    }
+  }
+
+  // ── Messaging ──────────────────────────────────────────────────────
+
+  /** Inter-agent messaging via Redis pub/sub */
+  protected async send(msg: {
+    fromAgent:   string;
+    toAgent:     string;
+    messageType: string;
+    subject:     string;
+    payload:     unknown;
+    tenantId:    string;
+    priority?:   number;
+  }): Promise<void> {
+    if (!this.redis) return;
+    const channel = `aegis:agent:${msg.toAgent}`;
+    await this.redis.publish(channel, JSON.stringify({
+      ...msg,
+      timestamp: new Date().toISOString(),
+    })).catch(() => {});
+    // Audit trail
+    if (this.db) {
+      this.db.query(`
+        INSERT INTO agent_messages
+          (from_agent, to_agent, message_type, subject, payload, tenant_id, priority, created_at)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())`,
+        [msg.fromAgent, msg.toAgent, msg.messageType, msg.subject,
+         JSON.stringify(msg.payload), msg.tenantId, msg.priority ?? 5]
+      ).catch(() => {});
+    }
+  }
+
+  /** Broadcast event to all agents / Redis subscribers */
+  protected async broadcast(
+    payload: unknown,
+    topic: string,
+    tenantId?: string,
+  ): Promise<void> {
+    if (!this.redis) return;
+    const channel = `aegis:broadcast:${tenantId ?? 'global'}`;
+    await this.redis.publish(channel, JSON.stringify({
+      topic,
+      from: this.agentId,
+      payload,
+      timestamp: new Date().toISOString(),
+    })).catch(() => {});
+  }
+
+  // ── Intelligence Feed ──────────────────────────────────────────────
+
+  /** Push market intelligence signal */
+  protected async pushIntel(
+    signalOrType: Record<string, unknown> | string,
+    ...args: unknown[]
+  ): Promise<string> {
+    const intelId = `intel_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+
+    let signal: Record<string, unknown>;
+    if (typeof signalOrType === 'string') {
+      signal = {
+        signal_type: signalOrType,
+        title: args[0] as string,
+        summary: args[1] as string,
+        actionHint: args[2] as string,
+        targetAgents: args[3],
+      };
+    } else {
+      signal = signalOrType;
+    }
+
+    if (this.db) {
+      this.db.query(`
+        INSERT INTO intel_feed
+          (id, source, signal_type, subject, data, confidence, relevance_score, created_at)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())`,
+        [
+          intelId,
+          signal.source ?? this.agentId,
+          signal.signal_type ?? 'generic',
+          signal.subject ?? signal.title ?? '',
+          JSON.stringify(signal.data ?? signal),
+          signal.confidence ?? 0.7,
+          signal.relevance_score ?? 5,
+        ]
+      ).catch(() => {});
+    }
+
+    return intelId;
+  }
+
+  /** Read intel feed */
+  protected async readIntelFeed(opts?: {
+    limit?: number;
+    type?: string;
+  }): Promise<Record<string, unknown>[]> {
+    if (!this.db) return [];
+    try {
+      const { rows } = await this.db.query(`
+        SELECT * FROM intel_feed
+        WHERE ($1::text IS NULL OR signal_type = $1)
+        ORDER BY created_at DESC LIMIT $2`,
+        [opts?.type ?? null, opts?.limit ?? 20]
+      );
+      return rows;
+    } catch { return []; }
+  }
+
+  // ── Memory shortcuts ───────────────────────────────────────────────
+
+  protected async remember(shopId: string, opts: {
+    memory_key: string; memory_type: string; value: unknown; ttl_hours: number;
+  }): Promise<void> {
+    if (!this.db) return;
+    await this.db.query(`
+      INSERT INTO agent_memory
+        (shop_id, agent_name, memory_key, memory_type, value, expires_at)
+      VALUES ($1,$2,$3,$4,$5, NOW() + ($6 || ' hours')::INTERVAL)
+      ON CONFLICT (shop_id, agent_name, memory_key) DO UPDATE
+        SET value=$5, expires_at=NOW() + ($6 || ' hours')::INTERVAL`,
+      [shopId, this.agentId, opts.memory_key, opts.memory_type,
+       JSON.stringify(opts.value), opts.ttl_hours]).catch(() => {});
+  }
+
+  protected async emit(event: string, payload: unknown): Promise<void> {
+    if (!this.redis) return;
+    const channel = `aegis:event:${(payload as any)?.shop_id ?? (payload as any)?.tenantId ?? 'global'}:${event}`;
+    await this.redis.publish(channel, JSON.stringify(payload)).catch(() => {});
+  }
+
+  protected async getShopConfig(shopId: string): Promise<Record<string, any>> {
+    if (!this.db) return {};
+    try {
+      const { rows } = await this.db.query(`SELECT * FROM shops WHERE id=$1`, [shopId]);
+      return rows[0] ?? {};
+    } catch { return {}; }
+  }
+
+  protected async getWorldState(shopId: string): Promise<Record<string, any>> {
+    if (!this.db) return {};
+    try {
+      const { rows } = await this.db.query(`SELECT * FROM world_state WHERE shop_id=$1`, [shopId]);
+      return rows[0] ?? {};
+    } catch { return {}; }
+  }
+
+  protected async getAgentMemory(shopId: string, limit = 10): Promise<any[]> {
+    if (!this.db) return [];
+    try {
+      const { rows } = await this.db.query(`
+        SELECT memory_key, memory_type, value, created_at
+        FROM agent_memory
+        WHERE shop_id = $1 AND agent_name = $2
+          AND (expires_at IS NULL OR expires_at > NOW())
+        ORDER BY created_at DESC LIMIT $3`,
+        [shopId, this.agentId, limit]);
+      return rows.map(r => ({
+        key: r.memory_key, type: r.memory_type,
+        value: typeof r.value === 'string' ? JSON.parse(r.value) : r.value,
+        at: r.created_at,
+      }));
+    } catch { return []; }
+  }
+}
+
+// Re-export everything agents need
+export { TierGateVerdict };

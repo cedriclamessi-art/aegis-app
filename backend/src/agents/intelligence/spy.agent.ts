@@ -1042,7 +1042,7 @@ ${hooks.map((h, i) => `${i + 1}. "${h}"`).join("\
     const [shopify, traffic, adsRes] = await Promise.allSettled([
       this.analyzeShopifyStore(domain),
       this.estimateStoreTraffic(domain),
-      this.getStoreMeta ads(domain),
+      this.getStoreMetaAds(domain),
     ]);
 
     const shopifyData  = shopify.status  === "fulfilled" ? shopify.value  : { apps: [], theme: "", productCount: 0, shopifyScore: 0, platform: "custom" };
@@ -1369,7 +1369,7 @@ Angles : ${params.angles.join(", ")}
     } catch { return 0; }
   }
 
-  private async getStoreMeta ads(domain: string): Promise<{ count: number; maxDays: number }> {
+  private async getStoreMetaAds(domain: string): Promise<{ count: number; maxDays: number }> {
     try {
       const res = await fetch(
         `https://graph.facebook.com/v19.0/ads_archive?search_terms=${encodeURIComponent(domain)}` +
@@ -1458,7 +1458,7 @@ Angles : ${params.angles.join(", ")}
   private nDaysAgoISO  = (n: number) => new Date(Date.now() - n*86400000).toISOString();
   private nMonthsAgo   = (n: number) => { const d = new Date(); d.setMonth(d.getMonth()-n); return d.toISOString().split("T")[0]; };
 
-  private async callLLM(opts: { system: string; user: string; maxTokens: number }): Promise<string> {
+  protected async callLLM(opts: { system: string; user: string; maxTokens: number }): Promise<string> {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

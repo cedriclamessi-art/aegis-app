@@ -442,7 +442,7 @@ class SkillExtractionEngine {
     }
 
     // Update latest usage record
-    const lastRecord = this.usageLog.findLast(r => r.skillId === skillId);
+    const lastRecord = [...this.usageLog].reverse().find((r: SkillUsageRecord) => r.skillId === skillId);
     if (lastRecord) {
       lastRecord.success = success;
       lastRecord.roasBefore = roasBefore;

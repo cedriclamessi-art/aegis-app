@@ -1543,7 +1543,7 @@ ${commentTexts}
     return r.rows.map((row: { url: string }) => row.url).filter(Boolean);
   }
 
-  private async callLLM(opts: { system: string; user: string; maxTokens: number }): Promise<string> {
+  protected async callLLM(opts: { system: string; user: string; maxTokens: number }): Promise<string> {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

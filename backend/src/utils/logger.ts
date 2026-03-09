@@ -5,3 +5,5 @@ export const logger = pino({
   formatters: { level: (label) => ({ level: label }) },
   timestamp: pino.stdTimeFunctions.isoTime,
 });
+
+export default logger;

@@ -77,11 +77,7 @@ interface UGCScript {
   hook:       string;
   body:       string;
   cta:        string;
-  full:       string;    // hook + "\
-\
-" + body + "\
-\
-" + cta
+  full:       string;    // hook + "\n\n" + body + "\n\n" + cta
   hookType:   string;
   durationSec: number;
 }
@@ -896,8 +892,7 @@ close-up detail, vertical 9:16`,
 [aout_voice]volume=1.0[aout];`;
       }
 
-      ffmpegCmd += ` -filter_complex "${filterComplex.replace(/\
-/g, " ").replace(/\s+/g, " ")}"`;
+      ffmpegCmd += ` -filter_complex "${filterComplex.replace(/\n/g, " ").replace(/\s+/g, " ")}"`;
       ffmpegCmd += ` -map "[vout]" -map "[aout]"`;
       ffmpegCmd += ` -c:v libx264 -preset fast -crf 23 -pix_fmt yuv420p`;
       ffmpegCmd += ` -c:a aac -b:a 128k -ar 44100`;
@@ -1211,7 +1206,7 @@ ${winnersR.rows.map(r => `ROAS ${r.roas} | type: ${r.hook_type} | angle: ${r.tar
 
   private sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-  private async callLLM(opts: { system: string; user: string; maxTokens: number }): Promise<string> {
+  protected async callLLM(opts: { system: string; user: string; maxTokens: number }): Promise<string> {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
@@ -1226,5 +1221,3 @@ ${winnersR.rows.map(r => `ROAS ${r.roas} | type: ${r.hook_type} | angle: ${r.tar
     return data.content.find(b => b.type === "text")?.text ?? "";
   }
 }
-ENDAGENT
-echo "AGENT_UGC_FACTORY cr\u00e9\u00e9 : $(wc -l < /home/claude/aegis-final-merged/backend/src/agents/creative/ugc-factory.agent.ts) lignes"
