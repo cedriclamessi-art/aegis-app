@@ -10,14 +10,15 @@ import { createApp } from './api/server';
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
 async function boot() {
-  console.log('⚡ AEGIS v7.0 — Démarrage...');
+  console.log('⚡ AEGIS v7.2 — Démarrage...');
 
   // ── PostgreSQL ──────────────────────────────────────
   const dbUrl = process.env.DATABASE_URL || 'postgresql://aegis:aegis@localhost:5432/aegis';
   const pool = new Pool({ connectionString: dbUrl, connectionTimeoutMillis: 5000 });
 
-  // Suppress pool errors to avoid crash
-  pool.on('error', () => {});
+  pool.on('error', (err) => {
+    console.error('PostgreSQL pool error:', err.message);
+  });
 
   let dbReady = false;
   try {

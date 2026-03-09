@@ -26,4 +26,4 @@ COPY backend/package.json ./
 EXPOSE 3000
 USER node
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/boot.js"]

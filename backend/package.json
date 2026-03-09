@@ -1,11 +1,11 @@
 {
   "name": "aegis-backend",
-  "version": "3.0.0",
+  "version": "7.2.0",
   "private": true,
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/boot.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/boot.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

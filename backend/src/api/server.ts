@@ -163,27 +163,8 @@ export function createApp(db: Pool, redis: Redis) {
     }
   });
 
-  app.post('/api/auth/register', rateLimiter(5), async (req, res) => {
-    const { email, password, full_name, shop_name } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
-
-    try {
-      const hash = await bcrypt.hash(password, 12);
-      const { rows: [user] } = await db.query(`
-        INSERT INTO user_accounts (email, password_hash, full_name) VALUES ($1,$2,$3) RETURNING id, email`,
-        [email, hash, full_name]);
-
-      if (shop_name) {
-        const { rows: [shop] } = await db.query(`INSERT INTO shops (name) VALUES ($1) RETURNING id`, [shop_name]);
-        await db.query(`INSERT INTO user_shop_access (user_id, shop_id, role) VALUES ($1,$2,'owner')`, [user.id, shop.id]);
-        await db.query(`INSERT INTO onboarding_state (shop_id) VALUES ($1)`, [shop.id]);
-      }
-
-      res.status(201).json({ message: 'Account created', user_id: user.id });
-    } catch (err) {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
+  // NOTE: /api/auth/register is handled by dashboard-routes.ts (saas schema, tenant isolation).
+  // Legacy register endpoint removed to avoid duplicate/conflicting implementations.
 
   // ── HEALTH CHECK (/health + /healthz) ──────────────────────
   const healthHandler = async (_req: Request, res: Response) => {
@@ -202,7 +183,7 @@ export function createApp(db: Pool, redis: Redis) {
     res.status(healthy ? 200 : 503).json({
       status: healthy ? 'ok' : 'degraded',
       checks,
-      version: '4.0.0',
+      version: '7.2.0',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
     });
