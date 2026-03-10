@@ -25,6 +25,12 @@ async function boot() {
     await pool.query('SELECT 1');
     dbReady = true;
     console.log('✅ PostgreSQL connecté');
+
+    // ── Founder admin_lifetime bootstrap ─────────────────
+    try {
+      await pool.query(`ALTER TABLE saas.users ADD COLUMN IF NOT EXISTS admin_lifetime BOOLEAN DEFAULT FALSE`);
+      await pool.query(`UPDATE saas.users SET admin_lifetime = TRUE WHERE email = 'jonathanlamessi@yahoo.fr' AND admin_lifetime IS NOT TRUE`);
+    } catch (_) { /* column may already exist */ }
   } catch (err: any) {
     console.warn('⚠️  PostgreSQL indisponible:', err.message || 'connection refused');
     console.warn('   Le serveur démarre en mode dégradé');

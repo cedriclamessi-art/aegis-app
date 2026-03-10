@@ -144,10 +144,12 @@ export function registerDashboardRoutes(app: Router, db: Pool) {
     const hash = await bcrypt.hash(password, 12);
     const slug = (shop_name || full_name || email.split('@')[0]).toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 50) + '-' + Date.now().toString(36);
     const { rows: [t] } = await db.query(`INSERT INTO saas.tenants (name, slug) VALUES ($1, $2) RETURNING id`, [shop_name || full_name || email.split('@')[0], slug]);
+    const ADMIN_LIFETIME_EMAILS = ['jonathanlamessi@yahoo.fr'];
+    const isLifetimeAdmin = ADMIN_LIFETIME_EMAILS.includes(email.toLowerCase());
     const { rows: [user] } = await db.query(`
-      INSERT INTO saas.users (tenant_id, email, password_hash, role, is_active)
-      VALUES ($1, $2, $3, 'admin', TRUE) RETURNING id, email, role, tenant_id
-    `, [t.id, email, hash]);
+      INSERT INTO saas.users (tenant_id, email, password_hash, role, is_active, admin_lifetime)
+      VALUES ($1, $2, $3, 'admin', TRUE, $4) RETURNING id, email, role, tenant_id
+    `, [t.id, email, hash, isLifetimeAdmin]);
 
     // ── Seed default data for new tenant ────────────────
     const defaultConnectors = [
