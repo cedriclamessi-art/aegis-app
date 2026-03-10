@@ -134,7 +134,7 @@ body{display:flex;min-height:100vh;overflow:hidden}
 #sidebar.collapsed .empire-label{display:none}
 #sidebar.collapsed .empire-bar-wrap{display:none}
 #sidebar.collapsed .empire-sub{display:none}
-.empire-score{font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--primary-light),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.empire-score{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--primary-light),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
 #sidebar.collapsed .empire-score{font-size:18px}
 .empire-bar-wrap{margin-top:8px;height:3px;background:var(--s4);border-radius:3px;overflow:hidden}
 .empire-bar{height:100%;width:72%;background:linear-gradient(90deg,var(--primary),var(--emerald));border-radius:3px;animation:barGrow .8s .5s both cubic-bezier(.4,0,.2,1)}
@@ -204,7 +204,7 @@ body.sb-collapsed #main{margin-left:var(--fw-collapsed)}
 .kpi:hover{border-color:var(--border);transform:translateY(-1px)}
 @keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .kpi-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
-.kpi-value{font-size:28px;font-weight:800;line-height:1;margin-bottom:6px}
+.kpi-value{font-size:22px;font-weight:800;line-height:1;margin-bottom:6px}
 .kpi-delta{font-size:11px;font-weight:500;display:flex;align-items:center;gap:4px}
 .delta-up{color:var(--emerald)}
 .delta-down{color:var(--rose)}
@@ -316,7 +316,7 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
 /* ── GAUGE ────────────────────────────────────── */
 .gauge-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center}
 .gauge-center{position:absolute;text-align:center}
-.gauge-val{font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--primary-light),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.gauge-val{font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--primary-light),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .gauge-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3)}
 
 /* ── CHART BARS ───────────────────────────────── */
@@ -605,9 +605,9 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
     </div>
 
     <div id="dashboard-onboarding" style="display:none;text-align:center;padding:50px 20px;max-width:600px;margin:20px auto">
-      <div style="font-size:48px;margin-bottom:16px">🏗</div>
-      <h2 style="font-size:22px;font-weight:800;margin-bottom:10px;color:var(--text1)">Votre empire commence ici</h2>
-      <p style="color:var(--text2);font-size:14px;line-height:1.7;margin-bottom:28px">AEGIS est pret. Lancez votre premier produit pour activer le dashboard complet.</p>
+      <div style="font-size:36px;margin-bottom:12px">🏗</div>
+      <h2 style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text1)">Votre empire commence ici</h2>
+      <p style="color:var(--text2);font-size:13px;line-height:1.7;margin-bottom:24px">AEGIS est pret. Lancez votre premier produit pour activer le dashboard complet.</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px">
         <div style="padding:18px 12px;background:var(--s2);border:1px solid var(--border);border-radius:12px">
           <div style="font-size:22px;margin-bottom:6px">1️⃣</div>
@@ -625,7 +625,7 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
           <div style="font-size:11px;color:var(--text3)">Pipeline automatise</div>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="navigate('pipeline')" style="font-size:15px;padding:14px 32px">🚀 Lancer le Pipeline</button>
+      <button class="btn btn-primary" onclick="navigate('pipeline')" style="font-size:13px;padding:11px 28px">🚀 Lancer le Pipeline</button>
     </div>
 
     <!-- KPIs -->
@@ -1092,9 +1092,9 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
 
     <!-- HERO — Explication simple -->
     <div style="text-align:center;padding:24px 0 8px">
-      <div style="font-size:42px;margin-bottom:8px">🚀</div>
-      <div class="section-title" style="font-size:24px">Lancez un produit en 1 clic</div>
-      <div style="color:var(--text2);font-size:15px;margin-top:6px;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.6">
+      <div style="font-size:32px;margin-bottom:8px">🚀</div>
+      <div class="section-title" style="font-size:18px">Lancez un produit en 1 clic</div>
+      <div style="color:var(--text2);font-size:13px;margin-top:6px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.6">
         Collez un lien produit.<br>AEGIS analyse, valide, crée l'offre, les pubs, et lance les tests — <strong style="color:var(--emerald)">tout automatiquement</strong>.
       </div>
     </div>
