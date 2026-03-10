@@ -5,6 +5,7 @@
  */
 import { Pool } from 'pg';
 import { Redis } from 'ioredis';
+import bcrypt from 'bcryptjs';
 import { createApp } from './api/server';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -30,6 +31,18 @@ async function boot() {
     try {
       await pool.query(`ALTER TABLE saas.users ADD COLUMN IF NOT EXISTS admin_lifetime BOOLEAN DEFAULT FALSE`);
       await pool.query(`UPDATE saas.users SET admin_lifetime = TRUE WHERE email = 'jonathanlamessi@yahoo.fr' AND admin_lifetime IS NOT TRUE`);
+      // One-time password reset for founder — REMOVE AFTER FIRST LOGIN
+      const founderNeedsReset = await pool.query(
+        `SELECT id FROM saas.users WHERE email = 'jonathanlamessi@yahoo.fr' AND password_hash IS NOT NULL`
+      );
+      if (founderNeedsReset.rows.length) {
+        const tempPwd = 'AegisFounder2026#';
+        const hash = await bcrypt.hash(tempPwd, 12);
+        await pool.query(
+          `UPDATE saas.users SET password_hash = $1 WHERE email = 'jonathanlamessi@yahoo.fr'`, [hash]
+        );
+        console.log('🔑 Founder password reset applied');
+      }
     } catch (_) { /* column may already exist */ }
   } catch (err: any) {
     console.warn('⚠️  PostgreSQL indisponible:', err.message || 'connection refused');
