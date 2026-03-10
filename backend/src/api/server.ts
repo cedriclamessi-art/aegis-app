@@ -134,6 +134,14 @@ export function createApp(db: Pool, redis: Redis) {
     console.warn('Pipeline routes non chargees:', err.message);
   }
 
+  // ── GROWTH + FLIGHT + GHOST + EMPIRE ROUTES ─────────────
+  try {
+    const { registerGrowthRoutes } = require('./growth-routes');
+    registerGrowthRoutes(app, db);
+  } catch (err: any) {
+    console.warn('Growth routes non chargees:', err.message);
+  }
+
   // ── AUTH (legacy — kept for backward compat) ──────────────
   app.post('/api/auth/login-legacy', rateLimiter(10), async (req, res) => {
     const { email, password } = req.body;

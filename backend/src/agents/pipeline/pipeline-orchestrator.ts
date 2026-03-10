@@ -1448,4 +1448,109 @@ export class PipelineOrchestrator {
     // Re-lancer l'avancement
     return this.advancePipeline(pipelineId, db);
   }
+
+  // ── Auto-Advance : Le Rêve AEGIS ─────────────────────────────────────
+  // "Colle un lien produit, clique sur Launch,
+  //  et AEGIS analyse, crée, lance, optimise, scale automatiquement."
+
+  /**
+   * Exécute TOUTES les étapes du pipeline automatiquement.
+   * C'est la réalisation du rêve AEGIS : 1 URL → 1 business complet.
+   *
+   * Le pipeline avance étape par étape. Si une étape échoue,
+   * on tente un retry automatique (max 2). Si ça échoue encore,
+   * le pipeline se met en pause pour intervention humaine.
+   *
+   * @param pipelineId - Identifiant du pipeline
+   * @param db         - Connexion PostgreSQL
+   * @returns L'état final du pipeline (completed ou paused)
+   */
+  async autoAdvance(
+    pipelineId: string,
+    db: Pool,
+  ): Promise<PipelineState> {
+    const MAX_RETRIES = 2;
+    const STEP_DELAY_MS = 500; // Small delay between steps to avoid rate limits
+
+    let state = await this.loadPipelineState(pipelineId, db);
+
+    await this.logStepEvent(db, pipelineId, 'PIPELINE', 'auto_advance_started', {
+      currentStep: state.currentStep,
+      totalSteps:  state.steps.length,
+    });
+
+    while (state.status === 'running' && state.currentStep < state.steps.length) {
+      let retries = 0;
+      let stepSucceeded = false;
+
+      while (retries <= MAX_RETRIES && !stepSucceeded) {
+        try {
+          state = await this.advancePipeline(pipelineId, db);
+
+          if (state.status === 'paused' || state.status === 'failed') {
+            // Step failed — retry
+            retries++;
+            if (retries <= MAX_RETRIES) {
+              await this.logStepEvent(db, pipelineId, state.steps[state.currentStep]?.id || 'unknown', 'auto_retry', {
+                attempt: retries,
+                maxRetries: MAX_RETRIES,
+              });
+
+              // Reset failed step for retry
+              const failedStep = state.steps[state.currentStep];
+              if (failedStep) {
+                failedStep.status = 'pending';
+                failedStep.result = null;
+                failedStep.startedAt = null;
+                failedStep.completedAt = null;
+              }
+              state.status = 'running';
+              await this.persistState(state, db);
+
+              // Wait before retry
+              await new Promise(r => setTimeout(r, 1000 * retries));
+            }
+          } else {
+            stepSucceeded = true;
+          }
+        } catch (err) {
+          retries++;
+          if (retries > MAX_RETRIES) {
+            await this.logStepEvent(db, pipelineId, 'PIPELINE', 'auto_advance_exhausted', {
+              error: (err as Error).message,
+              step:  state.currentStep,
+            });
+            break;
+          }
+          await new Promise(r => setTimeout(r, 1000 * retries));
+        }
+      }
+
+      // If step still failed after retries, stop auto-advance
+      if (!stepSucceeded) {
+        await this.logStepEvent(db, pipelineId, 'PIPELINE', 'auto_advance_paused', {
+          reason: `Step ${state.steps[state.currentStep]?.id} failed after ${MAX_RETRIES} retries`,
+          currentStep: state.currentStep,
+        });
+        break;
+      }
+
+      // Small delay between steps
+      if (state.status === 'running') {
+        await new Promise(r => setTimeout(r, STEP_DELAY_MS));
+      }
+    }
+
+    // Reload final state
+    state = await this.loadPipelineState(pipelineId, db);
+
+    if (state.status === 'completed') {
+      await this.logStepEvent(db, pipelineId, 'PIPELINE', 'auto_advance_completed', {
+        totalSteps:  state.steps.length,
+        durationMs:  Date.now() - new Date(state.createdAt).getTime(),
+      });
+    }
+
+    return state;
+  }
 }
