@@ -18,6 +18,13 @@
  *   8. Final CTA (urgence + action)
  *
  * Signale AGENT_CREATIVE_FACTORY pour les visuels.
+ *
+ * ── OUTILS EXTERNES (INSPIRATION & TEMPLATES) ──────────────
+ *
+ *  - DropMagic (https://dropmagic.ai) — Store builder AI, product page
+ *    templates optimisés conversion, inspiration layouts best-sellers
+ *  - CopyFy (https://www.copyfy.io) — Spy stores concurrents, copier
+ *    les structures de pages qui convertissent le mieux, A/B test copy
  */
 
 import { AgentBase, AgentTask, AgentResult } from '../base/agent.base';

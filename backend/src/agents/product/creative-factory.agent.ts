@@ -7,6 +7,18 @@
  *
  * Formule CONDOR : (Angle \u00d7 (Avatar \u00d7 Awareness)) \u00d7 Concept \u00d7 Coherence Index
  * Entity ID compliant Meta 2026 : chaque it\u00e9ration change format/persona/d\u00e9cor/v\u00e9hicule
+ *
+ * \u2500\u2500 OUTILS EXTERNES (ASSETS & INSPIRATION) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+ *
+ *  - Freepik (https://www.freepik.com) \u2014 Source d'assets cr\u00e9atifs (images,
+ *    vecteurs, PSD, vid\u00e9os). Workflow : recherche asset \u2192 t\u00e9l\u00e9chargement \u2192
+ *    personnalisation \u2192 int\u00e9gration dans le brief cr\u00e9atif
+ *  - WinningHunter (https://winninghunter.com) \u2014 Spy des meilleures cr\u00e9as
+ *    qui ont d\u00e9j\u00e0 fait leurs preuves (vid\u00e9os + images performantes)
+ *  - AdHeart (https://adheart.me) \u2014 Biblioth\u00e8que d'ads performantes,
+ *    analyse des hooks, formats et angles qui convertissent
+ *  - TrendTrack (https://www.trendtrack.io) \u2014 Trends visuelles et formats
+ *    populaires par niche, inspiration pour les concepts cr\u00e9atifs
  */
 
 import { AgentBase, AgentTask, AgentResult } from '../base/agent.base';

@@ -28,6 +28,15 @@
  *  - Briefs créatifs pour chaque post
  *  - Tracking views/engagement par compte
  *  - A/B test des angles qui performent
+ *
+ * ── OUTILS EXTERNES (INSPIRATION & TRENDS) ──────────────────
+ *
+ *  - WinningHunter (https://winninghunter.com) — Trending creatives, spy ads,
+ *    viral content patterns pour s'inspirer des meilleurs créateurs
+ *  - AdHeart (https://adheart.me) — Ad library intelligence, creative formats
+ *    qui performent, hooks qui convertissent
+ *  - TrendTrack (https://www.trendtrack.io) — Trending sounds, hashtags,
+ *    formats populaires par niche et par pays
  */
 
 import { Pool } from 'pg';

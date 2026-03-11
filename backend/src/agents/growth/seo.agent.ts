@@ -26,6 +26,15 @@
  *  - Pins Pinterest optimisés
  *  - Score SEO /100 par produit
  *  - Rapport de positions hebdomadaire
+ *
+ * ── OUTILS EXTERNES (RECHERCHE & DATA) ─────────────────────
+ *
+ *  - SemRush (https://www.semrush.com) — Keyword research, competitor analysis,
+ *    backlink audit, position tracking, content gap analysis
+ *  - TrendTrack (https://www.trendtrack.io) — Ecosystem concurrent study,
+ *    keyword trends, market analysis pour faire mieux que la concurrence
+ *  - Google Search Console — Organic performance tracking
+ *  - Pinterest Analytics — Pin performance & SEO metrics
  */
 
 import { Pool } from 'pg';
