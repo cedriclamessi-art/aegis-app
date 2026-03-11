@@ -1,6 +1,6 @@
 /**
- * AEGIS Strategic Routes — HUNTER · TRAFFIC · SEO · SUPPORT
- * Endpoints for the 11 Strategic Agents ecosystem
+ * AEGIS Strategic Routes — PSYCHE · HUNTER · TRAFFIC · SEO · SUPPORT
+ * Endpoints for the 12 Strategic Agents ecosystem
  */
 import { Express, Request, Response, NextFunction } from 'express';
 import { Pool } from 'pg';
@@ -137,6 +137,116 @@ export function registerStrategicRoutes(app: Express, db: Pool): void {
     } catch {
       res.status(500).json({ error: 'Internal error' });
     }
+  });
+
+  // ═══════════════════════════════════════════════════
+  // PSYCHE — Psychologie & Persuasion Engine 🧠
+  // ═══════════════════════════════════════════════════
+
+  /** GET /api/psyche/strategy/:productId — Get existing persuasion strategy */
+  app.get('/api/psyche/strategy/:productId', stratAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { rows } = await db.query(`
+        SELECT content
+        FROM agents.agent_memory
+        WHERE agent_id = 'AGENT_PSYCHE' AND tenant_id = $1
+          AND memory_type = 'persuasion_strategy'
+          AND content->>'product_id' = $2
+        ORDER BY created_at DESC
+        LIMIT 1
+      `, [user.tenant_id, req.params.productId]);
+
+      if (!rows.length) {
+        return res.json({
+          exists: false,
+          strategy: null,
+          message: 'Aucune stratégie PSYCHE pour ce produit. Lancez une analyse.',
+        });
+      }
+
+      res.json({
+        exists: true,
+        strategy: rows[0].content,
+      });
+    } catch {
+      res.json({ exists: false, strategy: null });
+    }
+  });
+
+  /** POST /api/psyche/analyze — Trigger PSYCHE analysis for a product */
+  app.post('/api/psyche/analyze', stratAuth, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user;
+      const { product_id, product_name, description, price, cost, category, niche } = req.body;
+
+      if (!product_id || !product_name) {
+        return res.status(400).json({ error: 'product_id and product_name required' });
+      }
+
+      // Store analysis request in agent memory for PSYCHE to pick up
+      await db.query(`
+        INSERT INTO agents.agent_memory (agent_id, tenant_id, memory_type, content)
+        VALUES ('AGENT_PSYCHE', $1, 'analysis_request', $2)
+      `, [user.tenant_id, JSON.stringify({
+        product_id,
+        product_name,
+        description: description || '',
+        price: price || 30,
+        cost: cost || 10,
+        category: category || 'default',
+        niche: niche || '',
+        requested_by: user.email,
+        requested_at: new Date().toISOString(),
+        status: 'pending',
+      })]);
+
+      // Try to run PSYCHE analysis inline if agent is available
+      try {
+        const { PsycheAgent } = require('../agents/intelligence/psyche.agent');
+        const Redis = require('ioredis');
+        const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+        const psyche = new PsycheAgent(db, redis);
+        const strategy = await psyche.analyzeProduct(user.tenant_id, product_id, {
+          name: product_name,
+          description: description || '',
+          price: price || 30,
+          cost: cost || 10,
+          category: category || 'default',
+          niche: niche || '',
+        });
+        redis.disconnect();
+        res.json({
+          success: true,
+          strategy,
+          message: `Analyse PSYCHE terminée — score de persuasion : ${strategy.persuasion_score}/100`,
+        });
+      } catch (agentErr: any) {
+        // Agent not available — request queued
+        res.json({
+          success: true,
+          queued: true,
+          message: 'Analyse PSYCHE mise en file d\'attente. Résultat sous 2h.',
+        });
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: 'Erreur lors de l\'analyse PSYCHE' });
+    }
+  });
+
+  /** GET /api/psyche/models — List available mental models */
+  app.get('/api/psyche/models', stratAuth, async (_req: Request, res: Response) => {
+    res.json({
+      total: 22,
+      categories: {
+        conversion: ['Loi de Hick', 'Énergie d\'activation', 'Modèle BJ Fogg', 'Paradoxe du choix'],
+        pricing: ['Ancrage de prix', 'Cadrage', 'Comptabilité mentale', 'Aversion à la perte'],
+        trust: ['Autorité', 'Preuve sociale', 'Réciprocité', 'Effet de halo'],
+        urgency: ['Rareté', 'FOMO', 'Effet Zeigarnik'],
+        retention: ['Effet de dotation', 'Coûts irrécupérables', 'Biais du statu quo'],
+        emotion: ['Storytelling', 'Effet de contraste', 'Peak-End Rule', 'Identité', 'Jobs to be Done'],
+      },
+    });
   });
 
   // ═══════════════════════════════════════════════════
@@ -325,14 +435,14 @@ export function registerStrategicRoutes(app: Express, db: Pool): void {
   // AGENTS OVERVIEW — Dashboard des 11 agents
   // ═══════════════════════════════════════════════════
 
-  /** GET /api/strategic/overview — All 11 strategic agents status */
+  /** GET /api/strategic/overview — All 12 strategic agents status */
   app.get('/api/strategic/overview', stratAuth, async (req: Request, res: Response) => {
     try {
       const { rows } = await db.query(`
         SELECT agent_id, name, category, is_active, schedule_cron, description
         FROM agents.registry
         WHERE agent_id IN (
-          'AGENT_HUNTER','AGENT_INTEL','AGENT_STORE','AGENT_ADS',
+          'AGENT_HUNTER','AGENT_PSYCHE','AGENT_INTEL','AGENT_STORE','AGENT_ADS',
           'AGENT_CREATIVE_FACTORY','AGENT_TRAFFIC','AGENT_SEO',
           'AGENT_SUPPORT','AGENT_POST_PURCHASE','AGENT_COMPLIANCE','AGENT_GHOST'
         )
@@ -343,6 +453,7 @@ export function registerStrategicRoutes(app: Express, db: Pool): void {
       // Fallback: return static list
       const staticAgents = [
         { agent_id: 'AGENT_HUNTER', name: 'Hunter', category: 'intelligence', is_active: true },
+        { agent_id: 'AGENT_PSYCHE', name: 'PSYCHE — Persuasion Engine', category: 'intelligence', is_active: true },
         { agent_id: 'AGENT_INTEL', name: 'Intel', category: 'intelligence', is_active: true },
         { agent_id: 'AGENT_STORE', name: 'Store Builder', category: 'operations', is_active: true },
         { agent_id: 'AGENT_ADS', name: 'Ads Manager', category: 'growth', is_active: true },
@@ -354,11 +465,11 @@ export function registerStrategicRoutes(app: Express, db: Pool): void {
         { agent_id: 'AGENT_COMPLIANCE', name: 'Compliance', category: 'operations', is_active: true },
         { agent_id: 'AGENT_GHOST', name: 'Ghost', category: 'intelligence', is_active: true },
       ];
-      res.json({ agents: staticAgents, total: 11 });
+      res.json({ agents: staticAgents, total: 12 });
     }
   });
 
-  console.log('✅ Strategic routes (HUNTER/TRAFFIC/SEO/SUPPORT) chargées');
+  console.log('✅ Strategic routes (PSYCHE/HUNTER/TRAFFIC/SEO/SUPPORT) chargées');
 }
 
 // ── Helper ──────────────────────────────────────────
