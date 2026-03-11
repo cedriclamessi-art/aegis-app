@@ -142,6 +142,14 @@ export function createApp(db: Pool, redis: Redis) {
     console.warn('Growth routes non chargees:', err.message);
   }
 
+  // ── STRATEGIC ROUTES (HUNTER/TRAFFIC/SEO/SUPPORT) ──────
+  try {
+    const { registerStrategicRoutes } = require('./strategic-routes');
+    registerStrategicRoutes(app, db);
+  } catch (err: any) {
+    console.warn('Strategic routes non chargees:', err.message);
+  }
+
   // ── AUTH (legacy — kept for backward compat) ──────────────
   app.post('/api/auth/login-legacy', rateLimiter(10), async (req, res) => {
     const { email, password } = req.body;
