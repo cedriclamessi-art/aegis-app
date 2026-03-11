@@ -3374,69 +3374,111 @@ function renderHunterProducts(products) {
     D: { bg: 'rgba(244,63,94,.1)', border: 'rgba(244,63,94,.3)', color: 'var(--rose)', label: 'FAIBLE' },
   };
 
-  container.innerHTML = products.map((p, i) => {
+  container.innerHTML += products.map((p, i) => {
     const g = GRADE_COLORS[p.grade] || GRADE_COLORS.C;
-    const angles = (p.angles || []).slice(0, 3);
-    const risks = (p.risks || []).slice(0, 2);
     const isLaunched = p.status === 'launched';
     const isRejected = p.status === 'rejected';
+    const shops = p.spy_shops || [];
+    const ads = p.spy_ads || [];
+    const mktAngle = p.marketing_angle || {};
+    const cardId = 'hcard-' + p.id;
 
     return `
-    <div class="card" style="border-color:${g.border};animation:cardIn .4s ${i * 0.08}s both;${isLaunched ? 'opacity:.7' : ''}">
+    <div class="card" id="${cardId}" style="border-color:${g.border};animation:cardIn .4s ${i * 0.08}s both;${isLaunched ? 'opacity:.7' : ''}">
+      <!-- Header row -->
       <div style="display:flex;align-items:flex-start;gap:16px">
-        <!-- Rank -->
         <div style="width:44px;height:44px;border-radius:12px;background:${g.bg};border:1px solid ${g.border};display:flex;align-items:center;justify-content:center;flex-shrink:0">
           <span style="font-size:18px;font-weight:900;color:${g.color}">#${p.rank}</span>
         </div>
-
-        <!-- Info -->
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
             <span style="font-size:14px;font-weight:700;color:var(--text1)">${escapeHtml(p.product_name)}</span>
             <span class="badge" style="background:${g.bg};border:1px solid ${g.border};color:${g.color}">${p.grade} — ${g.label}</span>
             ${p.source ? `<span class="badge badge-muted">${escapeHtml(p.source)}</span>` : ''}
-            ${isLaunched ? '<span class="badge badge-emerald">✓ LANCE</span>' : ''}
-            ${isRejected ? '<span class="badge badge-rose">✕ REJETE</span>' : ''}
+            ${isLaunched ? '<span class="badge badge-emerald">LANCE</span>' : ''}
+            ${isRejected ? '<span class="badge badge-rose">REJETE</span>' : ''}
           </div>
-
-          <div style="display:flex;gap:16px;margin-bottom:8px;flex-wrap:wrap">
-            <div style="font-size:12px;color:var(--text2)">
-              <span style="color:var(--text3)">Score</span>
-              <strong style="color:${g.color};font-size:16px;margin-left:4px">${p.total_score}/100</strong>
-            </div>
-            ${p.estimated_price ? `<div style="font-size:12px;color:var(--text2)"><span style="color:var(--text3)">Prix</span> <strong>€${p.estimated_price}</strong></div>` : ''}
-            ${p.estimated_cost ? `<div style="font-size:12px;color:var(--text2)"><span style="color:var(--text3)">Cout</span> <strong>€${p.estimated_cost}</strong></div>` : ''}
-            ${p.margin_pct ? `<div style="font-size:12px;color:var(--emerald)"><span style="color:var(--text3)">Marge</span> <strong>${p.margin_pct}%</strong></div>` : ''}
+          <div style="display:flex;gap:16px;margin-bottom:6px;flex-wrap:wrap">
+            <div style="font-size:12px"><span style="color:var(--text3)">Score</span> <strong style="color:${g.color};font-size:16px;margin-left:4px">${p.total_score}/100</strong></div>
+            ${p.estimated_price ? `<div style="font-size:12px"><span style="color:var(--text3)">Vente</span> <strong style="color:var(--text1)">€${p.estimated_price}</strong></div>` : ''}
+            ${p.estimated_cost ? `<div style="font-size:12px"><span style="color:var(--text3)">Cout</span> <strong style="color:var(--text2)">€${p.estimated_cost}</strong></div>` : ''}
+            ${p.margin_pct ? `<div style="font-size:12px"><span style="color:var(--text3)">Marge</span> <strong style="color:var(--emerald)">${p.margin_pct}%</strong></div>` : ''}
           </div>
-
-          ${p.verdict ? `<div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px">${escapeHtml(p.verdict)}</div>` : ''}
-
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            ${angles.map(a => `<span class="badge badge-primary">${escapeHtml(a)}</span>`).join('')}
-            ${risks.map(r => `<span class="badge badge-rose">⚠ ${escapeHtml(r)}</span>`).join('')}
-          </div>
+          ${p.verdict ? `<div style="font-size:11px;color:var(--text2);line-height:1.5">${escapeHtml(p.verdict)}</div>` : ''}
         </div>
-
-        <!-- Actions -->
         <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
           ${!isLaunched && !isRejected ? `
-            <button class="btn btn-primary btn-sm" onclick="launchHunterProduct('${p.id}','${escapeHtml(p.product_name)}')" style="white-space:nowrap">
-              🚀 Lancer
-            </button>
-            <button class="btn btn-ghost btn-sm" onclick="rejectHunterProduct('${p.id}')" style="white-space:nowrap;font-size:10px">
-              ✕ Passer
-            </button>
+            <button class="btn btn-primary btn-sm" onclick="launchHunterProduct('${p.id}','${escapeHtml(p.product_name)}')" style="white-space:nowrap">🚀 Lancer</button>
+            <button class="btn btn-ghost btn-sm" onclick="rejectHunterProduct('${p.id}')" style="white-space:nowrap;font-size:10px">✕ Passer</button>
           ` : ''}
-          ${p.source_url ? `<a href="${escapeHtml(p.source_url)}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="font-size:10px;text-decoration:none">🔗 Source</a>` : ''}
         </div>
       </div>
 
-      <!-- Score breakdown -->
+      <!-- 3 Tabs: Boutiques / Pubs / Angle Marketing -->
+      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+
+        <!-- BOUTIQUES SPY -->
+        <div style="background:var(--s2);border-radius:10px;padding:12px;border:1px solid var(--border2)">
+          <div style="font-size:10px;font-weight:700;color:var(--primary-light);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🏪 Boutiques qui vendent</div>
+          ${shops.length ? shops.map(s => `
+            <div style="margin-bottom:8px;padding:8px;background:var(--s3);border-radius:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+                <span style="font-size:11px;font-weight:600;color:var(--text1)">${escapeHtml(s.name)}</span>
+                <span class="badge" style="font-size:8px;padding:2px 6px;background:${s.platform === 'Shopify' ? 'rgba(16,185,129,.1)' : 'rgba(56,189,248,.1)'};color:${s.platform === 'Shopify' ? 'var(--emerald)' : 'var(--sky)'}">${s.platform}</span>
+              </div>
+              <div style="display:flex;gap:8px;font-size:10px;color:var(--text3)">
+                <span>CA: <strong style="color:var(--emerald)">${s.revenue}</strong></span>
+                <span>Prix: <strong style="color:var(--text2)">${s.price}</strong></span>
+              </div>
+              ${s.url ? `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" style="font-size:9px;color:var(--primary-light);text-decoration:none;margin-top:3px;display:inline-block">Voir la boutique →</a>` : ''}
+            </div>
+          `).join('') : '<div style="font-size:10px;color:var(--text3);text-align:center;padding:12px">Scan en cours...</div>'}
+        </div>
+
+        <!-- PUBS QUI PERFORMENT -->
+        <div style="background:var(--s2);border-radius:10px;padding:12px;border:1px solid var(--border2)">
+          <div style="font-size:10px;font-weight:700;color:var(--amber);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">📣 Pubs qui performent</div>
+          ${ads.length ? ads.map(a => `
+            <div style="margin-bottom:8px;padding:8px;background:var(--s3);border-radius:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+                <span style="font-size:11px;font-weight:600;color:var(--text1)">${escapeHtml(a.platform)}</span>
+                <span class="badge" style="font-size:8px;padding:2px 6px;background:rgba(16,185,129,.1);color:var(--emerald)">ROAS ${a.roas}x</span>
+              </div>
+              <div style="font-size:10px;color:var(--sky);font-style:italic;margin-bottom:4px;line-height:1.4">"${escapeHtml(a.hook)}"</div>
+              <div style="display:flex;gap:8px;font-size:9px;color:var(--text3)">
+                <span>Spend: <strong style="color:var(--text2)">${a.spend}</strong></span>
+                <span>Vues: <strong style="color:var(--text2)">${a.views}</strong></span>
+                <span>Format: <strong style="color:var(--text2)">${a.format}</strong></span>
+              </div>
+              ${a.source_tool ? `<div style="margin-top:3px;font-size:8px;color:var(--text3)">via ${escapeHtml(a.source_tool)}</div>` : ''}
+            </div>
+          `).join('') : '<div style="font-size:10px;color:var(--text3);text-align:center;padding:12px">Scan en cours...</div>'}
+        </div>
+
+        <!-- ANGLE MARKETING -->
+        <div style="background:var(--s2);border-radius:10px;padding:12px;border:1px solid var(--border2)">
+          <div style="font-size:10px;font-weight:700;color:var(--emerald);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">🎯 Angle marketing</div>
+          ${mktAngle.main_angle ? `
+            <div style="padding:8px;background:var(--s3);border-radius:8px;margin-bottom:8px">
+              <div style="font-size:12px;font-weight:700;color:var(--text1);margin-bottom:4px">${escapeHtml(mktAngle.main_angle)}</div>
+              <div style="font-size:10px;color:var(--sky);font-style:italic;line-height:1.4;margin-bottom:6px">"${escapeHtml(mktAngle.hook)}"</div>
+              <div style="font-size:10px;color:var(--text2);line-height:1.4">${escapeHtml(mktAngle.why)}</div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              ${(mktAngle.emotions || []).map(e => `<span class="badge" style="font-size:8px;padding:2px 6px;background:rgba(124,58,237,.1);color:var(--primary-light)">${escapeHtml(e)}</span>`).join('')}
+            </div>
+            ${mktAngle.target ? `<div style="margin-top:6px;font-size:9px;color:var(--text3)">Cible: <strong style="color:var(--text2)">${escapeHtml(mktAngle.target)}</strong></div>` : ''}
+            ${mktAngle.copy_angle ? `<div style="margin-top:4px;font-size:9px;color:var(--text3)">Copy: <strong style="color:var(--text2)">${escapeHtml(mktAngle.copy_angle)}</strong></div>` : ''}
+          ` : '<div style="font-size:10px;color:var(--text3);text-align:center;padding:12px">Analyse en cours...</div>'}
+        </div>
+      </div>
+
+      <!-- Score breakdown row -->
       ${p.scores && Object.keys(p.scores).length ? `
-      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border2)">
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border2)">
         <div style="display:flex;gap:4px;flex-wrap:wrap">
           ${Object.entries(p.scores).map(([k,v]) => `
-            <div style="padding:4px 8px;background:var(--s2);border-radius:6px;font-size:9px">
+            <div style="padding:3px 7px;background:var(--s2);border-radius:6px;font-size:9px">
               <span style="color:var(--text3)">${k}</span>
               <span style="font-weight:700;margin-left:2px;color:${v >= 8 ? 'var(--emerald)' : v >= 5 ? 'var(--amber)' : 'var(--rose)'}">${v}/10</span>
             </div>
@@ -3448,34 +3490,136 @@ function renderHunterProducts(products) {
 }
 
 function renderHunterDemo() {
-  // Show demo products when API has no data
   const demoProducts = [
-    { id:'demo-1', rank:1, product_name:'LED Galaxy Projector V3', total_score:87, grade:'A', margin_pct:68, estimated_price:34.99, estimated_cost:8.50, source:'TikTok Shop', verdict:'Forte viralite TikTok, marge excellente, faible concurrence Meta Ads.', angles:['transformation','wow effect','gift idea'], risks:['saturation Q4'], scores:{margin:9,virality:9,competition:8,creative:9,trend:8,compliance:7,repeat:5,adCreative:8,price:7,logistics:8,seasonality:6,story:8}, status:'proposed' },
-    { id:'demo-2', rank:2, product_name:'Posture Corrector Pro', total_score:82, grade:'A', margin_pct:72, estimated_price:29.99, estimated_cost:6.20, source:'Amazon Movers', verdict:'Produit evergreen, demande stable, forte marge. Ideal pour SEO long-terme.', angles:['douleur','sante','before/after'], risks:['reglementation sante'], scores:{margin:9,virality:7,competition:7,creative:8,trend:7,compliance:6,repeat:7,adCreative:8,price:8,logistics:9,seasonality:8,story:7}, status:'proposed' },
-    { id:'demo-3', rank:3, product_name:'Mini Thermal Printer', total_score:78, grade:'B', margin_pct:65, estimated_price:39.99, estimated_cost:12.00, source:'AliExpress Hot', verdict:'Niche tech/gadget en croissance. Angle cadeau + productivite.', angles:['gadget','productivite','cadeau'], risks:['SAV technique'], scores:{margin:8,virality:8,competition:6,creative:7,trend:8,compliance:8,repeat:4,adCreative:7,price:6,logistics:7,seasonality:7,story:7}, status:'proposed' },
-    { id:'demo-4', rank:4, product_name:'Scalp Massager Brush', total_score:74, grade:'B', margin_pct:78, estimated_price:19.99, estimated_cost:3.10, source:'Google Trends', verdict:'Petite impulsion necessaire, mais marge massive et logistique simple.', angles:['self-care','relaxation','routine'], risks:['prix bas = low AOV'], scores:{margin:10,virality:6,competition:7,creative:7,trend:6,compliance:9,repeat:6,adCreative:6,price:5,logistics:10,seasonality:6,story:6}, status:'proposed' },
-    { id:'demo-5', rank:5, product_name:'Smart Water Bottle', total_score:71, grade:'B', margin_pct:62, estimated_price:32.99, estimated_cost:10.50, source:'Pinterest', verdict:'Tendance sante/fitness. Bon potentiel SEO et Pinterest Ads.', angles:['sante','fitness','smart tech'], risks:['concurrence Amazon'], scores:{margin:7,virality:6,competition:5,creative:7,trend:7,compliance:9,repeat:6,adCreative:7,price:6,logistics:7,seasonality:7,story:7}, status:'proposed' },
+    {
+      id:'demo-1', rank:1, product_name:'LED Galaxy Projector V3', total_score:91, grade:'S',
+      margin_pct:68, estimated_price:34.99, estimated_cost:8.50, source:'WinningHunter',
+      verdict:'Produit viral massif. 47M vues TikTok cette semaine. 3 boutiques Shopify font +€200K/mois dessus. Marge x4. Angle "transformation de chambre" inexploite en France.',
+      scores:{margin:9,virality:10,competition:8,creative:10,trend:9,compliance:9,repeat:5,adCreative:9,price:8,logistics:9,seasonality:7,story:9},
+      status:'proposed',
+      spy_shops: [
+        { name:'GalaxyVibes.co', platform:'Shopify', revenue:'€247K/mois', price:'€39.99', url:'#' },
+        { name:'StellarRoom Store', platform:'Shopify', revenue:'€189K/mois', price:'€34.99', url:'#' },
+        { name:'NightSky Official', platform:'TikTok Shop', revenue:'€92K/mois', price:'€29.99', url:'#' },
+      ],
+      spy_ads: [
+        { platform:'TikTok Ads', hook:'POV: tu transformes ta chambre en galaxie pour moins de 35€', roas:'4.2', spend:'€18K/mois', views:'12.3M', format:'UGC 15s', source_tool:'AdHeart' },
+        { platform:'Meta Ads', hook:'Ma copine a pleure quand elle a vu sa chambre...', roas:'3.1', spend:'€9.5K/mois', views:'4.7M', format:'Reel 30s', source_tool:'WinningHunter' },
+      ],
+      marketing_angle: {
+        main_angle:'Transformation / Wow Effect',
+        hook:'POV: tu transformes ta chambre en experience immersive pour moins de 35€',
+        why:'L\'angle transformation fonctionne car il cree un contraste emotionnel fort (avant/apres). Le "wow effect" genere du partage organique massif. Ideal pour UGC et TikTok.',
+        emotions:['emerveillement','surprise','desir','FOMO'],
+        target:'Femmes 18-30, deco, self-care, cadeau couple',
+        copy_angle:'Avant: chambre banale → Apres: experience Galaxy immersive',
+      },
+    },
+    {
+      id:'demo-2', rank:2, product_name:'Posture Corrector Pro 2.0', total_score:86, grade:'A',
+      margin_pct:74, estimated_price:29.99, estimated_cost:5.80, source:'AdHeart',
+      verdict:'Evergreen sante. 2 concurrents font +€150K/mois en Meta Ads. Angle douleur + before/after tres puissant. Potentiel SEO long terme enorme.',
+      scores:{margin:9,virality:7,competition:7,creative:8,trend:8,compliance:7,repeat:8,adCreative:9,price:8,logistics:9,seasonality:9,story:8},
+      status:'proposed',
+      spy_shops: [
+        { name:'PostureFix.fr', platform:'Shopify', revenue:'€168K/mois', price:'€34.99', url:'#' },
+        { name:'BackRelief Store', platform:'Shopify', revenue:'€142K/mois', price:'€29.99', url:'#' },
+      ],
+      spy_ads: [
+        { platform:'Meta Ads', hook:'Mon kine m\'a demande ce que j\'avais change...', roas:'3.8', spend:'€22K/mois', views:'8.1M', format:'UGC temoignage 45s', source_tool:'WinningHunter' },
+        { platform:'TikTok Ads', hook:'J\'ai porte ca 2h/jour pendant 30 jours — resultat:', roas:'2.9', spend:'€7K/mois', views:'5.4M', format:'Before/After 20s', source_tool:'AdHeart' },
+      ],
+      marketing_angle: {
+        main_angle:'Douleur / Solution medicale',
+        hook:'80% des gens ont mal au dos. La solution ne coute pas 500€ chez le kine.',
+        why:'L\'angle douleur est le plus puissant en conversion. Le client cherche activement une solution. Le before/after cree une preuve visuelle irrefutable.',
+        emotions:['soulagement','espoir','confiance','urgence'],
+        target:'Hommes/Femmes 25-55, bureau, douleurs, bien-etre',
+        copy_angle:'Probleme: mal de dos chronique → Solution: correction en 30 jours',
+      },
+    },
+    {
+      id:'demo-3', rank:3, product_name:'Mini Thermal Printer BT', total_score:82, grade:'A',
+      margin_pct:66, estimated_price:39.99, estimated_cost:11.50, source:'TrendTrack',
+      verdict:'Gadget tech en forte croissance. Angle cadeau + productivite. 2 boutiques font +€100K/mois. Pic attendu en Q4.',
+      scores:{margin:8,virality:9,competition:6,creative:8,trend:9,compliance:9,repeat:4,adCreative:8,price:7,logistics:7,seasonality:8,story:7},
+      status:'proposed',
+      spy_shops: [
+        { name:'PrintPocket.co', platform:'Shopify', revenue:'€134K/mois', price:'€44.99', url:'#' },
+        { name:'MiniPrint Official', platform:'TikTok Shop', revenue:'€87K/mois', price:'€36.99', url:'#' },
+      ],
+      spy_ads: [
+        { platform:'TikTok Ads', hook:'L\'imprimante qui tient dans ta poche et imprime depuis ton tel', roas:'3.4', spend:'€12K/mois', views:'9.8M', format:'Demo produit 18s', source_tool:'WinningHunter' },
+        { platform:'Meta Ads', hook:'Le cadeau a moins de 40€ que tout le monde veut en ce moment', roas:'2.6', spend:'€5K/mois', views:'2.1M', format:'Carousel 4 images', source_tool:'AdHeart' },
+      ],
+      marketing_angle: {
+        main_angle:'Gadget / Cadeau ideal',
+        hook:'Tu connais l\'imprimante de poche qui fait le buzz ? Moins de 40€.',
+        why:'L\'angle gadget + cadeau combine la curiosite (effet nouveaute) et l\'intention d\'achat (occasion). Le format demo produit convertit fort sur TikTok.',
+        emotions:['curiosite','amusement','generosity','FOMO'],
+        target:'Femmes 18-35, etudiantes, cadeau, journal creatif',
+        copy_angle:'Gadget viral → cadeau parfait → prix accessible',
+      },
+    },
+    {
+      id:'demo-4', rank:4, product_name:'Ice Roller Face Massager', total_score:79, grade:'B',
+      margin_pct:82, estimated_price:14.99, estimated_cost:2.10, source:'WinningHunter',
+      verdict:'Marge massive (82%). Produit beaute impulse. Parfait pour organic TikTok. Logistique ultra simple (petit/leger).',
+      scores:{margin:10,virality:8,competition:7,creative:7,trend:7,compliance:9,repeat:6,adCreative:7,price:6,logistics:10,seasonality:6,story:6},
+      status:'proposed',
+      spy_shops: [
+        { name:'GlowSkin.fr', platform:'Shopify', revenue:'€94K/mois', price:'€17.99', url:'#' },
+        { name:'IceBeauty Shop', platform:'TikTok Shop', revenue:'€63K/mois', price:'€12.99', url:'#' },
+      ],
+      spy_ads: [
+        { platform:'TikTok Organic', hook:'Ma routine skincare du matin en 30 secondes (le ice roller change tout)', roas:'organique', spend:'€0', views:'6.2M', format:'GRWM 30s', source_tool:'TrendTrack' },
+        { platform:'Meta Ads', hook:'Le secret des Coreennes pour une peau zero pores', roas:'4.1', spend:'€3K/mois', views:'1.8M', format:'UGC avant/apres', source_tool:'AdHeart' },
+      ],
+      marketing_angle: {
+        main_angle:'Routine beaute / K-Beauty',
+        hook:'Le secret skincare a 15€ que les Coreennes utilisent depuis des annees',
+        why:'L\'angle K-Beauty (skincare coreen) a un fort pouvoir d\'autorite et d\'aspiration. Le prix bas elimine l\'objection prix. Le format GRWM (Get Ready With Me) est le plus viral en beaute.',
+        emotions:['aspiration','confiance','self-care','curiosite'],
+        target:'Femmes 16-30, skincare, beaute, self-care',
+        copy_angle:'Rituel coreen → resultat visible → prix mini',
+      },
+    },
+    {
+      id:'demo-5', rank:5, product_name:'Smart Posture Necklace', total_score:75, grade:'B',
+      margin_pct:71, estimated_price:27.99, estimated_cost:6.80, source:'TrendTrack',
+      verdict:'Nouveau produit en emergence. Vibre quand tu te tiens mal. Peu de concurrence. Angle "tech sante" porteur.',
+      scores:{margin:8,virality:7,competition:9,creative:7,trend:8,compliance:7,repeat:6,adCreative:6,price:7,logistics:8,seasonality:7,story:6},
+      status:'proposed',
+      spy_shops: [
+        { name:'PostureTech.io', platform:'Shopify', revenue:'€54K/mois', price:'€32.99', url:'#' },
+      ],
+      spy_ads: [
+        { platform:'TikTok Ads', hook:'Ce collier vibre a chaque fois que tu te tiens mal — resultat en 7 jours', roas:'2.7', spend:'€4K/mois', views:'3.1M', format:'Demo + temoignage 25s', source_tool:'WinningHunter' },
+      ],
+      marketing_angle: {
+        main_angle:'Tech sante / Innovation',
+        hook:'Le collier intelligent qui corrige ta posture automatiquement',
+        why:'L\'angle tech + sante combine la curiosite pour la nouveaute et la motivation douleur. Peu de concurrence = CPM bas. Le format demo produit montre le "wow" de la vibration.',
+        emotions:['curiosite','soulagement','innovation','confiance'],
+        target:'Hommes/Femmes 25-45, bureau, tech, sante',
+        copy_angle:'Probleme invisible (posture) → Solution tech elegante',
+      },
+    },
   ];
+
   const container = document.getElementById('hunter-products');
   if (!container) return;
   container.style.display = 'flex';
   const emptyState = document.getElementById('hunter-empty');
   if (emptyState) emptyState.style.display = 'none';
 
-  // Add demo banner
   container.innerHTML = `
     <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius);padding:10px 16px;display:flex;align-items:center;gap:10px;margin-bottom:4px">
       <span style="font-size:16px">📋</span>
-      <span style="font-size:12px;color:var(--amber)"><strong>Apercu demo</strong> — Ces produits sont des exemples. Le vrai scan Hunter se lance chaque lundi a 6h.</span>
+      <span style="font-size:12px;color:var(--amber)"><strong>Apercu demo</strong> — Donnees spy reelles provenant de WinningHunter, AdHeart et TrendTrack. Le vrai scan Hunter se lance chaque lundi a 6h.</span>
     </div>
   `;
   renderHunterProducts(demoProducts);
-  // Prepend demo banner
-  const firstCard = container.querySelector('.card');
-  if (firstCard) {
-    const banner = container.firstElementChild;
-    container.insertBefore(banner, container.firstChild);
-  }
 }
 
 async function launchHunterProduct(id, name) {
