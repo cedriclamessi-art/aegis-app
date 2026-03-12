@@ -562,6 +562,28 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
         <span class="nav-label">Mes Créatifs</span>
         <div class="nav-tooltip" role="tooltip">Mes Créatifs</div>
       </div>
+      <!-- ── GROWTH INTELLIGENCE ── -->
+      <div style="padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;opacity:.5" class="nav-label">Growth Intelligence</div>
+      <div class="nav-item" onclick="navigate('post-purchase')" role="button" tabindex="0" aria-label="Post Purchase">
+        <div class="nav-icon" aria-hidden="true">📦</div>
+        <span class="nav-label">Post Purchase</span>
+        <div class="nav-badge" style="background:var(--emerald)">LTV</div>
+        <div class="nav-tooltip" role="tooltip">Upsell, Emails, Rétention</div>
+      </div>
+      <div class="nav-item" onclick="navigate('turbulence')" role="button" tabindex="0" aria-label="Turbulence Control">
+        <div class="nav-icon" aria-hidden="true">🌊</div>
+        <span class="nav-label">Turbulence</span>
+        <div class="nav-badge" style="background:var(--rose)">LIVE</div>
+        <div class="nav-tooltip" role="tooltip">Détection & Correction Auto</div>
+      </div>
+      <div class="nav-item" onclick="navigate('ghost')" role="button" tabindex="0" aria-label="Ghost Analytics">
+        <div class="nav-icon" aria-hidden="true">👻</div>
+        <span class="nav-label">Ghost Analytics</span>
+        <div class="nav-badge" style="background:var(--text3)">SPY</div>
+        <div class="nav-tooltip" role="tooltip">Signaux invisibles & opportunités</div>
+      </div>
+      <!-- ── SYSTEM ── -->
+      <div style="padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;opacity:.5" class="nav-label">Système</div>
       <div class="nav-item" onclick="navigate('connectors')" role="button" tabindex="0" aria-label="Mes Connexions">
         <div class="nav-icon" aria-hidden="true">🔌</div>
         <span class="nav-label">Mes Connexions</span>
@@ -1314,6 +1336,548 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
 
   </div>
 
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- POST PURCHASE — Upsell, Emails, LTV, Rétention     -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div id="page-post-purchase" class="page-content" style="display:none">
+
+    <!-- TIER BAR — Palier de croissance actuel -->
+    <div id="tier-bar-pp" style="background:linear-gradient(90deg,rgba(124,58,237,.15),rgba(16,185,129,.1));border:1px solid var(--border);border-radius:12px;padding:12px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">🏔️</span>
+        <div>
+          <div style="font-size:11px;color:var(--text3);font-weight:600">PALIER ACTUEL</div>
+          <div style="font-size:15px;font-weight:700;color:var(--primary-light)">VALIDATION <span style="color:var(--text3);font-weight:400;font-size:12px">0 → 1M €</span></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px"><span>0€</span><span style="color:var(--emerald);font-weight:600">12,847€</span><span>1M€</span></div>
+        <div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="height:100%;width:1.3%;background:linear-gradient(90deg,var(--primary),var(--emerald));border-radius:3px;transition:width 1s"></div></div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <div style="background:var(--primary);color:white;font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px">PALIER 1</div>
+        <div style="background:var(--bg2);color:var(--text3);font-size:9px;font-weight:600;padding:3px 8px;border-radius:6px;opacity:.5">PALIER 2</div>
+        <div style="background:var(--bg2);color:var(--text3);font-size:9px;font-weight:600;padding:3px 8px;border-radius:6px;opacity:.3">PALIER 3</div>
+        <div style="background:var(--bg2);color:var(--text3);font-size:9px;font-weight:600;padding:3px 8px;border-radius:6px;opacity:.2">PALIER 4</div>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div style="text-align:center;padding:16px 0 8px">
+      <div style="font-size:32px;margin-bottom:6px">📦</div>
+      <div class="section-title" style="font-size:18px">Post Purchase Intelligence</div>
+      <div style="color:var(--text2);font-size:13px;margin-top:4px">Maximisez la LTV avec upsells, séquences emails, et rétention automatisée</div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:16px 0">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--emerald)" class="countup" data-target="34.7">0</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">LTV Moyen (€)</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--primary-light)" class="countup" data-target="23">0</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">Upsell CVR %</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--amber)" class="countup" data-target="4.2">0</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">Emails / Client</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--rose)" class="countup" data-target="18">0</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">Repeat Purchase %</div>
+      </div>
+    </div>
+
+    <!-- ONE-CLICK UPSELL FUNNEL -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;color:var(--text1)">🎯 One-Click Upsell Funnel</div>
+        <div style="background:var(--emerald);color:white;font-size:9px;font-weight:700;padding:3px 10px;border-radius:6px">ACTIF</div>
+      </div>
+      <!-- Visual funnel -->
+      <div style="display:flex;align-items:center;gap:4px;overflow-x:auto;padding-bottom:8px">
+        <div style="flex:1;min-width:120px;background:linear-gradient(135deg,var(--primary),#4F46E5);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">🛒</div>
+          <div style="font-size:11px;font-weight:700;color:white">Checkout</div>
+          <div style="font-size:18px;font-weight:800;color:white;margin-top:4px">100%</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.7)">847 clients</div>
+        </div>
+        <div style="font-size:16px;color:var(--text3)">→</div>
+        <div style="flex:1;min-width:120px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">⚡</div>
+          <div style="font-size:11px;font-weight:700;color:var(--amber)">Upsell #1</div>
+          <div style="font-size:18px;font-weight:800;color:var(--text1);margin-top:4px">34%</div>
+          <div style="font-size:9px;color:var(--text3)">Pack Premium +19€</div>
+        </div>
+        <div style="font-size:16px;color:var(--text3)">→</div>
+        <div style="flex:1;min-width:120px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">🎁</div>
+          <div style="font-size:11px;font-weight:700;color:var(--primary-light)">Upsell #2</div>
+          <div style="font-size:18px;font-weight:800;color:var(--text1);margin-top:4px">18%</div>
+          <div style="font-size:9px;color:var(--text3)">Accessoire +9€</div>
+        </div>
+        <div style="font-size:16px;color:var(--text3)">→</div>
+        <div style="flex:1;min-width:120px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">💎</div>
+          <div style="font-size:11px;font-weight:700;color:var(--emerald)">Downsell</div>
+          <div style="font-size:18px;font-weight:800;color:var(--text1);margin-top:4px">42%</div>
+          <div style="font-size:9px;color:var(--text3)">-30% sur refus</div>
+        </div>
+        <div style="font-size:16px;color:var(--text3)">→</div>
+        <div style="flex:1;min-width:120px;background:linear-gradient(135deg,var(--emerald),#059669);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">✅</div>
+          <div style="font-size:11px;font-weight:700;color:white">Thank You</div>
+          <div style="font-size:18px;font-weight:800;color:white;margin-top:4px">+47%</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.7)">AOV boost</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL SEQUENCES -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;color:var(--text1);margin-bottom:14px">📧 Séquences Email Automatisées</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+        <!-- Sequence 1 -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:12px;font-weight:700;color:var(--primary-light)">🛒 Abandon Panier</div>
+            <div style="font-size:9px;font-weight:700;color:var(--emerald);background:rgba(16,185,129,.15);padding:2px 8px;border-radius:4px">32% récup</div>
+          </div>
+          <div style="display:flex;gap:4px;margin-bottom:8px">
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--emerald)"></div>
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--emerald)"></div>
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--amber)"></div>
+          </div>
+          <div style="font-size:10px;color:var(--text3)">3 emails • H+1 → H+24 → H+72</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Open rate: <span style="color:var(--emerald);font-weight:600">54%</span></div>
+        </div>
+        <!-- Sequence 2 -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:12px;font-weight:700;color:var(--amber)">📦 Post-Achat</div>
+            <div style="font-size:9px;font-weight:700;color:var(--emerald);background:rgba(16,185,129,.15);padding:2px 8px;border-radius:4px">ACTIF</div>
+          </div>
+          <div style="display:flex;gap:4px;margin-bottom:8px">
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--primary)"></div>
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--primary)"></div>
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--primary)"></div>
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--primary)"></div>
+          </div>
+          <div style="font-size:10px;color:var(--text3)">4 emails • J+0 → J+3 → J+7 → J+14</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Review rate: <span style="color:var(--amber);font-weight:600">28%</span></div>
+        </div>
+        <!-- Sequence 3 -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:12px;font-weight:700;color:var(--rose)">♻️ Repurchase</div>
+            <div style="font-size:9px;font-weight:700;color:var(--emerald);background:rgba(16,185,129,.15);padding:2px 8px;border-radius:4px">IA</div>
+          </div>
+          <div style="display:flex;gap:4px;margin-bottom:8px">
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--rose)"></div>
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--rose);opacity:.5"></div>
+          </div>
+          <div style="font-size:10px;color:var(--text3)">Timing IA • Prédit le manque produit</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Repeat: <span style="color:var(--rose);font-weight:600">J+72 avg</span></div>
+        </div>
+        <!-- Sequence 4 -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:12px;font-weight:700;color:var(--emerald)">💎 VIP Winback</div>
+            <div style="font-size:9px;font-weight:700;color:var(--amber);background:rgba(245,158,11,.15);padding:2px 8px;border-radius:4px">J+90</div>
+          </div>
+          <div style="display:flex;gap:4px;margin-bottom:8px">
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--emerald)"></div>
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--bg3)"></div>
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--bg3)"></div>
+          </div>
+          <div style="font-size:10px;color:var(--text3)">3 emails • Réactive les clients dormants</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Winback rate: <span style="color:var(--emerald);font-weight:600">12%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LTV TIMELINE -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px">
+      <div style="font-size:14px;font-weight:700;color:var(--text1);margin-bottom:14px">📈 Stratégie LTV / Rétention — Timeline Client</div>
+      <div style="display:flex;align-items:flex-start;gap:0;overflow-x:auto;padding-bottom:8px">
+        <div style="text-align:center;min-width:80px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:16px">🛒</div>
+          <div style="font-size:10px;font-weight:700;color:var(--text1)">J+0</div>
+          <div style="font-size:9px;color:var(--text3)">Achat</div>
+          <div style="font-size:9px;color:var(--primary-light);font-weight:600">29€</div>
+        </div>
+        <div style="flex:1;border-top:2px dashed var(--border);margin-top:20px;min-width:20px"></div>
+        <div style="text-align:center;min-width:80px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:16px">⚡</div>
+          <div style="font-size:10px;font-weight:700;color:var(--text1)">J+0</div>
+          <div style="font-size:9px;color:var(--text3)">Upsell</div>
+          <div style="font-size:9px;color:var(--amber);font-weight:600">+19€</div>
+        </div>
+        <div style="flex:1;border-top:2px dashed var(--border);margin-top:20px;min-width:20px"></div>
+        <div style="text-align:center;min-width:80px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:16px">📧</div>
+          <div style="font-size:10px;font-weight:700;color:var(--text1)">J+3</div>
+          <div style="font-size:9px;color:var(--text3)">Review</div>
+          <div style="font-size:9px;color:var(--text3)">ask</div>
+        </div>
+        <div style="flex:1;border-top:2px dashed var(--border);margin-top:20px;min-width:20px"></div>
+        <div style="text-align:center;min-width:80px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:16px">🎁</div>
+          <div style="font-size:10px;font-weight:700;color:var(--text1)">J+14</div>
+          <div style="font-size:9px;color:var(--text3)">Cross-sell</div>
+          <div style="font-size:9px;color:var(--emerald);font-weight:600">+12€</div>
+        </div>
+        <div style="flex:1;border-top:2px dashed var(--border);margin-top:20px;min-width:20px"></div>
+        <div style="text-align:center;min-width:80px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:16px">♻️</div>
+          <div style="font-size:10px;font-weight:700;color:var(--text1)">J+72</div>
+          <div style="font-size:9px;color:var(--text3)">Repurchase</div>
+          <div style="font-size:9px;color:var(--rose);font-weight:600">+29€</div>
+        </div>
+        <div style="flex:1;border-top:2px dashed var(--border);margin-top:20px;min-width:20px"></div>
+        <div style="text-align:center;min-width:80px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--emerald);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:16px;color:white;font-weight:800;font-size:11px">VIP</div>
+          <div style="font-size:10px;font-weight:700;color:var(--text1)">J+90</div>
+          <div style="font-size:9px;color:var(--text3)">Fidélité</div>
+          <div style="font-size:9px;color:var(--emerald);font-weight:600">LTV 89€</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;text-align:center">
+        <span style="font-size:11px;color:var(--text3)">LTV projetée sur 90 jours : </span>
+        <span style="font-size:15px;font-weight:800;color:var(--emerald)">89€</span>
+        <span style="font-size:11px;color:var(--text3)"> soit </span>
+        <span style="font-size:13px;font-weight:700;color:var(--amber)">+207%</span>
+        <span style="font-size:11px;color:var(--text3)"> vs premier achat (29€)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- TURBULENCE CONTROL — Détection & Correction Auto      -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div id="page-turbulence" class="page-content" style="display:none">
+
+    <!-- HERO -->
+    <div style="text-align:center;padding:16px 0 8px">
+      <div style="font-size:32px;margin-bottom:6px">🌊</div>
+      <div class="section-title" style="font-size:18px">Turbulence Control</div>
+      <div style="color:var(--text2);font-size:13px;margin-top:4px">Détection automatique des chutes de performance & correction en temps réel</div>
+    </div>
+
+    <!-- SYSTEM STATUS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:16px 0">
+      <div style="background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.05));border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:24px;margin-bottom:4px">✅</div>
+        <div style="font-size:13px;font-weight:700;color:var(--emerald)">STABLE</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">Status global</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--text1)" class="countup" data-target="2.4">0</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">CVR actuel %</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--text1)" class="countup" data-target="18.7">0</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">CPA actuel (€)</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+        <div style="font-size:22px;font-weight:800;color:var(--emerald)" class="countup" data-target="3.1">0</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">ROAS actuel</div>
+      </div>
+    </div>
+
+    <!-- TURBULENCE DETECTORS -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;color:var(--text1);margin-bottom:14px">🔍 Détecteurs de Turbulence</div>
+      <div style="display:grid;gap:8px">
+        <!-- Detector 1 -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(16,185,129,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📉</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--text1)">CVR Drop Detector</div>
+            <div style="font-size:10px;color:var(--text3)">Alerte si CVR chute de >15% sur 24h</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--emerald);animation:pulse 2s infinite"></div>
+            <span style="font-size:10px;color:var(--emerald);font-weight:600">OK</span>
+          </div>
+        </div>
+        <!-- Detector 2 -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(245,158,11,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💸</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--text1)">CPA Spike Detector</div>
+            <div style="font-size:10px;color:var(--text3)">Alerte si CPA dépasse le seuil de rentabilité</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--emerald);animation:pulse 2s infinite"></div>
+            <span style="font-size:10px;color:var(--emerald);font-weight:600">OK</span>
+          </div>
+        </div>
+        <!-- Detector 3 -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(239,68,68,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🎨</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--text1)">Creative Fatigue Detector</div>
+            <div style="font-size:10px;color:var(--text3)">Détecte l'usure des créatives avant qu'elle coûte</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--amber);animation:pulse 2s infinite"></div>
+            <span style="font-size:10px;color:var(--amber);font-weight:600">WATCH</span>
+          </div>
+        </div>
+        <!-- Detector 4 -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(124,58,237,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🎯</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--text1)">Audience Saturation</div>
+            <div style="font-size:10px;color:var(--text3)">Fréquence d'affichage par audience surveillée</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--emerald);animation:pulse 2s infinite"></div>
+            <span style="font-size:10px;color:var(--emerald);font-weight:600">OK</span>
+          </div>
+        </div>
+        <!-- Detector 5 -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(239,68,68,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⚠️</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--text1)">Chargeback Monitor</div>
+            <div style="font-size:10px;color:var(--text3)">Surveille le taux de litiges et chargebacks</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--emerald);animation:pulse 2s infinite"></div>
+            <span style="font-size:10px;color:var(--emerald);font-weight:600">0.2%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTO-CORRECTIONS -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:700;color:var(--text1);margin-bottom:14px">🔧 Corrections Automatiques</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:16px">🔄</span>
+            <div style="font-size:12px;font-weight:700;color:var(--text1)">Auto-Rotate Creatives</div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);line-height:1.5">Si fatigue créative détectée → rotation auto des visuels, nouvelles variations lancées par Creative Factory</div>
+          <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+            <div style="height:3px;flex:1;background:var(--emerald);border-radius:2px"></div>
+            <span style="font-size:9px;color:var(--emerald);font-weight:600">PRÊT</span>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:16px">🛡</span>
+            <div style="font-size:12px;font-weight:700;color:var(--text1)">CPA Stop-Loss</div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);line-height:1.5">Si CPA dépasse 2x le seuil → pause auto de l'adset, redistribution du budget vers les winners</div>
+          <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+            <div style="height:3px;flex:1;background:var(--emerald);border-radius:2px"></div>
+            <span style="font-size:9px;color:var(--emerald);font-weight:600">PRÊT</span>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:16px">🎯</span>
+            <div style="font-size:12px;font-weight:700;color:var(--text1)">Audience Refresh</div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);line-height:1.5">Si saturation audience détectée → élargissement automatique du ciblage + nouvelles audiences similaires</div>
+          <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+            <div style="height:3px;flex:1;background:var(--amber);border-radius:2px"></div>
+            <span style="font-size:9px;color:var(--amber);font-weight:600">STANDBY</span>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:16px">📊</span>
+            <div style="font-size:12px;font-weight:700;color:var(--text1)">Dynamic Pricing</div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);line-height:1.5">Si conversion chute mais trafic stable → test auto d'une offre flash ou ajustement du pricing</div>
+          <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+            <div style="height:3px;flex:1;background:var(--amber);border-radius:2px"></div>
+            <span style="font-size:9px;color:var(--amber);font-weight:600">STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT EVENTS LOG -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px">
+      <div style="font-size:14px;font-weight:700;color:var(--text1);margin-bottom:14px">📋 Journal des Turbulences (7 derniers jours)</div>
+      <div style="display:grid;gap:6px">
+        <div style="background:var(--card);border-left:3px solid var(--emerald);border-radius:0 8px 8px 0;padding:10px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;min-width:80px">12 mars 03:14</span>
+          <span style="font-size:10px;color:var(--emerald);font-weight:600;min-width:60px">RESOLVED</span>
+          <span style="font-size:11px;color:var(--text2)">Creative fatigue sur Ad #47 → Auto-rotation déclenchée, nouveau CTR +12%</span>
+        </div>
+        <div style="background:var(--card);border-left:3px solid var(--emerald);border-radius:0 8px 8px 0;padding:10px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;min-width:80px">11 mars 14:22</span>
+          <span style="font-size:10px;color:var(--emerald);font-weight:600;min-width:60px">RESOLVED</span>
+          <span style="font-size:11px;color:var(--text2)">CPA spike sur Adset "Femmes 25-34" → Budget réduit de 40%, réalloué aux winners</span>
+        </div>
+        <div style="background:var(--card);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;min-width:80px">10 mars 09:45</span>
+          <span style="font-size:10px;color:var(--amber);font-weight:600;min-width:60px">WATCHING</span>
+          <span style="font-size:11px;color:var(--text2)">CVR en baisse progressive (-8% sur 3j) — seuil d'alerte pas encore atteint</span>
+        </div>
+        <div style="background:var(--card);border-left:3px solid var(--emerald);border-radius:0 8px 8px 0;padding:10px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;min-width:80px">09 mars 17:30</span>
+          <span style="font-size:10px;color:var(--emerald);font-weight:600;min-width:60px">RESOLVED</span>
+          <span style="font-size:11px;color:var(--text2)">Audience saturation détectée → Lookalike 3% élargi à 5%, volume restauré</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- GHOST ANALYTICS — Signaux Invisibles & Opportunités   -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div id="page-ghost" class="page-content" style="display:none">
+
+    <!-- HERO -->
+    <div style="text-align:center;padding:16px 0 8px">
+      <div style="font-size:32px;margin-bottom:6px">👻</div>
+      <div class="section-title" style="font-size:18px">Ghost Analytics</div>
+      <div style="color:var(--text2);font-size:13px;margin-top:4px">L'agent invisible qui observe, analyse et révèle ce que personne ne cherche</div>
+    </div>
+
+    <!-- 4 MODES D'OBSERVATION -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:16px 0">
+      <div style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(124,58,237,.05));border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:14px;text-align:center;cursor:pointer" onclick="filterGhostSignals('performance')">
+        <div style="font-size:20px;margin-bottom:4px">📊</div>
+        <div style="font-size:11px;font-weight:700;color:var(--primary-light)">Performance</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text1);margin-top:4px" class="countup" data-target="7">0</div>
+        <div style="font-size:9px;color:var(--text3)">signaux actifs</div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:14px;text-align:center;cursor:pointer" onclick="filterGhostSignals('competitor')">
+        <div style="font-size:20px;margin-bottom:4px">🕵️</div>
+        <div style="font-size:11px;font-weight:700;color:var(--rose)">Competitor</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text1);margin-top:4px" class="countup" data-target="3">0</div>
+        <div style="font-size:9px;color:var(--text3)">signaux actifs</div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.05));border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:14px;text-align:center;cursor:pointer" onclick="filterGhostSignals('behavior')">
+        <div style="font-size:20px;margin-bottom:4px">🧠</div>
+        <div style="font-size:11px;font-weight:700;color:var(--amber)">Behavior</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text1);margin-top:4px" class="countup" data-target="5">0</div>
+        <div style="font-size:9px;color:var(--text3)">signaux actifs</div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.05));border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:14px;text-align:center;cursor:pointer" onclick="filterGhostSignals('opportunity')">
+        <div style="font-size:20px;margin-bottom:4px">💡</div>
+        <div style="font-size:11px;font-weight:700;color:var(--emerald)">Opportunity</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text1);margin-top:4px" class="countup" data-target="4">0</div>
+        <div style="font-size:9px;color:var(--text3)">signaux actifs</div>
+      </div>
+    </div>
+
+    <!-- GHOST SIGNALS FEED -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;color:var(--text1)">📡 Signaux Ghost — Flux en Temps Réel</div>
+        <div style="display:flex;gap:6px">
+          <div style="background:rgba(239,68,68,.15);color:var(--rose);font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer" onclick="filterGhostSignals('alert')">🔴 Alert</div>
+          <div style="background:rgba(245,158,11,.15);color:var(--amber);font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer" onclick="filterGhostSignals('murmur')">🟡 Murmur</div>
+          <div style="background:rgba(124,58,237,.15);color:var(--primary-light);font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer" onclick="filterGhostSignals('whisper')">🟣 Whisper</div>
+        </div>
+      </div>
+      <div id="ghost-signals-feed" style="display:grid;gap:8px">
+        <!-- ALERT signal -->
+        <div class="ghost-signal" data-mode="competitor" data-severity="alert" style="background:var(--card);border:1px solid rgba(239,68,68,.3);border-left:3px solid var(--rose);border-radius:0 10px 10px 0;padding:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <div style="background:var(--rose);color:white;font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px">ALERT</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text1)">Concurrent lance un produit similaire à -20%</div>
+            <span style="margin-left:auto;font-size:9px;color:var(--text3)">il y a 2h</span>
+          </div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.5;margin-bottom:8px">
+            ShopConcurrent.com a lancé un produit très similaire à votre Posture Corrector Pro avec un prix de 23€ vs votre 29€. Leur page utilise un angle "scientifique" différent.
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:9px;color:var(--text3)">🎯 Agent cible: <strong style="color:var(--primary-light)">INTEL</strong></span>
+            <span style="font-size:9px;color:var(--text3)">• Confiance: <strong style="color:var(--rose)">87%</strong></span>
+            <button onclick="actOnGhostSignal('intel-counter')" style="margin-left:auto;background:var(--rose);color:white;border:none;font-size:9px;font-weight:700;padding:4px 12px;border-radius:6px;cursor:pointer">Contre-attaquer</button>
+          </div>
+        </div>
+        <!-- MURMUR signal -->
+        <div class="ghost-signal" data-mode="performance" data-severity="murmur" style="background:var(--card);border:1px solid rgba(245,158,11,.3);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <div style="background:var(--amber);color:white;font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px">MURMUR</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text1)">CTR en baisse progressive sur 5 jours</div>
+            <span style="margin-left:auto;font-size:9px;color:var(--text3)">il y a 6h</span>
+          </div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.5;margin-bottom:8px">
+            Le CTR de votre campagne principale est passé de 3.2% à 2.7% sur les 5 derniers jours. Tendance confirmée sur 3+ jours — fatigue créative probable.
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:9px;color:var(--text3)">🎨 Agent cible: <strong style="color:var(--amber)">CREATIVE FACTORY</strong></span>
+            <span style="font-size:9px;color:var(--text3)">• Confiance: <strong style="color:var(--amber)">72%</strong></span>
+            <button onclick="actOnGhostSignal('rotate-creatives')" style="margin-left:auto;background:var(--amber);color:white;border:none;font-size:9px;font-weight:700;padding:4px 12px;border-radius:6px;cursor:pointer">Nouvelles créatives</button>
+          </div>
+        </div>
+        <!-- WHISPER signal -->
+        <div class="ghost-signal" data-mode="opportunity" data-severity="whisper" style="background:var(--card);border:1px solid rgba(124,58,237,.2);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <div style="background:var(--primary);color:white;font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px">WHISPER</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text1)">Audience non exploitée : Hommes 45-54 convertissent 2x mieux</div>
+            <span style="margin-left:auto;font-size:9px;color:var(--text3)">il y a 12h</span>
+          </div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.5;margin-bottom:8px">
+            Le segment Hommes 45-54 représente 4% de votre trafic mais 9% de vos conversions. CVR segment : 4.1% vs 2.4% global. Opportunité d'expansion audience.
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:9px;color:var(--text3)">📢 Agent cible: <strong style="color:var(--primary-light)">ADS</strong></span>
+            <span style="font-size:9px;color:var(--text3)">• Confiance: <strong style="color:var(--primary-light)">65%</strong></span>
+            <button onclick="actOnGhostSignal('expand-audience')" style="margin-left:auto;background:var(--primary);color:white;border:none;font-size:9px;font-weight:700;padding:4px 12px;border-radius:6px;cursor:pointer">Tester audience</button>
+          </div>
+        </div>
+        <!-- WHISPER signal 2 -->
+        <div class="ghost-signal" data-mode="behavior" data-severity="whisper" style="background:var(--card);border:1px solid rgba(124,58,237,.2);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <div style="background:var(--primary);color:white;font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px">WHISPER</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text1)">Pic de conversions détecté entre 21h-23h</div>
+            <span style="margin-left:auto;font-size:9px;color:var(--text3)">il y a 1j</span>
+          </div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.5;margin-bottom:8px">
+            38% de vos ventes se concentrent entre 21h et 23h. Votre budget publicitaire est réparti uniformément. Recommandation : concentrer 50% du budget sur ce créneau.
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:9px;color:var(--text3)">⏱ Agent cible: <strong style="color:var(--primary-light)">DAYPARTING</strong></span>
+            <span style="font-size:9px;color:var(--text3)">• Confiance: <strong style="color:var(--primary-light)">81%</strong></span>
+            <button onclick="actOnGhostSignal('optimize-dayparting')" style="margin-left:auto;background:var(--primary);color:white;border:none;font-size:9px;font-weight:700;padding:4px 12px;border-radius:6px;cursor:pointer">Optimiser horaires</button>
+          </div>
+        </div>
+        <!-- MURMUR signal 2 -->
+        <div class="ghost-signal" data-mode="behavior" data-severity="murmur" style="background:var(--card);border:1px solid rgba(245,158,11,.3);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <div style="background:var(--amber);color:white;font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px">MURMUR</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text1)">Page FAQ visitée par 67% des acheteurs avant achat</div>
+            <span style="margin-left:auto;font-size:9px;color:var(--text3)">il y a 1j</span>
+          </div>
+          <div style="font-size:10px;color:var(--text2);line-height:1.5;margin-bottom:8px">
+            La page FAQ est un point de passage critique. Les visiteurs qui lisent la FAQ ont un CVR de 5.8% vs 1.9% pour ceux qui ne la lisent pas. Suggestion : rendre la FAQ plus visible.
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:9px;color:var(--text3)">🏪 Agent cible: <strong style="color:var(--amber)">STORE</strong></span>
+            <span style="font-size:9px;color:var(--text3)">• Confiance: <strong style="color:var(--amber)">78%</strong></span>
+            <button onclick="actOnGhostSignal('optimize-faq')" style="margin-left:auto;background:var(--amber);color:white;border:none;font-size:9px;font-weight:700;padding:4px 12px;border-radius:6px;cursor:pointer">Optimiser FAQ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GHOST PHILOSOPHY -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:11px;color:var(--text3);line-height:1.6;max-width:500px;margin:0 auto">
+        <span style="font-size:14px">👻</span><br>
+        <strong style="color:var(--text2)">GHOST ne déclenche jamais d'action directe.</strong><br>
+        Il observe, analyse, et dépose ses signaux dans la mémoire du système.<br>
+        Les autres agents lisent ces signaux et décident d'agir.<br>
+        <span style="color:var(--primary-light)">Un signal non lu après 48h est escaladé vers le Morning Brief.</span>
+      </div>
+    </div>
+  </div>
+
   <!-- ── PIPELINE ────────────────────────────────── -->
   <div id="page-pipeline" class="page-content" style="display:none">
 
@@ -1939,8 +2503,8 @@ function timeAgo(ts) {
 }
 
 // ── DATA ──────────────────────────────────────────
-const PAGES={hunter:'Produits Gagnants',pipeline:'Nouveau Produit',dashboard:'Tableau de bord',campaigns:'Mes Publicités','product-intel':'Analyser un Produit',creatives:'Moteur créatif',library:'Mes Créatifs',analytics:'Résultats détaillés',intelligence:'Concurrents',agents:'Assistants IA',connectors:'Mes Connexions',settings:'Réglages',brief:'Résumé du matin',dct:'Tests de pub',tiktok:'TikTok',strategies:'Stratégies',inventory:'Inventaire',guardrails:'Limites de sécurité',billing:'Facturation',activity:'Historique',landing:'Pages de vente'};
-const BADGES={hunter:'Hunter vous livre 5 winners chaque lundi',pipeline:'Collez un lien, on s\'occupe du reste',dashboard:'Vue globale de votre business',campaigns:'Toutes vos publicités en cours','product-intel':'Analysez n\'importe quel produit',creatives:'Création et performance de vos visuels',library:'Tous vos visuels publicitaires',analytics:'Vos résultats sur toutes les plateformes',intelligence:'Analysez vos concurrents',agents:'Vos assistants automatiques',connectors:'Vos plateformes connectées',settings:'Configuration de votre compte',brief:'Résumé automatique du matin',dct:'Testez plusieurs versions de vos pubs',tiktok:'Croissance organique TikTok',strategies:'Plans de croissance automatisés',inventory:'Gestion de vos stocks',guardrails:'Vos protections automatiques',billing:'Abonnement et factures'};
+const PAGES={hunter:'Produits Gagnants',pipeline:'Nouveau Produit',dashboard:'Tableau de bord',campaigns:'Mes Publicités','product-intel':'Analyser un Produit',creatives:'Moteur créatif',library:'Mes Créatifs',analytics:'Résultats détaillés',intelligence:'Concurrents',agents:'Assistants IA',connectors:'Mes Connexions',settings:'Réglages',brief:'Résumé du matin',dct:'Tests de pub',tiktok:'TikTok',strategies:'Stratégies',inventory:'Inventaire',guardrails:'Limites de sécurité',billing:'Facturation',activity:'Historique',landing:'Pages de vente','store-builder':'AI Store Builder','post-purchase':'Post Purchase','turbulence':'Turbulence Control','ghost':'Ghost Analytics'};
+const BADGES={hunter:'Hunter vous livre 5 winners chaque lundi',pipeline:'Collez un lien, on s\'occupe du reste',dashboard:'Vue globale de votre business',campaigns:'Toutes vos publicités en cours','product-intel':'Analysez n\'importe quel produit',creatives:'Création et performance de vos visuels',library:'Tous vos visuels publicitaires',analytics:'Vos résultats sur toutes les plateformes',intelligence:'Analysez vos concurrents',agents:'Vos assistants automatiques',connectors:'Vos plateformes connectées',settings:'Configuration de votre compte',brief:'Résumé automatique du matin',dct:'Testez plusieurs versions de vos pubs',tiktok:'Croissance organique TikTok',strategies:'Plans de croissance automatisés',inventory:'Gestion de vos stocks',guardrails:'Vos protections automatiques',billing:'Abonnement et factures','store-builder':'Créez une boutique en 60 secondes','post-purchase':'Upsells, emails, rétention automatisée','turbulence':'Détection & correction automatique','ghost':'Signaux invisibles & opportunités cachées'};
 
 const STRATEGIES=[
   {id:'dtc',cat:'scaling',icon:'📈',name:'DTC Scaling Guardian',tag:'Scale les winners par paliers',status:'active',impact:'HIGH'},
@@ -4211,6 +4775,36 @@ function quickBuildStore(productId, productName) {
     if (productSelect) productSelect.value = productId;
     showToast('🏪 Produit pre-selectionne — cliquez Generer !', 'primary');
   }, 200);
+}
+
+// ══════════════════════════════════════════════════════════════
+// GHOST ANALYTICS — Filtrage signaux
+// ══════════════════════════════════════════════════════════════
+
+function filterGhostSignals(filter) {
+  const signals = document.querySelectorAll('.ghost-signal');
+  let count = 0;
+  signals.forEach(s => {
+    const mode = s.dataset.mode;
+    const severity = s.dataset.severity;
+    const match = (mode === filter || severity === filter || filter === 'all');
+    s.style.display = match ? 'block' : 'none';
+    if (match) count++;
+  });
+  showToast('👻 ' + count + ' signal(s) ' + filter, 'primary');
+}
+
+function actOnGhostSignal(action) {
+  const actions = {
+    'intel-counter': { msg: '🕵️ INTEL lance une analyse concurrentielle approfondie...', agent: 'INTEL' },
+    'rotate-creatives': { msg: '🎨 CREATIVE FACTORY génère 3 nouvelles variations...', agent: 'CREATIVE FACTORY' },
+    'expand-audience': { msg: '🎯 ADS crée un nouvel adset Hommes 45-54...', agent: 'ADS' },
+    'optimize-dayparting': { msg: '⏱ DAYPARTING concentre 50% du budget 21h-23h...', agent: 'DAYPARTING' },
+    'optimize-faq': { msg: '🏪 STORE repositionne la FAQ plus haut sur la page...', agent: 'STORE' }
+  };
+  const a = actions[action] || { msg: '🔧 Action déclenchée...', agent: 'SYSTEM' };
+  showToast(a.msg, 'emerald');
+  setTimeout(() => showToast('✅ Agent ' + a.agent + ' a pris en charge le signal', 'emerald'), 2000);
 }
 
 // ══════════════════════════════════════════════════════════════
