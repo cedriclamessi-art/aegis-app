@@ -552,6 +552,12 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
         <span class="nav-label">Nouveau Produit</span>
         <div class="nav-tooltip" role="tooltip">Nouveau Produit</div>
       </div>
+      <div class="nav-item" onclick="navigate('creative-gen')" role="button" tabindex="0" aria-label="Visuels IA">
+        <div class="nav-icon" aria-hidden="true">✨</div>
+        <span class="nav-label">Visuels IA</span>
+        <div class="nav-badge" style="background:var(--primary)">NEW</div>
+        <div class="nav-tooltip" role="tooltip">Generateur de visuels publicitaires IA</div>
+      </div>
       <div class="nav-item" onclick="navigate('campaigns')" role="button" tabindex="0" aria-label="Mes Publicités">
         <div class="nav-icon" aria-hidden="true">📣</div>
         <span class="nav-label">Mes Publicités</span>
@@ -1733,6 +1739,257 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
   </div>
 
   <!-- ══════════════════════════════════════════════════════ -->
+  <!-- CREATIVE GENERATOR — Visuels Publicitaires IA         -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div id="page-creative-gen" class="page-content" style="display:none">
+
+    <!-- HERO -->
+    <div style="text-align:center;padding:16px 0 8px">
+      <div style="font-size:32px;margin-bottom:6px">✨</div>
+      <div class="section-title" style="font-size:18px">Generateur de Visuels Publicitaires IA</div>
+      <div style="color:var(--text2);font-size:13px;margin-top:4px">Upload ton produit → 20 visuels generes automatiquement avec 6 angles PSYCHE</div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 0">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--primary-light)">SDXL</div>
+        <div style="font-size:9px;color:var(--text3);margin-top:2px">Moteur IA</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--text1)" class="countup" data-target="20">0</div>
+        <div style="font-size:9px;color:var(--text3);margin-top:2px">Visuels / batch</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--amber)" class="countup" data-target="6">0</div>
+        <div style="font-size:9px;color:var(--text3);margin-top:2px">Angles marketing</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--emerald)" class="countup" data-target="3">0</div>
+        <div style="font-size:9px;color:var(--text3);margin-top:2px">Formats (1:1, 9:16, 16:9)</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: PRODUIT -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:28px;height:28px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:white">1</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text1)">Selectionne ton produit</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Produit existant</div>
+          <select id="cg-product-select" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px">
+            <option value="">-- Choisir un produit --</option>
+            <option value="posture-pro">Posture Corrector Pro (29€)</option>
+            <option value="glow-serum">Glow Vitamin C Serum (34€)</option>
+            <option value="smart-lamp">Aurora Smart Lamp (49€)</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Ou colle un lien</div>
+          <div style="display:flex;gap:6px">
+            <input id="cg-product-url" type="url" placeholder="https://aliexpress.com/item/..." style="flex:1;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text1);font-size:13px">
+            <button onclick="fetchCGProduct()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text1);cursor:pointer;font-size:12px">🔗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: STYLES -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:28px;height:28px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:white">2</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text1)">Choisis 3 styles d'inspiration</div>
+        <span id="cg-style-count" style="font-size:11px;color:var(--primary-light);font-weight:600">0/3</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px">
+        <div class="cg-style-card" onclick="toggleCGStyle(this,'minimal')" style="background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all .2s">
+          <div style="width:100%;aspect-ratio:1;border-radius:6px;background:linear-gradient(135deg,#f8f9fa,#e9ecef);margin-bottom:6px"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--text1)">Minimal</div>
+          <div style="font-size:9px;color:var(--text3)">Clean, fond blanc</div>
+        </div>
+        <div class="cg-style-card" onclick="toggleCGStyle(this,'lifestyle')" style="background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all .2s">
+          <div style="width:100%;aspect-ratio:1;border-radius:6px;background:linear-gradient(135deg,#ffecd2,#fcb69f);margin-bottom:6px"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--text1)">Lifestyle</div>
+          <div style="font-size:9px;color:var(--text3)">Chaleureux</div>
+        </div>
+        <div class="cg-style-card" onclick="toggleCGStyle(this,'ugc')" style="background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all .2s">
+          <div style="width:100%;aspect-ratio:1;border-radius:6px;background:linear-gradient(135deg,#a1c4fd,#c2e9fb);margin-bottom:6px"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--text1)">UGC</div>
+          <div style="font-size:9px;color:var(--text3)">Authentique</div>
+        </div>
+        <div class="cg-style-card" onclick="toggleCGStyle(this,'premium')" style="background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all .2s">
+          <div style="width:100%;aspect-ratio:1;border-radius:6px;background:linear-gradient(135deg,#1a1a2e,#d4af37);margin-bottom:6px"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--text1)">Premium</div>
+          <div style="font-size:9px;color:var(--text3)">Luxe, elegant</div>
+        </div>
+        <div class="cg-style-card" onclick="toggleCGStyle(this,'bold')" style="background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all .2s">
+          <div style="width:100%;aspect-ratio:1;border-radius:6px;background:linear-gradient(135deg,#eb3349,#f45c43);margin-bottom:6px"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--text1)">Bold</div>
+          <div style="font-size:9px;color:var(--text3)">Impactant</div>
+        </div>
+        <div class="cg-style-card" onclick="toggleCGStyle(this,'organic')" style="background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer;transition:all .2s">
+          <div style="width:100%;aspect-ratio:1;border-radius:6px;background:linear-gradient(135deg,#11998e,#38ef7d);margin-bottom:6px"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--text1)">Organic</div>
+          <div style="font-size:9px;color:var(--text3)">Naturel, eco</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: ANGLES MARKETING -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:28px;height:28px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:white">3</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text1)">Angles marketing</div>
+        <div style="background:var(--primary);color:white;font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px">Auto PSYCHE</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px">
+        <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer">
+          <input type="checkbox" class="cg-angle" value="transformation" checked style="accent-color:var(--primary)">
+          <span style="font-size:12px;font-weight:600;color:var(--text1)">🔄 Transformation</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer">
+          <input type="checkbox" class="cg-angle" value="social_proof" checked style="accent-color:var(--primary)">
+          <span style="font-size:12px;font-weight:600;color:var(--text1)">⭐ Social Proof</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer">
+          <input type="checkbox" class="cg-angle" value="douleur" checked style="accent-color:var(--primary)">
+          <span style="font-size:12px;font-weight:600;color:var(--text1)">💢 Douleur</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer">
+          <input type="checkbox" class="cg-angle" value="curiosite" style="accent-color:var(--primary)">
+          <span style="font-size:12px;font-weight:600;color:var(--text1)">🔍 Curiosite</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer">
+          <input type="checkbox" class="cg-angle" value="urgence" style="accent-color:var(--primary)">
+          <span style="font-size:12px;font-weight:600;color:var(--text1)">⏰ Urgence</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer">
+          <input type="checkbox" class="cg-angle" value="autorite" style="accent-color:var(--primary)">
+          <span style="font-size:12px;font-weight:600;color:var(--text1)">🏆 Autorite</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- STEP 4: FORMATS -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:28px;height:28px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:white">4</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text1)">Formats de sortie</div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <label style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 20px;background:var(--card);border:2px solid var(--primary);border-radius:10px;cursor:pointer">
+          <input type="checkbox" class="cg-format" value="1080x1080" checked style="display:none">
+          <div style="width:40px;height:40px;border:2px solid var(--primary);border-radius:4px;background:rgba(124,58,237,.1)"></div>
+          <span style="font-size:12px;font-weight:600;color:var(--text1)">Feed 1:1</span>
+          <span style="font-size:9px;color:var(--text3)">1080x1080</span>
+        </label>
+        <label style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 20px;background:var(--card);border:2px solid var(--primary);border-radius:10px;cursor:pointer">
+          <input type="checkbox" class="cg-format" value="1080x1920" checked style="display:none">
+          <div style="width:28px;height:50px;border:2px solid var(--primary);border-radius:4px;background:rgba(124,58,237,.1)"></div>
+          <span style="font-size:12px;font-weight:600;color:var(--text1)">Story 9:16</span>
+          <span style="font-size:9px;color:var(--text3)">1080x1920</span>
+        </label>
+        <label style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 20px;background:var(--card);border:2px solid var(--border);border-radius:10px;cursor:pointer">
+          <input type="checkbox" class="cg-format" value="1200x628" style="display:none">
+          <div style="width:56px;height:30px;border:2px solid var(--border);border-radius:4px;background:rgba(124,58,237,.05)"></div>
+          <span style="font-size:12px;font-weight:600;color:var(--text1)">Landscape</span>
+          <span style="font-size:9px;color:var(--text3)">1200x628</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- STEP 5: GENERATE -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px">
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;padding:12px;background:var(--card);border-radius:8px">
+        <div><span style="font-size:10px;color:var(--text3);display:block">Produit</span><span id="cg-summary-product" style="font-size:13px;font-weight:600;color:var(--text1)">-</span></div>
+        <div><span style="font-size:10px;color:var(--text3);display:block">Styles</span><span id="cg-summary-styles" style="font-size:13px;font-weight:600;color:var(--text1)">0</span></div>
+        <div><span style="font-size:10px;color:var(--text3);display:block">Angles</span><span id="cg-summary-angles" style="font-size:13px;font-weight:600;color:var(--text1)">3</span></div>
+        <div><span style="font-size:10px;color:var(--text3);display:block">Creatifs</span><span id="cg-summary-count" style="font-size:13px;font-weight:600;color:var(--primary-light)">20</span></div>
+        <div><span style="font-size:10px;color:var(--text3);display:block">Temps</span><span style="font-size:13px;font-weight:600;color:var(--amber)">~45s</span></div>
+      </div>
+      <button onclick="generateCreatives()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),#4F46E5);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">
+        🚀 Generer 20 Visuels
+      </button>
+      <!-- Progress bar -->
+      <div id="cg-progress" style="display:none;margin-top:16px;text-align:center">
+        <div style="height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:8px"><div id="cg-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--emerald));border-radius:3px;transition:width .3s"></div></div>
+        <div id="cg-progress-text" style="font-size:12px;color:var(--text3)">Initialisation...</div>
+        <div id="cg-progress-count" style="font-size:16px;font-weight:700;color:var(--primary-light);margin-top:4px">0/20</div>
+      </div>
+    </div>
+
+    <!-- RESULTS GRID -->
+    <div id="cg-results" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:700;color:var(--text1)">✅ Visuels generes</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="selectAllCGCreatives()" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text1);cursor:pointer;font-size:11px;font-weight:600">Tout selectionner</button>
+          <button onclick="exportCGtoDCT()" style="background:var(--primary);color:white;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:11px;font-weight:600">➡️ Exporter vers DCT</button>
+        </div>
+      </div>
+      <div id="cg-results-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
+    <!-- TEMPLATE LIBRARY -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-top:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:14px;font-weight:700;color:var(--text1)">📚 Bibliotheque de Templates</div>
+        <div style="display:flex;gap:6px">
+          <select id="tpl-category-filter" onchange="filterTemplates()" style="padding:6px 10px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text1);font-size:11px">
+            <option value="">Toutes categories</option>
+            <option value="beauty">💄 Beaute</option>
+            <option value="health">💚 Sante</option>
+            <option value="tech">📱 Tech</option>
+            <option value="fashion">👗 Mode</option>
+            <option value="fitness">💪 Fitness</option>
+          </select>
+          <select id="tpl-angle-filter" onchange="filterTemplates()" style="padding:6px 10px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text1);font-size:11px">
+            <option value="">Tous angles</option>
+            <option value="transformation">🔄 Transformation</option>
+            <option value="social_proof">⭐ Social Proof</option>
+            <option value="douleur">💢 Douleur</option>
+            <option value="urgence">⏰ Urgence</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:32px">🔄</div>
+          <div style="padding:10px">
+            <div style="font-size:11px;font-weight:700;color:var(--text1)">Transformation Before/After</div>
+            <div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:9px;background:rgba(99,102,241,.2);color:var(--primary-light);padding:1px 6px;border-radius:3px">beauty</span><span style="font-size:9px;color:var(--text3)">CTR 2.4%</span><span style="font-size:9px;color:var(--emerald)">ROAS 3.2</span></div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#f5af19,#f12711);display:flex;align-items:center;justify-content:center;font-size:32px">⭐</div>
+          <div style="padding:10px">
+            <div style="font-size:11px;font-weight:700;color:var(--text1)">Social Proof Stars</div>
+            <div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:9px;background:rgba(16,185,129,.2);color:var(--emerald);padding:1px 6px;border-radius:3px">health</span><span style="font-size:9px;color:var(--text3)">CTR 1.8%</span><span style="font-size:9px;color:var(--emerald)">ROAS 2.8</span></div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#0f0c29,#302b63);display:flex;align-items:center;justify-content:center;font-size:32px">⏰</div>
+          <div style="padding:10px">
+            <div style="font-size:11px;font-weight:700;color:var(--text1)">Urgence Countdown</div>
+            <div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:9px;background:rgba(236,72,153,.2);color:var(--rose);padding:1px 6px;border-radius:3px">tech</span><span style="font-size:9px;color:var(--text3)">CTR 3.1%</span><span style="font-size:9px;color:var(--emerald)">ROAS 2.5</span></div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#11998e,#38ef7d);display:flex;align-items:center;justify-content:center;font-size:32px">💢</div>
+          <div style="padding:10px">
+            <div style="font-size:11px;font-weight:700;color:var(--text1)">Douleur Problem/Solution</div>
+            <div style="display:flex;gap:4px;margin-top:4px"><span style="font-size:9px;background:rgba(245,158,11,.2);color:var(--amber);padding:1px 6px;border-radius:3px">fitness</span><span style="font-size:9px;color:var(--text3)">CTR 2.7%</span><span style="font-size:9px;color:var(--emerald)">ROAS 3.0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
   <!-- GHOST ANALYTICS — Signaux Invisibles & Opportunités   -->
   <!-- ══════════════════════════════════════════════════════ -->
   <div id="page-ghost" class="page-content" style="display:none">
@@ -2503,8 +2760,8 @@ function timeAgo(ts) {
 }
 
 // ── DATA ──────────────────────────────────────────
-const PAGES={hunter:'Produits Gagnants',pipeline:'Nouveau Produit',dashboard:'Tableau de bord',campaigns:'Mes Publicités','product-intel':'Analyser un Produit',creatives:'Moteur créatif',library:'Mes Créatifs',analytics:'Résultats détaillés',intelligence:'Concurrents',agents:'Assistants IA',connectors:'Mes Connexions',settings:'Réglages',brief:'Résumé du matin',dct:'Tests de pub',tiktok:'TikTok',strategies:'Stratégies',inventory:'Inventaire',guardrails:'Limites de sécurité',billing:'Facturation',activity:'Historique',landing:'Pages de vente','store-builder':'AI Store Builder','post-purchase':'Post Purchase','turbulence':'Turbulence Control','ghost':'Ghost Analytics'};
-const BADGES={hunter:'Hunter vous livre 5 winners chaque lundi',pipeline:'Collez un lien, on s\'occupe du reste',dashboard:'Vue globale de votre business',campaigns:'Toutes vos publicités en cours','product-intel':'Analysez n\'importe quel produit',creatives:'Création et performance de vos visuels',library:'Tous vos visuels publicitaires',analytics:'Vos résultats sur toutes les plateformes',intelligence:'Analysez vos concurrents',agents:'Vos assistants automatiques',connectors:'Vos plateformes connectées',settings:'Configuration de votre compte',brief:'Résumé automatique du matin',dct:'Testez plusieurs versions de vos pubs',tiktok:'Croissance organique TikTok',strategies:'Plans de croissance automatisés',inventory:'Gestion de vos stocks',guardrails:'Vos protections automatiques',billing:'Abonnement et factures','store-builder':'Créez une boutique en 60 secondes','post-purchase':'Upsells, emails, rétention automatisée','turbulence':'Détection & correction automatique','ghost':'Signaux invisibles & opportunités cachées'};
+const PAGES={hunter:'Produits Gagnants',pipeline:'Nouveau Produit',dashboard:'Tableau de bord',campaigns:'Mes Publicités','product-intel':'Analyser un Produit',creatives:'Moteur créatif',library:'Mes Créatifs',analytics:'Résultats détaillés',intelligence:'Concurrents',agents:'Assistants IA',connectors:'Mes Connexions',settings:'Réglages',brief:'Résumé du matin',dct:'Tests de pub',tiktok:'TikTok',strategies:'Stratégies',inventory:'Inventaire',guardrails:'Limites de sécurité',billing:'Facturation',activity:'Historique',landing:'Pages de vente','store-builder':'AI Store Builder','post-purchase':'Post Purchase','turbulence':'Turbulence Control','ghost':'Ghost Analytics','creative-gen':'Visuels IA'};
+const BADGES={hunter:'Hunter vous livre 5 winners chaque lundi',pipeline:'Collez un lien, on s\'occupe du reste',dashboard:'Vue globale de votre business',campaigns:'Toutes vos publicités en cours','product-intel':'Analysez n\'importe quel produit',creatives:'Création et performance de vos visuels',library:'Tous vos visuels publicitaires',analytics:'Vos résultats sur toutes les plateformes',intelligence:'Analysez vos concurrents',agents:'Vos assistants automatiques',connectors:'Vos plateformes connectées',settings:'Configuration de votre compte',brief:'Résumé automatique du matin',dct:'Testez plusieurs versions de vos pubs',tiktok:'Croissance organique TikTok',strategies:'Plans de croissance automatisés',inventory:'Gestion de vos stocks',guardrails:'Vos protections automatiques',billing:'Abonnement et factures','store-builder':'Créez une boutique en 60 secondes','post-purchase':'Upsells, emails, rétention automatisée','turbulence':'Détection & correction automatique','ghost':'Signaux invisibles & opportunités cachées','creative-gen':'20 visuels publicitaires en 45 secondes'};
 
 const STRATEGIES=[
   {id:'dtc',cat:'scaling',icon:'📈',name:'DTC Scaling Guardian',tag:'Scale les winners par paliers',status:'active',impact:'HIGH'},
@@ -4776,6 +5033,73 @@ function quickBuildStore(productId, productName) {
     showToast('🏪 Produit pre-selectionne — cliquez Generer !', 'primary');
   }, 200);
 }
+
+// ══════════════════════════════════════════════════════════════
+// CREATIVE GENERATOR — Logic
+// ══════════════════════════════════════════════════════════════
+
+let cgSelectedStyles = [];
+function toggleCGStyle(el, style) {
+  const idx = cgSelectedStyles.indexOf(style);
+  if (idx > -1) { cgSelectedStyles.splice(idx, 1); el.style.borderColor = 'var(--border)'; }
+  else if (cgSelectedStyles.length < 3) { cgSelectedStyles.push(style); el.style.borderColor = 'var(--primary)'; el.style.background = 'rgba(124,58,237,.1)'; }
+  else { showToast('Maximum 3 styles', 'amber'); return; }
+  document.getElementById('cg-style-count').textContent = cgSelectedStyles.length + '/3';
+  document.getElementById('cg-summary-styles').textContent = cgSelectedStyles.length;
+}
+
+function fetchCGProduct() { showToast('🔗 Recuperation du produit...', 'primary'); }
+
+function generateCreatives() {
+  const product = document.getElementById('cg-product-select').value;
+  if (!product && !document.getElementById('cg-product-url').value) { showToast('Selectionnez un produit', 'rose'); return; }
+  if (cgSelectedStyles.length === 0) { showToast('Selectionnez au moins 1 style', 'rose'); return; }
+  const angles = Array.from(document.querySelectorAll('.cg-angle:checked')).map(c => c.value);
+  if (angles.length === 0) { showToast('Selectionnez au moins 1 angle', 'rose'); return; }
+
+  document.getElementById('cg-progress').style.display = 'block';
+  document.getElementById('cg-results').style.display = 'none';
+  let progress = 0;
+  const total = Math.min(cgSelectedStyles.length * angles.length * 3, 20);
+  const msgs = ['Generation des fonds...', 'Suppression arriere-plans...', 'Composition visuels...', 'Ajout textes PSYCHE...', 'Optimisation finale...'];
+  const interval = setInterval(() => {
+    progress = Math.min(progress + 1, total);
+    const pct = (progress / total) * 100;
+    document.getElementById('cg-progress-bar').style.width = pct + '%';
+    document.getElementById('cg-progress-count').textContent = progress + '/' + total;
+    document.getElementById('cg-progress-text').textContent = msgs[Math.floor((progress / total) * msgs.length)] || 'Finalisation...';
+    if (progress >= total) {
+      clearInterval(interval);
+      setTimeout(() => {
+        document.getElementById('cg-progress').style.display = 'none';
+        showCGResults(total, angles);
+      }, 500);
+    }
+  }, 300);
+}
+
+function showCGResults(count, angles) {
+  document.getElementById('cg-results').style.display = 'block';
+  const grid = document.getElementById('cg-results-grid');
+  grid.innerHTML = '';
+  const hookMap = { transformation: '🔄 Avant/Apres', social_proof: '⭐ +10K clients', douleur: '💢 La solution', curiosite: '🔍 Secret viral', urgence: '⏰ Stock limite', autorite: '🏆 Certifie' };
+  const colors = ['#6366f1', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#10b981'];
+  for (let i = 0; i < count; i++) {
+    const angle = angles[i % angles.length];
+    const style = cgSelectedStyles[i % cgSelectedStyles.length];
+    const color = colors[i % colors.length];
+    grid.innerHTML += '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor=\'var(--primary)\'" onmouseout="this.style.borderColor=\'var(--border)\'">' +
+      '<div style="aspect-ratio:1;background:linear-gradient(135deg,' + color + ',' + color + '88);display:flex;align-items:center;justify-content:center;font-size:28px;position:relative">' +
+      '<span style="opacity:.3;font-size:48px">🖼️</span>' +
+      '<div style="position:absolute;top:6px;left:6px;display:flex;gap:3px"><span style="font-size:8px;background:rgba(99,102,241,.9);color:white;padding:1px 5px;border-radius:3px">' + (hookMap[angle]||angle) + '</span><span style="font-size:8px;background:rgba(16,185,129,.9);color:white;padding:1px 5px;border-radius:3px">' + style + '</span></div></div>' +
+      '<div style="padding:8px"><div style="font-size:10px;color:var(--text2);line-height:1.4">' + (hookMap[angle]||'Creative #' + i) + '</div></div></div>';
+  }
+  showToast('✅ ' + count + ' visuels generes !', 'emerald');
+}
+
+function selectAllCGCreatives() { showToast('Tous les creatifs selectionnes', 'primary'); }
+function exportCGtoDCT() { showToast('➡️ Export vers DCT en cours...', 'emerald'); setTimeout(() => showToast('✅ Creatifs importes dans DCT !', 'emerald'), 1500); }
+function filterTemplates() { showToast('🔍 Filtres appliques', 'primary'); }
 
 // ══════════════════════════════════════════════════════════════
 // GHOST ANALYTICS — Filtrage signaux
