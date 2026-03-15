@@ -199,7 +199,7 @@ export function createApp(db: Pool, redis: Redis) {
     res.status(healthy ? 200 : 503).json({
       status: healthy ? 'ok' : 'degraded',
       checks,
-      version: '7.2.0',
+      version: '12.3.0',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
     });
