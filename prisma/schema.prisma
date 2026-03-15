@@ -1,0 +1,533 @@
+// ============================================================
+// AEGIS v12.3 — Schéma Prisma Complet
+// 154 Agents • 60 Minutes • CRO-Optimized
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// 1. USERS (Super Admins + Clients)
+// ============================================================
+
+model User {
+  id                    String   @id @default(uuid())
+  email                 String   @unique
+  clerkId               String?  @unique
+  
+  // Super Admin flags (immutable)
+  isSuperAdmin          Boolean  @default(false)
+  isLifetimeFree        Boolean  @default(false)
+  
+  // Client plans
+  planType              PlanType @default(STARTER)
+  agentsQuota           Int      @default(45)
+  empireIndexMax        Int      @default(40)
+  monthlySpendMax       Decimal? @db.Decimal(10, 2)
+  
+  // Metrics
+  empireIndexCurrent    Decimal  @default(0) @db.Decimal(5, 2)
+  agentsActiveCount     Int      @default(0)
+  brandsCreatedCount    Int      @default(0)
+  
+  // Security
+  twoFactorEnabled      Boolean  @default(false)
+  lastLogin             DateTime?
+  createdAt             DateTime @default(now())
+  
+  // Relations
+  brands                Brand[]
+  agentDnas             AgentDNA[]
+  
+  // Constraints
+  @@index([email])
+  @@index([isSuperAdmin])
+  
+  // Validation Super Admin
+  @@map("users")
+}
+
+enum PlanType {
+  STARTER
+  PRO
+  SCALE
+  EMPIRE
+}
+
+// ============================================================
+// 2. AGENT DNA (AGen-L System) — 154 agents
+// ============================================================
+
+model AgentDNA {
+  id              String    @id @default(uuid())
+  agentCode       String    @unique // "HUNTER-1", "PULSE-META-3"
+  name            String
+  module          String    // "INTEL", "ADS", "POST", etc.
+  
+  // Genetic chromosomes (JSON)
+  chromosomes     Json      @default("{}")
+  
+  // Relations
+  ownerId         String?
+  owner           User?     @relation(fields: [ownerId], references: [id])
+  parentIds       String[]  // References to other AgentDNA
+  
+  // State
+  status          AgentStatus @default(ACTIVE)
+  generation      Int       @default(1)
+  fitnessScore    Decimal   @default(0.5) @db.Decimal(5, 2)
+  
+  // Metrics
+  executionCount  Int       @default(0)
+  successRate     Decimal   @default(0) @db.Decimal(5, 2)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  lastEvolution   DateTime?
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations inverse
+  mutations       Mutation[]
+  tasks           Task[]
+  
+  @@index([module])
+  @@index([fitnessScore])
+  @@map("agent_dna")
+}
+
+enum AgentStatus {
+  ACTIVE
+  PAUSED
+  EVOLVING
+  ARCHIVED
+}
+
+// ============================================================
+// 3. BRANDS (Marques créées)
+// ============================================================
+
+model Brand {
+  id                String   @id @default(uuid())
+  ownerId           String
+  owner             User     @relation(fields: [ownerId], references: [id])
+  
+  // Identity
+  name              String
+  slug              String   @unique
+  niche             String?
+  tagline           String?
+  
+  // Assets
+  logoUrl           String?
+  colorPrimary      String?
+  colorSecondary    String?
+  fontPrimary       String?
+  fontSecondary     String?
+  shopifyStoreUrl   String?
+  
+  // Empire Index metrics
+  revenueTotal      Decimal  @default(0) @db.Decimal(12, 2)
+  ordersCount       Int      @default(0)
+  customersCount    Int      @default(0)
+  roasAverage       Decimal  @default(0) @db.Decimal(5, 2)
+  empireIndex       Decimal  @default(0) @db.Decimal(5, 2)
+  
+  // Status
+  status            BrandStatus @default(DISCOVERING)
+  
+  // Relations
+  products          Product[]
+  campaigns         Campaign[]
+  orders            Order[]
+  logisticsSetup    LogisticsSetup?
+  adConnectors      AdPlatformConnector[]
+  
+  // Timestamps
+  createdAt         DateTime @default(now())
+  launchedAt        DateTime?
+  
+  @@index([ownerId])
+  @@index([status])
+  @@map("brands")
+}
+
+enum BrandStatus {
+  DISCOVERING
+  VALIDATING
+  BUILDING
+  LAUNCHING
+  SCALING
+  OPTIMIZING
+  MATURE
+  DORMANT
+}
+
+// ============================================================
+// 4. PRODUCTS (Catalogue)
+// ============================================================
+
+model Product {
+  id                String   @id @default(uuid())
+  brandId           String
+  brand             Brand    @relation(fields: [brandId], references: [id])
+  
+  // Source
+  sourceType        String   // "amazon", "aliexpress", "manual"
+  sourceUrl         String?
+  
+  // Info
+  name              String
+  description       String?
+  descriptionAi     String?  // Version optimisée par GEN-COPY
+  
+  // Pricing
+  costPrice         Decimal  @db.Decimal(10, 2)
+  sellingPrice      Decimal  @db.Decimal(10, 2)
+  
+  // Media
+  images            String[]
+  videoUrls         String[]
+  
+  // Scoring
+  hunterScore       Int?
+  croPotentialScore Int?
+  psychologyProfile Json?
+  
+  // Status
+  validationStatus  String   @default("pending") // "pending", "approved", "rejected"
+  
+  // Metrics
+  unitsSold         Int      @default(0)
+  revenueGenerated  Decimal  @default(0) @db.Decimal(12, 2)
+  
+  // Relations
+  logisticsProducts LogisticsProduct[]
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([brandId])
+  @@index([hunterScore])
+  @@map("products")
+}
+
+// ============================================================
+// 5. LOGISTICS (Tes fournisseurs)
+// ============================================================
+
+model LogisticsSetup {
+  id                    String   @id @default(uuid())
+  brandId               String   @unique
+  brand                 Brand    @relation(fields: [brandId], references: [id])
+  
+  // API credentials (encrypted)
+  apiKeyEncrypted       String
+  webhookSecretEncrypted String?
+  endpointUrl           String
+  
+  // Settings
+  defaultWarehouseId    String?
+  defaultCarrier        String   @default("colissimo")
+  autoFulfillment       Boolean  @default(true)
+  
+  isActive              Boolean  @default(true)
+  lastSyncAt            DateTime?
+  createdAt             DateTime @default(now())
+  
+  @@map("logistics_setup")
+}
+
+model LogisticsProduct {
+  id                  String   @id @default(uuid())
+  brandId             String
+  productId           String?
+  product             Product? @relation(fields: [productId], references: [id])
+  
+  logisticsSku        String
+  supplierInfo        Json?
+  
+  stockQuantity       Int      @default(0)
+  stockStatus         String   @default("in_stock")
+  lastStockUpdate     DateTime?
+  
+  syncStatus          String   @default("pending")
+  
+  @@unique([brandId, logisticsSku])
+  @@map("logistics_products")
+}
+
+// ============================================================
+// 6. AD PLATFORM CONNECTORS (Meta, TikTok, Google, Pinterest)
+// ============================================================
+
+model AdPlatformConnector {
+  id                String   @id @default(uuid())
+  brandId           String
+  brand             Brand    @relation(fields: [brandId], references: [id])
+  
+  platform          PlatformType
+  adAccountId       String
+  pixelId           String?
+  
+  // OAuth (encrypted)
+  accessTokenEncrypted String
+  refreshTokenEncrypted String?
+  
+  // Settings
+  defaultBudgetDaily    Decimal? @db.Decimal(10, 2)
+  defaultRoasTarget     Decimal? @db.Decimal(4, 2)
+  autoOptimization      Boolean  @default(true)
+  
+  // CRO
+  psychologyTargeting   Json?
+  creativeStrategy      String   @default("a_b_testing")
+  
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  
+  // Relations
+  campaigns             Campaign[]
+  
+  @@unique([brandId, platform])
+  @@map("ad_platform_connectors")
+}
+
+enum PlatformType {
+  META
+  TIKTOK
+  GOOGLE
+  PINTEREST
+}
+
+// ============================================================
+// 7. CAMPAIGNS (Publicitaires CRO-Optimized)
+// ============================================================
+
+model Campaign {
+  id                    String   @id @default(uuid())
+  brandId               String
+  brand                 Brand    @relation(fields: [brandId], references: [id])
+  platformConnectorId   String?
+  platformConnector     AdPlatformConnector? @relation(fields: [platformConnectorId], references: [id])
+  
+  name                  String
+  objective             String   // "conversions", "awareness"
+  
+  // Psychology strategy
+  primaryPsychologyTrigger   String?
+  secondaryPsychologyTrigger String?
+  customerAwarenessStage     String?
+  
+  // Creative variants
+  creativeVariants      Json?
+  
+  // Targeting
+  targetAudiencePsychographics Json?
+  
+  // Budget
+  budgetDaily           Decimal? @db.Decimal(10, 2)
+  bidStrategy           String   @default("lowest_cost")
+  
+  // CRO tracking
+  abTestStatus          String   @default("running")
+  winningVariantId      String?
+  statisticalSignificance Decimal? @db.Decimal(5, 4)
+  
+  // Metrics
+  spendTotal            Decimal  @default(0) @db.Decimal(12, 2)
+  impressions           Int      @default(0)
+  clicks                Int      @default(0)
+  conversions           Int      @default(0)
+  revenueAttributed     Decimal  @default(0) @db.Decimal(12, 2)
+  roas                  Decimal? @db.Decimal(5, 2)
+  cpa                   Decimal? @db.Decimal(8, 2)
+  
+  status                String   @default("draft")
+  createdAt             DateTime @default(now())
+  launchedAt            DateTime?
+  
+  @@index([brandId])
+  @@index([status])
+  @@map("campaigns")
+}
+
+// ============================================================
+// 8. ORDERS (Commandes)
+// ============================================================
+
+model Order {
+  id                String   @id @default(uuid())
+  brandId           String
+  brand             Brand    @relation(fields: [brandId], references: [id])
+  
+  customerEmail     String
+  totalAmount       Decimal  @db.Decimal(10, 2)
+  status            String   @default("pending")
+  
+  // Logistics
+  logisticsOrderId  String?
+  trackingNumber    String?
+  carrierName       String?
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  
+  createdAt         DateTime @default(now())
+  
+  @@index([brandId])
+  @@map("orders")
+}
+
+// ============================================================
+// 9. MUTATIONS (Évolution agents AGen-L)
+// ============================================================
+
+model Mutation {
+  id              String   @id @default(uuid())
+  agentId         String
+  agent           AgentDNA @relation(fields: [agentId], references: [id])
+  
+  mutationType    String
+  beforeValue     Json
+  afterValue      Json
+  impactScore     Decimal? @db.Decimal(5, 2)
+  generation      Int
+  
+  createdAt       DateTime @default(now())
+  
+  @@map("mutations")
+}
+
+// ============================================================
+// 10. TASKS (Exécution agents)
+// ============================================================
+
+model Task {
+  id              String   @id @default(uuid())
+  agentId         String
+  agent           AgentDNA @relation(fields: [agentId], references: [id])
+  
+  title           String
+  taskType        String
+  priority        String   @default("medium")
+  
+  status          String   @default("pending")
+  inputPayload    Json?
+  outputPayload   Json?
+  errorLog        String?
+  
+  // Temporal.io integration
+  temporalWorkflowId  String?
+  
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([agentId])
+  @@index([status])
+  @@map("tasks")
+}
+
+// ============================================================
+// 11. SYSTEM EVENTS (Audit)
+// ============================================================
+
+model SystemEvent {
+  id            String   @id @default(uuid())
+  eventType     String
+  severity      String   @default("info") // "debug", "info", "warning", "error", "critical"
+  
+  userId        String?
+  agentId       String?
+  brandId       String?
+  
+  message       String
+  payload       Json?
+  ipAddress     String?
+  
+  createdAt     DateTime @default(now())
+  
+  @@index([eventType])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("system_events")
+}
+
+// ============================================================
+// 12. GHOST OBSERVATIONS (Analytics invisible)
+// ============================================================
+
+model GhostObservation {
+  id            String   @id @default(uuid())
+  
+  ghostMode     String   // "performance", "competitor", "behavior", "opportunity"
+  signalLevel   String   // "whisper", "murmur", "alert"
+  
+  sourceAgent   String
+  targetAgents  String[]
+  
+  observation   String
+  recommendation String?
+  confidence    Decimal  @db.Decimal(3, 2)
+  
+  acknowledgedBy String?
+  acknowledgedAt DateTime?
+  
+  createdAt     DateTime @default(now())
+  
+  @@index([ghostMode])
+  @@index([signalLevel])
+  @@map("ghost_observations")
+}
+
+// ============================================================
+// 13. TURBULENCE EVENTS (Problèmes détectés)
+// ============================================================
+
+model TurbulenceEvent {
+  id              String   @id @default(uuid())
+  
+  detectorType    String   // "CVR_DROP", "CPA_SPIKE", etc.
+  alertLevel      String   // "whisper", "murmur", "alert"
+  
+  brandId         String
+  metrics         Json
+  thresholdBreached Json
+  
+  correctionActions Json?
+  correctionResults Json?
+  
+  resolvedAt      DateTime?
+  createdAt       DateTime @default(now())
+  
+  @@index([detectorType])
+  @@index([alertLevel])
+  @@map("turbulence_events")
+}
+
+// ============================================================
+// 14. MONDAY FLOW EXECUTIONS (Pipeline hebdomadaire)
+// ============================================================
+
+model MondayFlowExecution {
+  id              String   @id @default(uuid())
+  brandId         String
+  
+  status          String   @default("running") // "running", "completed", "failed"
+  phase           String   @default("discovery")
+  
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+  
+  executionLog    Json?
+  finalOutputs    Json?
+  
+  @@index([brandId])
+  @@index([status])
+  @@map("monday_flow_executions")
+}

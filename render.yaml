@@ -1,0 +1,62 @@
+services:
+  - type: web
+    name: aegis-app
+    env: node
+    buildCommand: npm install && npm run build && npx prisma migrate deploy
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aegis-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: aegis-redis
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: META_ACCESS_TOKEN
+        sync: false
+      - key: TIKTOK_ACCESS_TOKEN
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+
+  - type: worker
+    name: aegis-monday-flow
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run monday-flow-worker
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aegis-db
+          property: connectionString
+
+  - type: worker
+    name: aegis-ghost
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run ghost-worker
+
+  - type: worker
+    name: aegis-turbulence
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run turbulence-worker
+
+databases:
+  - name: aegis-db
+    databaseName: aegis
+    user: aegis
+    plan: standard
+
+redis:
+  - name: aegis-redis
+    plan: standard

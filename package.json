@@ -1,7 +1,7 @@
 {
   "name": "aegis",
-  "version": "3.0.0",
-  "description": "AEGIS — Autonomous E-commerce & Growth Intelligence System",
+  "version": "12.3.0",
+  "description": "AEGIS v12.3 — Autonomous E-commerce Growth Intelligence System • 225 Agents • 17 Modules",
   "private": true,
   "workspaces": ["backend", "workers"],
   "scripts": {
@@ -9,8 +9,15 @@
     "build": "cd backend && npm run build && cd ../workers && npm run build",
     "migrate": "psql $DATABASE_URL < migrations/000_consolidated.sql",
     "migrate:all": "for f in migrations/*.sql; do echo \"Running $f...\"; psql $DATABASE_URL < $f; done",
+    "migrate:v12": "for f in migrations/047_*.sql migrations/048_*.sql migrations/049_*.sql migrations/050_*.sql migrations/051_*.sql migrations/052_*.sql migrations/053_*.sql; do echo \"Running $f...\"; psql $DATABASE_URL < $f; done",
     "seed": "cd backend && npx ts-node scripts/seed.ts",
-    "test": "cd backend && npx ts-node scripts/test-suite.ts"
+    "test": "cd backend && npx ts-node scripts/test-suite.ts",
+    "test:unit": "cd backend && jest --testPathPattern=unit",
+    "db:generate": "npx prisma generate",
+    "db:studio": "npx prisma studio",
+    "monday-flow": "cd backend && ts-node scripts/monday-flow-trigger.ts",
+    "agents:status": "cd backend && ts-node scripts/agents-status.ts",
+    "setup": "bash setup.sh local"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

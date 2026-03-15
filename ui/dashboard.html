@@ -523,7 +523,7 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
     <div class="sb-logo-icon" aria-hidden="true">Æ</div>
     <div>
       <div class="sb-logo-text" aria-label="AEGIS">AEG<span>IS</span></div>
-      <div class="sb-version" aria-label="Version 7.0">v7.0</div>
+      <div class="sb-version" aria-label="Version 12.3">v12.3</div>
     </div>
     <button class="sb-toggle" onclick="toggleSidebar()" title="Réduire le menu" aria-label="Réduire ou agrandir le menu latéral" aria-expanded="true">◀</button>
   </div>
@@ -567,6 +567,40 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
         <div class="nav-icon" aria-hidden="true">🎨</div>
         <span class="nav-label">Mes Créatifs</span>
         <div class="nav-tooltip" role="tooltip">Mes Créatifs</div>
+      </div>
+      <!-- ── v12.3 MODULES ── -->
+      <div style="padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;opacity:.5" class="nav-label">v12.3 Modules</div>
+      <div class="nav-item" onclick="navigate('ceo-agent')" role="button" tabindex="0" aria-label="CEO Agent">
+        <div class="nav-icon" aria-hidden="true">👑</div>
+        <span class="nav-label">CEO Agent</span>
+        <div class="nav-badge" style="background:var(--amber)">AI</div>
+        <div class="nav-tooltip" role="tooltip">Orchestration Stratégique</div>
+      </div>
+      <div class="nav-item" onclick="navigate('finance')" role="button" tabindex="0" aria-label="Finance">
+        <div class="nav-icon" aria-hidden="true">💰</div>
+        <span class="nav-label">Finance</span>
+        <div class="nav-tooltip" role="tooltip">P&L, Budgets, Trésorerie</div>
+      </div>
+      <div class="nav-item" onclick="navigate('analytics-v12')" role="button" tabindex="0" aria-label="Analytics">
+        <div class="nav-icon" aria-hidden="true">📊</div>
+        <span class="nav-label">Analytics</span>
+        <div class="nav-tooltip" role="tooltip">Dashboards, Rapports, Alertes</div>
+      </div>
+      <div class="nav-item" onclick="navigate('data-etl')" role="button" tabindex="0" aria-label="Data ETL">
+        <div class="nav-icon" aria-hidden="true">🔄</div>
+        <span class="nav-label">Data ETL</span>
+        <div class="nav-tooltip" role="tooltip">Pipelines de Données</div>
+      </div>
+      <div class="nav-item" onclick="navigate('knowledge')" role="button" tabindex="0" aria-label="Knowledge">
+        <div class="nav-icon" aria-hidden="true">🧠</div>
+        <span class="nav-label">Knowledge</span>
+        <div class="nav-tooltip" role="tooltip">Apprentissage & Best Practices</div>
+      </div>
+      <div class="nav-item" onclick="navigate('governance')" role="button" tabindex="0" aria-label="Governance">
+        <div class="nav-icon" aria-hidden="true">🏛</div>
+        <span class="nav-label">Governance</span>
+        <div class="nav-badge" style="background:var(--rose)">META</div>
+        <div class="nav-tooltip" role="tooltip">Evolution Council + Kill Switch</div>
       </div>
       <!-- ── GROWTH INTELLIGENCE ── -->
       <div style="padding:10px 14px 4px;font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;opacity:.5" class="nav-label">Growth Intelligence</div>
@@ -2547,6 +2581,205 @@ label.form-label{font-size:11px;font-weight:600;color:var(--text2);text-transfor
     </div>
   </div>
 
+  <!-- ── CEO AGENT (v12.3) ────────────────────────── -->
+  <div id="page-ceo-agent" class="page-content" style="display:none">
+    <div class="section-header"><div><div class="section-title">👑 CEO Agent — Orchestration Stratégique</div><div class="section-sub">Agent central supervisant les 225 agents AEGIS v12.3</div></div></div>
+    <!-- Tier Bar -->
+    <div style="background:linear-gradient(90deg,rgba(124,58,237,.08),rgba(16,185,129,.08));border:1px solid var(--border);border-radius:var(--radius);padding:16px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px">
+      <div style="font-size:11px;font-weight:700;color:var(--amber);letter-spacing:1px">VALIDATION</div>
+      <div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden"><div style="width:35%;height:100%;background:linear-gradient(90deg,var(--primary),var(--emerald));border-radius:3px"></div></div>
+      <div style="font-size:11px;color:var(--text2)">0 → 1M€</div>
+    </div>
+    <div class="grid-4 gap-16" style="margin-bottom:24px">
+      <div class="kpi-card"><div class="kpi-label">Agents Actifs</div><div class="kpi-value" style="color:var(--primary)">225</div><div class="kpi-sub">17 modules</div></div>
+      <div class="kpi-card"><div class="kpi-label">Décisions/Jour</div><div class="kpi-value" style="color:var(--emerald)">347</div><div class="kpi-sub">+12% vs J-7</div></div>
+      <div class="kpi-card"><div class="kpi-label">Monday Flow</div><div class="kpi-value" style="color:var(--amber)">OK</div><div class="kpi-sub">8h30 / cycle</div></div>
+      <div class="kpi-card"><div class="kpi-label">Empire Index</div><div class="kpi-value" style="color:var(--sky)">42.5</div><div class="kpi-sub">/ 100</div></div>
+    </div>
+    <div class="grid-2 gap-16">
+      <div class="card">
+        <div class="card-title">Décisions Récentes CEO</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:10px;background:var(--s2);border-radius:8px;border-left:3px solid var(--emerald)"><div style="font-size:11px;font-weight:600">Optimisation Budget Meta</div><div style="font-size:10px;color:var(--text2);margin-top:4px">Réallocation +15% budget vers audiences look-alike (ROAS 4.2x)</div><div style="font-size:9px;color:var(--text3);margin-top:4px">il y a 2h • Confiance: 0.91</div></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px;border-left:3px solid var(--amber)"><div style="font-size:11px;font-weight:600">Scaling TikTok Activé</div><div style="font-size:10px;color:var(--text2);margin-top:4px">Viralité détectée (K=1.3) — budget x2 sur creative #TK-047</div><div style="font-size:9px;color:var(--text3);margin-top:4px">il y a 5h • Confiance: 0.87</div></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px;border-left:3px solid var(--rose)"><div style="font-size:11px;font-weight:600">Crise CPA Résolue</div><div style="font-size:10px;color:var(--text2);margin-top:4px">CPA spike +45% détecté — rotation créative + stop-loss activés</div><div style="font-size:9px;color:var(--text3);margin-top:4px">il y a 8h • Confiance: 0.95</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Modules v12.3 — Status</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">CEO (1)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">INTEL (35)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">ADS (40)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">CREATIVE (36)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">STORE (12)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">BASE (29)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">FINANCE (6)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">ANALYTICS (7)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">DATA (6) • GROWTH (8) • KNOWLEDGE (3)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">POST (6) • META (6) • COMPLIANCE (9)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">GHOST (4) • OPS (8) • PRODUCT (9)</span><span style="font-size:10px;color:var(--emerald)">Active</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FINANCE (v12.3) ───────────────────────────── -->
+  <div id="page-finance" class="page-content" style="display:none">
+    <div class="section-header"><div><div class="section-title">💰 Finance — P&L, Budgets, Trésorerie</div><div class="section-sub">6 agents financiers autonomes</div></div></div>
+    <div class="grid-4 gap-16" style="margin-bottom:24px">
+      <div class="kpi-card"><div class="kpi-label">Revenu Brut (30j)</div><div class="kpi-value" style="color:var(--emerald)">€47,280</div><div class="kpi-sub">+18% vs M-1</div></div>
+      <div class="kpi-card"><div class="kpi-label">Marge Nette</div><div class="kpi-value" style="color:var(--primary)">32.4%</div><div class="kpi-sub">Objectif: 35%</div></div>
+      <div class="kpi-card"><div class="kpi-label">Cash Runway</div><div class="kpi-value" style="color:var(--amber)">8.2 mois</div><div class="kpi-sub">Sain</div></div>
+      <div class="kpi-card"><div class="kpi-label">ROAS Global</div><div class="kpi-value" style="color:var(--sky)">3.8x</div><div class="kpi-sub">Target: 3.0x</div></div>
+    </div>
+    <div class="grid-2 gap-16">
+      <div class="card">
+        <div class="card-title">P&L Résumé (Mars 2026)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:rgba(16,185,129,.05);border-radius:6px"><span style="font-size:11px;color:var(--emerald)">Revenu Net</span><span style="font-size:12px;font-weight:700;color:var(--emerald)">€42,552</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--s2);border-radius:6px"><span style="font-size:11px;color:var(--text2)">COGS</span><span style="font-size:12px;font-weight:600;color:var(--rose)">-€12,450</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--s2);border-radius:6px"><span style="font-size:11px;color:var(--text2)">Logistique</span><span style="font-size:12px;font-weight:600;color:var(--rose)">-€3,890</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--s2);border-radius:6px"><span style="font-size:11px;color:var(--text2)">Ad Spend</span><span style="font-size:12px;font-weight:600;color:var(--rose)">-€11,200</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--s2);border-radius:6px"><span style="font-size:11px;color:var(--text2)">Frais Plateforme</span><span style="font-size:12px;font-weight:600;color:var(--rose)">-€1,272</span></div>
+          <div style="display:flex;justify-content:space-between;padding:10px 12px;background:rgba(124,58,237,.08);border-radius:6px;border:1px solid var(--border)"><span style="font-size:12px;font-weight:700;color:var(--primary)">Profit Net</span><span style="font-size:14px;font-weight:800;color:var(--emerald)">€13,740</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Prévisions Cashflow (90 jours)</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:10px;background:var(--s2);border-radius:8px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:10px;color:var(--text3)">Conservateur</span><span style="font-size:11px;font-weight:600;color:var(--amber)">€38,200</span></div><div style="height:4px;background:var(--s3);border-radius:2px"><div style="width:65%;height:100%;background:var(--amber);border-radius:2px"></div></div></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:10px;color:var(--text3)">Réaliste</span><span style="font-size:11px;font-weight:600;color:var(--emerald)">€52,800</span></div><div style="height:4px;background:var(--s3);border-radius:2px"><div style="width:80%;height:100%;background:var(--emerald);border-radius:2px"></div></div></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:10px;color:var(--text3)">Optimiste</span><span style="font-size:11px;font-weight:600;color:var(--primary)">€71,400</span></div><div style="height:4px;background:var(--s3);border-radius:2px"><div style="width:95%;height:100%;background:var(--primary);border-radius:2px"></div></div></div>
+          <div style="margin-top:8px;padding:8px 10px;background:rgba(16,185,129,.05);border-radius:6px;font-size:10px;color:var(--emerald)">Break-even: atteint • Runway: 8.2 mois</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ANALYTICS v12.3 ──────────────────────────── -->
+  <div id="page-analytics-v12" class="page-content" style="display:none">
+    <div class="section-header"><div><div class="section-title">📊 Analytics — Dashboards & Alertes</div><div class="section-sub">7 agents analytics avec alertes intelligentes</div></div></div>
+    <div class="grid-4 gap-16" style="margin-bottom:24px">
+      <div class="kpi-card"><div class="kpi-label">Dashboards Actifs</div><div class="kpi-value" style="color:var(--primary)">4</div><div class="kpi-sub">Exec / Marketing / Product / Finance</div></div>
+      <div class="kpi-card"><div class="kpi-label">Rapports Planifiés</div><div class="kpi-value" style="color:var(--sky)">12</div><div class="kpi-sub">Auto-envoi</div></div>
+      <div class="kpi-card"><div class="kpi-label">Alertes Actives</div><div class="kpi-value" style="color:var(--amber)">8</div><div class="kpi-sub">3 triggered aujourd'hui</div></div>
+      <div class="kpi-card"><div class="kpi-label">Attribution</div><div class="kpi-value" style="color:var(--emerald)">Multi</div><div class="kpi-sub">First + Last + Linear</div></div>
+    </div>
+    <div class="grid-2 gap-16">
+      <div class="card">
+        <div class="card-title">Alertes Intelligentes</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="padding:10px;background:var(--s2);border-radius:8px;display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:var(--emerald)"></div><span style="font-size:11px;flex:1">CVR Drop Critical</span><span style="font-size:9px;color:var(--text3)">Auto: Pause worst campaigns</span></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px;display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:var(--emerald)"></div><span style="font-size:11px;flex:1">ROAS Below 2.0 (4h)</span><span style="font-size:9px;color:var(--text3)">Auto: Reduce budget 30%</span></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px;display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:var(--amber)"></div><span style="font-size:11px;flex:1">Creative Fatigue (CTR -30%)</span><span style="font-size:9px;color:var(--text3)">Auto: Rotate + request new</span></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px;display:flex;align-items:center;gap:10px"><div style="width:8px;height:8px;border-radius:50%;background:var(--rose)"></div><span style="font-size:11px;flex:1">Cash Runway < 3 mois</span><span style="font-size:9px;color:var(--text3)">Auto: Emergency protocol</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Rapports Programmés</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="padding:10px;background:var(--s2);border-radius:8px;display:flex;justify-content:space-between"><span style="font-size:11px">P&L Hebdo</span><span style="font-size:10px;color:var(--text3)">Chaque lundi 9h</span></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px;display:flex;justify-content:space-between"><span style="font-size:11px">Performance Ads</span><span style="font-size:10px;color:var(--text3)">Quotidien 8h</span></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px;display:flex;justify-content:space-between"><span style="font-size:11px">Cohort Analysis</span><span style="font-size:10px;color:var(--text3)">Mensuel 1er</span></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px;display:flex;justify-content:space-between"><span style="font-size:11px">Executive Summary</span><span style="font-size:10px;color:var(--text3)">Vendredi 17h</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DATA ETL (v12.3) ─────────────────────────── -->
+  <div id="page-data-etl" class="page-content" style="display:none">
+    <div class="section-header"><div><div class="section-title">🔄 Data ETL — Pipelines de Données</div><div class="section-sub">6 agents data : extraction, transformation, enrichissement</div></div></div>
+    <div class="grid-3 gap-16" style="margin-bottom:24px">
+      <div class="kpi-card"><div class="kpi-label">Pipelines Actifs</div><div class="kpi-value" style="color:var(--primary)">8</div><div class="kpi-sub">6 ingestion • 2 export</div></div>
+      <div class="kpi-card"><div class="kpi-label">Records/Jour</div><div class="kpi-value" style="color:var(--emerald)">12.4K</div><div class="kpi-sub">Success rate: 99.7%</div></div>
+      <div class="kpi-card"><div class="kpi-label">Enrichissement</div><div class="kpi-value" style="color:var(--sky)">4 sources</div><div class="kpi-sub">Clearbit • Geo • Device • Behavioral</div></div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Pipelines Actifs</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border-radius:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--emerald)"></div><span style="font-size:11px;flex:1">Product Ingestion (Amazon/AliExpress)</span><span style="font-size:10px;color:var(--text3)">Toutes les 6h</span><span style="font-size:10px;color:var(--emerald)">OK</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border-radius:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--emerald)"></div><span style="font-size:11px;flex:1">Customer Enrichment</span><span style="font-size:10px;color:var(--text3)">Temps réel</span><span style="font-size:10px;color:var(--emerald)">OK</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border-radius:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--emerald)"></div><span style="font-size:11px;flex:1">Ad Performance Sync (Meta/TikTok/Google)</span><span style="font-size:10px;color:var(--text3)">Toutes les heures</span><span style="font-size:10px;color:var(--emerald)">OK</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border-radius:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--amber)"></div><span style="font-size:11px;flex:1">Competitor Intelligence Scraper</span><span style="font-size:10px;color:var(--text3)">Quotidien 3h</span><span style="font-size:10px;color:var(--amber)">Slow</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KNOWLEDGE (v12.3) ────────────────────────── -->
+  <div id="page-knowledge" class="page-content" style="display:none">
+    <div class="section-header"><div><div class="section-title">🧠 Knowledge — Apprentissage & Best Practices</div><div class="section-sub">3 agents knowledge : apprentissage continu, benchmark, calibration</div></div></div>
+    <div class="grid-3 gap-16" style="margin-bottom:24px">
+      <div class="kpi-card"><div class="kpi-label">Connaissances</div><div class="kpi-value" style="color:var(--primary)">342</div><div class="kpi-sub">Best practices stockées</div></div>
+      <div class="kpi-card"><div class="kpi-label">Expériences A/B</div><div class="kpi-value" style="color:var(--emerald)">89</div><div class="kpi-sub">Learnings validés</div></div>
+      <div class="kpi-card"><div class="kpi-label">Impact Moyen</div><div class="kpi-value" style="color:var(--sky)">+14%</div><div class="kpi-sub">Uplift par best practice appliquée</div></div>
+    </div>
+    <div class="grid-2 gap-16">
+      <div class="card">
+        <div class="card-title">Derniers Apprentissages</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:10px;background:var(--s2);border-radius:8px"><div style="font-size:11px;font-weight:600">UGC > Studio pour TikTok</div><div style="font-size:10px;color:var(--text2);margin-top:4px">CTR +47% avec créatifs UGC vs professionnels sur TikTok Ads</div><div style="font-size:9px;color:var(--emerald);margin-top:4px">Confiance: 0.94 • Appliqué à 12 campagnes</div></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px"><div style="font-size:11px;font-weight:600">Scarcity + Social Proof = combo gagnant</div><div style="font-size:10px;color:var(--text2);margin-top:4px">Combinaison "X personnes regardent" + "Stock limité" = CVR +23%</div><div style="font-size:9px;color:var(--emerald);margin-top:4px">Confiance: 0.88 • Appliqué à 5 landing pages</div></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px"><div style="font-size:11px;font-weight:600">Email J+3 post-achat optimal</div><div style="font-size:10px;color:var(--text2);margin-top:4px">Taux de repeat purchase +31% avec email personnalisé J+3 vs J+7</div><div style="font-size:9px;color:var(--emerald);margin-top:4px">Confiance: 0.91 • Appliqué à 3 séquences</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Catégories de Connaissances</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">Facebook Ads</span><span style="font-size:10px;color:var(--primary)">87 learnings</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">Psychology CRO</span><span style="font-size:10px;color:var(--primary)">64 learnings</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">TikTok Strategy</span><span style="font-size:10px;color:var(--primary)">52 learnings</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">Pricing Psychology</span><span style="font-size:10px;color:var(--primary)">41 learnings</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">Email Sequences</span><span style="font-size:10px;color:var(--primary)">38 learnings</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">Landing Page Optimization</span><span style="font-size:10px;color:var(--primary)">34 learnings</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--s2);border-radius:6px"><span style="font-size:11px">Logistics & Fulfillment</span><span style="font-size:10px;color:var(--primary)">26 learnings</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GOVERNANCE META (v12.3) ──────────────────── -->
+  <div id="page-governance" class="page-content" style="display:none">
+    <div class="section-header"><div><div class="section-title">🏛 Governance — Evolution Council & Kill Switch</div><div class="section-sub">META module : contrôle éthique, reproduction d'agents, supervision humaine</div></div></div>
+    <div class="grid-4 gap-16" style="margin-bottom:24px">
+      <div class="kpi-card"><div class="kpi-label">Council Members</div><div class="kpi-value" style="color:var(--primary)">7</div><div class="kpi-sub">CONDOR, CREATOR, SHIELD, AUDIT, NARRATIVE, SILENCE, GUARD</div></div>
+      <div class="kpi-card"><div class="kpi-label">Agent Births</div><div class="kpi-value" style="color:var(--emerald)">0</div><div class="kpi-sub">En attente de croissance</div></div>
+      <div class="kpi-card"><div class="kpi-label">Kill Switch</div><div class="kpi-value" style="color:var(--emerald)">ARMED</div><div class="kpi-sub">5/7 votes requis</div></div>
+      <div class="kpi-card"><div class="kpi-label">Founders</div><div class="kpi-value" style="color:var(--amber)">2</div><div class="kpi-sub">Jonathan & Enna</div></div>
+    </div>
+    <div class="grid-2 gap-16">
+      <div class="card">
+        <div class="card-title">Agent DNA System (AGen-L)</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:12px;background:var(--s2);border-radius:8px"><div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:6px">8 Chromosomes par Agent</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              <span style="font-size:9px;padding:3px 8px;background:var(--s3);border-radius:4px">Mission</span>
+              <span style="font-size:9px;padding:3px 8px;background:var(--s3);border-radius:4px">Perception</span>
+              <span style="font-size:9px;padding:3px 8px;background:var(--s3);border-radius:4px">Cognition</span>
+              <span style="font-size:9px;padding:3px 8px;background:var(--s3);border-radius:4px">Exécution</span>
+              <span style="font-size:9px;padding:3px 8px;background:var(--s3);border-radius:4px">Mémoire</span>
+              <span style="font-size:9px;padding:3px 8px;background:var(--s3);border-radius:4px">Sécurité</span>
+              <span style="font-size:9px;padding:3px 8px;background:var(--s3);border-radius:4px">Créativité</span>
+              <span style="font-size:9px;padding:3px 8px;background:var(--s3);border-radius:4px">Résilience</span>
+            </div>
+          </div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px"><div style="font-size:11px;font-weight:600">Reproduction</div><div style="font-size:10px;color:var(--text2);margin-top:4px">Crossover 2 parents + Mutation adaptative (5-50% selon turbulence)</div></div>
+          <div style="padding:10px;background:var(--s2);border-radius:8px"><div style="font-size:11px;font-weight:600">Viability Check</div><div style="font-size:10px;color:var(--text2);margin-top:4px">Purpose defined + Safety limits + Fitness > 0.1 + Ethical constraints</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Evolution Council Process</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border-radius:8px"><div style="width:24px;height:24px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">1</div><div><div style="font-size:11px;font-weight:600">CONDOR Deliberation</div><div style="font-size:10px;color:var(--text2)">6 agents débattent — 5/6 required</div></div></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border-radius:8px"><div style="width:24px;height:24px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">2</div><div><div style="font-size:11px;font-weight:600">Human Notification</div><div style="font-size:10px;color:var(--text2)">24h veto window — Email + SMS founders</div></div></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border-radius:8px"><div style="width:24px;height:24px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">3</div><div><div style="font-size:11px;font-weight:600">Ethical Audit</div><div style="font-size:10px;color:var(--text2)">Automated ethical check — no forbidden genes</div></div></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border-radius:8px"><div style="width:24px;height:24px;border-radius:50%;background:var(--emerald);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">4</div><div><div style="font-size:11px;font-weight:600">Community Vote + Deploy</div><div style="font-size:10px;color:var(--text2)">Priority ranking + Gradual deployment</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── SETTINGS ────────────────────────────────── -->
   <div id="page-settings" class="page-content" style="display:none">
     <div class="section-header"><div><div class="section-title">Réglages</div></div></div>
@@ -2760,8 +2993,8 @@ function timeAgo(ts) {
 }
 
 // ── DATA ──────────────────────────────────────────
-const PAGES={hunter:'Produits Gagnants',pipeline:'Nouveau Produit',dashboard:'Tableau de bord',campaigns:'Mes Publicités','product-intel':'Analyser un Produit',creatives:'Moteur créatif',library:'Mes Créatifs',analytics:'Résultats détaillés',intelligence:'Concurrents',agents:'Assistants IA',connectors:'Mes Connexions',settings:'Réglages',brief:'Résumé du matin',dct:'Tests de pub',tiktok:'TikTok',strategies:'Stratégies',inventory:'Inventaire',guardrails:'Limites de sécurité',billing:'Facturation',activity:'Historique',landing:'Pages de vente','store-builder':'AI Store Builder','post-purchase':'Post Purchase','turbulence':'Turbulence Control','ghost':'Ghost Analytics','creative-gen':'Visuels IA'};
-const BADGES={hunter:'Hunter vous livre 5 winners chaque lundi',pipeline:'Collez un lien, on s\'occupe du reste',dashboard:'Vue globale de votre business',campaigns:'Toutes vos publicités en cours','product-intel':'Analysez n\'importe quel produit',creatives:'Création et performance de vos visuels',library:'Tous vos visuels publicitaires',analytics:'Vos résultats sur toutes les plateformes',intelligence:'Analysez vos concurrents',agents:'Vos assistants automatiques',connectors:'Vos plateformes connectées',settings:'Configuration de votre compte',brief:'Résumé automatique du matin',dct:'Testez plusieurs versions de vos pubs',tiktok:'Croissance organique TikTok',strategies:'Plans de croissance automatisés',inventory:'Gestion de vos stocks',guardrails:'Vos protections automatiques',billing:'Abonnement et factures','store-builder':'Créez une boutique en 60 secondes','post-purchase':'Upsells, emails, rétention automatisée','turbulence':'Détection & correction automatique','ghost':'Signaux invisibles & opportunités cachées','creative-gen':'20 visuels publicitaires en 45 secondes'};
+const PAGES={hunter:'Produits Gagnants',pipeline:'Nouveau Produit',dashboard:'Tableau de bord',campaigns:'Mes Publicités','product-intel':'Analyser un Produit',creatives:'Moteur créatif',library:'Mes Créatifs',analytics:'Résultats détaillés',intelligence:'Concurrents',agents:'Assistants IA',connectors:'Mes Connexions',settings:'Réglages',brief:'Résumé du matin',dct:'Tests de pub',tiktok:'TikTok',strategies:'Stratégies',inventory:'Inventaire',guardrails:'Limites de sécurité',billing:'Facturation',activity:'Historique',landing:'Pages de vente','store-builder':'AI Store Builder','post-purchase':'Post Purchase','turbulence':'Turbulence Control','ghost':'Ghost Analytics','creative-gen':'Visuels IA','ceo-agent':'CEO Agent','finance':'Finance','analytics-v12':'Analytics v12','data-etl':'Data ETL','knowledge':'Knowledge','governance':'Governance'};
+const BADGES={hunter:'Hunter vous livre 5 winners chaque lundi',pipeline:'Collez un lien, on s\'occupe du reste',dashboard:'Vue globale de votre business',campaigns:'Toutes vos publicités en cours','product-intel':'Analysez n\'importe quel produit',creatives:'Création et performance de vos visuels',library:'Tous vos visuels publicitaires',analytics:'Vos résultats sur toutes les plateformes',intelligence:'Analysez vos concurrents',agents:'Vos assistants automatiques',connectors:'Vos plateformes connectées',settings:'Configuration de votre compte',brief:'Résumé automatique du matin',dct:'Testez plusieurs versions de vos pubs',tiktok:'Croissance organique TikTok',strategies:'Plans de croissance automatisés',inventory:'Gestion de vos stocks',guardrails:'Vos protections automatiques',billing:'Abonnement et factures','store-builder':'Créez une boutique en 60 secondes','post-purchase':'Upsells, emails, rétention automatisée','turbulence':'Détection & correction automatique','ghost':'Signaux invisibles & opportunités cachées','creative-gen':'20 visuels publicitaires en 45 secondes','ceo-agent':'225 agents orchestrés par l\'IA CEO','finance':'P&L, budgets, trésorerie, prévisions','analytics-v12':'Dashboards, rapports et alertes intelligentes','data-etl':'Pipelines de données ETL automatisés','knowledge':'Apprentissage continu et best practices','governance':'Evolution Council + Kill Switch + Agent DNA'};
 
 const STRATEGIES=[
   {id:'dtc',cat:'scaling',icon:'📈',name:'DTC Scaling Guardian',tag:'Scale les winners par paliers',status:'active',impact:'HIGH'},
@@ -3168,7 +3401,7 @@ async function initAgents() {
     }).join('');
     // Update sidebar agent count
     const versionEl = document.querySelector('.sb-version');
-    if (versionEl) versionEl.textContent = `v7.0 · ${data.total || data.agents.length} agents`;
+    if (versionEl) versionEl.textContent = `v12.3 · ${data.total || data.agents.length} agents`;
   } else {
     grid.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);grid-column:1/-1">Aucun agent disponible.</div>';
   }
@@ -3770,7 +4003,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
 // ── AEGIS v3.7 — API Integration + PWA + LocalStorage ──────
 
 // ══════════════════════════════════════════════════════════════
-// AEGIS v7.0 — Live API Integration
+// AEGIS v12.3 — Live API Integration
 // Connects all dashboard pages to the real PostgreSQL backend.
 // ══════════════════════════════════════════════════════════════
 
@@ -3979,7 +4212,7 @@ async function loadAgentsLive() {
 
   // Update sidebar agent count
   const badge = document.querySelector('.sb-version');
-  if (badge) badge.textContent = `v7.0 · ${data.total} agents`;
+  if (badge) badge.textContent = `v12.3 · ${data.total} agents`;
 }
 
 // ── CONNECTORS : Real connector data (called from dashboard page) ──
