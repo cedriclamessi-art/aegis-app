@@ -8,14 +8,12 @@ dist
 .vscode
 .idea
 coverage
-docs
 brand
 infra
 scripts
 frontend
 scraper
 workers
-*.md
 *.zip
 .claude
 .vercel
