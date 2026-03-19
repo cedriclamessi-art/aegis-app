@@ -5,10 +5,12 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY prisma ./prisma/
 
 # Install dependencies
 RUN npm install
+
+# Copy all source files
+COPY . .
 
 # Build Next.js
 RUN npm run build
@@ -18,22 +20,18 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Install only production dependencies
+# Copy package files and install production dependencies
 COPY package*.json ./
-RUN npm install --only=production
+RUN npm install --omit=dev
 
 # Copy built app from builder
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules ./node_modules
 
 # Expose port
+ENV PORT=3000
 EXPOSE 3000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
 # Start app
 CMD ["npm", "start"]
