@@ -1,0 +1,148 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  password  String
+  name      String?
+  avatar    String?
+  tier      Int     @default(1) // 1=Radar, 2=Brand, 3=Executive, 4=Suprematie
+  role      String  @default("user") // user, admin
+  isFounder Boolean @default(false)
+  
+  // Subscription
+  stripeCustomerId String?
+  subscriptionStatus String @default("trial") // trial, active, cancelled
+  trialEndsAt DateTime?
+  subscriptionEndsAt DateTime?
+  
+  // Preferences
+  notificationsEnabled Boolean @default(true)
+  emailNotifications Boolean @default(true)
+  
+  // Tracking
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLoginAt DateTime?
+  
+  // Relations
+  products Product[]
+  campaigns Campaign[]
+  payments Payment[]
+  
+  @@index([email])
+  @@index([tier])
+}
+
+model Product {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  url       String
+  title     String
+  description String?
+  price     Float?
+  image     String?
+  
+  // Radar Analysis
+  demandScore Int?
+  profitabilityScore Int?
+  competitorCount Int?
+  radarScore Int?
+  
+  // Metadata
+  metadata  Json?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  campaigns Campaign[]
+  
+  @@unique([userId, url])
+  @@index([userId])
+}
+
+model Campaign {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  name      String
+  status    String @default("draft") // draft, active, paused, completed
+  objective String? // sales, leads, awareness
+  
+  // Budget & Performance
+  dailyBudget Float @default(50)
+  totalSpend Float @default(0)
+  revenue Float @default(0)
+  roas Float? // Return on Ad Spend
+  
+  // Scaling
+  scalingEnabled Boolean @default(false)
+  scalingMultiplier Float @default(1)
+  
+  // Brand Assets
+  images Json? // Array of image URLs
+  videos Json? // Array of video URLs
+  copy String?
+  website String?
+  
+  // Metadata
+  metadata Json?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  launchedAt DateTime?
+  
+  @@index([userId])
+  @@index([status])
+}
+
+model Payment {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  stripePaymentId String @unique
+  amount    Float
+  currency  String @default("eur")
+  status    String @default("pending") // pending, succeeded, failed
+  
+  tier      Int // 1, 2, 3, 4
+  plan      String // Radar, Brand, Executive, Suprematie
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+}
+
+model ApiLog {
+  id        Int     @id @default(autoincrement())
+  userId    Int?
+  endpoint  String
+  method    String
+  status    Int
+  duration  Int // ms
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
+}
