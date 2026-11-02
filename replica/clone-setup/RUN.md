@@ -15,7 +15,7 @@ claude --chrome
 Then in Claude Code:
 
 ```
-/clone-website https://shopamua.com
+/clone-website https://tryskult.com
 ```
 
 Needs Node 20+, Claude Code and Chrome. The skill is in `.claude/skills/clone-website/`.

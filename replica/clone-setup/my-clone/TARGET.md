@@ -1,9 +1,9 @@
 # Clone Target
 
 ## Target
-- **URL:** https://shopamua.com
+- **URL:** https://tryskult.com
 - **Platform of the original:** Shopify storefront (inferred from URL patterns)
-- **Pages to clone:** home (/), product (/products/amua-vitaldrops), cart (/cart)
+- **Pages to clone:** home (/), collection (/collections/all), product (/products/collagen-face-sculpt-wrap-abo), cart (/cart), about/how-it-works (/pages/how-it-works), FAQ (/pages/fos)
 - **Out of scope:** checkout (hosted by the platform), tracking app page, policy text, Spanish variant
 
 ## Fidelity
