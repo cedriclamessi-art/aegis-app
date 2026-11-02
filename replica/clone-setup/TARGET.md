@@ -8,10 +8,7 @@
 
 ## Fidelity
 Structural plus design tokens (layout, spacing, typography, colours, behaviours).
-Do NOT download the original's product photos, logos, reviews or marketing copy
-into the final project. Replace them with your own before publishing.
-Do NOT reuse the original's health claims ("hormonal balance", body-shape claims,
-"FDA-registered", "GMP", "third-party tested").
+Images will be replaced later.
 
 ## Customization plans (after the base clone)
 - Replace brand name, logo, palette and all copy with your own (/replica-brand)
