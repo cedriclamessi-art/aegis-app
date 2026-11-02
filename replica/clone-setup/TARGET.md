@@ -10,11 +10,5 @@
 Structural plus design tokens (layout, spacing, typography, colours, behaviours).
 Images will be replaced later.
 
-## Customization plans (after the base clone)
-- Replace brand name, logo, palette and all copy with your own (/replica-brand)
-- Pick ONE free-shipping threshold (original shows $50 and $70)
-- Wire the cart to Shopify (Storefront API / Hydrogen) or Stripe Checkout
-- Add your own reviews system
-
 ## Notes
 Recon: see ../recon.md and ../features.csv
