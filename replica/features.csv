@@ -1,0 +1,18 @@
+feature,area,priority,original,clone,notes
+Landing page with hero and primary CTA,storefront,must,yes,no,S01
+Product catalogue / collection page,storefront,must,yes,no,S02
+Product page with gallery and description,storefront,must,yes,no,S03
+Bundle selector (1 vs 3 bottles),storefront,must,yes,no,drives guarantee eligibility
+Cart with line items,checkout,must,yes,no,S06
+Free-shipping progress bar,checkout,should,yes,no,original threshold inconsistent ($50/$70): pick one
+Shipping protection add-on ($2.99),checkout,could,yes,no,
+Checkout and payment,checkout,must,unknown,no,not observed
+Order confirmation email with tracking,orders,must,yes,no,
+Order tracking page,orders,should,yes,no,S08
+Refund request flow,support,should,email only,no,could be a form instead of email
+Policy pages (refund/terms/shipping),legal,must,yes,no,write your own text
+About page,content,could,yes,no,
+Localized product page (Spanish),content,could,yes,no,
+Customer reviews and rating summary,social proof,should,yes,no,own reviews only
+Health and body claims,marketing,skip,yes,skip,unverified and regulated: do not copy
+Brand assets (logo/photos/copy),brand,skip,yes,skip,owned by Amua
