@@ -16,8 +16,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BRAND",
-  description: "Online store",
+  title: { default: "BRAND", template: "%s | BRAND" },
+  description: "Online store. Replace with your own description.",
+  icons: { icon: "/seo/favicon.svg" },
+  openGraph: { title: "BRAND", description: "Online store.", images: ["/seo/og.svg"] },
 };
 
 export default function RootLayout({
