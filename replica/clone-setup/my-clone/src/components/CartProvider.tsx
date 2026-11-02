@@ -25,6 +25,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [protection, setProtection] = useState(false);
   const [ready, setReady] = useState(false);
 
+  // Hydrate from localStorage after mount (avoids SSR/client hydration mismatch).
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
@@ -36,6 +38,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {}
     setReady(true);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (!ready) return;
