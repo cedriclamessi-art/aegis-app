@@ -1,31 +1,47 @@
 /**
  * EFFUSION - preset colorimetrique (eglise Effusion, Bussy-Saint-Georges)
  *
- * Charte : logo EFFUSION blanc sur noir, soulignement orange ;
- * gris beton pour le bracelet "pas de photo" (Charte droit a l'image).
+ * Source : canevas de design "Serie REVIENS - Effusion" (couleurs reellement
+ * utilisees dans la cover, la banniere web, la banniere YouTube et les fonds verts).
+ * Logo EFFUSION : blanc/creme sur noir, soulignement orange.
  *
- * A CONFIRMER : les valeurs hex ci-dessous sont des estimations basees sur
- * la description de la charte. Les remplacer par celles du kit de marque
- * "Effusion" de Canva (Brand Kit > Couleurs) si elles different.
+ * Note : le gris beton du bracelet "pas de photo" (Charte droit a l'image)
+ * n'a pas de valeur definie ; `concrete.500` est repris de la palette de gris.
  */
 const effusion = {
-  black: '#0a0a0a',   // fond principal, logo
-  white: '#ffffff',   // texte du logo, texte sur noir
-  orange: {
-    400: '#ff8a3d',
-    500: '#f97316',   // soulignement du logo, boutons, liens (CTA)
-    600: '#ea580c',   // survol
+  // Fonds
+  black: '#0B0B0B',       // fond principal
+  charcoal: {
+    900: '#141414',       // bandeaux, sol de decor
+    800: '#1C1C1C',       // emplacement photo (cover)
+    700: '#1E1E1E',       // emplacement photo (web, YouTube)
+    600: '#2C2C2C',       // contours de decor
   },
-  concrete: {
-    300: '#c9c9c6',
-    500: '#8d8d8a',   // gris beton : bracelet "pas de photo", bordures
-    800: '#2b2b2a',   // surfaces sur fond noir
-  },
+  // Texte et traits
+  cream: '#F4F1EA',       // "blanc" de la marque : titres, logo
   text: {
-    onDark: '#ffffff',
-    onLight: '#0a0a0a',
-    muted: '#a3a3a0',
+    primary: '#F4F1EA',
+    soft: '#E0E0E0',      // paragraphes
+    muted: '#BDBDBD',     // sous-titres, dates
+    subtle: '#A8A8A8',
+    placeholder: '#8A8A8A',
   },
+  border: 'rgba(244, 241, 234, 0.25)',       // filets
+  borderSubtle: 'rgba(244, 241, 234, 0.15)', // filets de navigation
+  overlay: 'rgba(11, 11, 11, 0.55)',         // voile sur photo
+  // Accent
+  orange: {
+    500: '#FF5A1F',       // logo, boutons (CTA), mot en script
+    400: '#FF7A45',       // survol
+  },
+  // Etat "pas de photo" (bracelet)
+  concrete: { 500: '#8A8A8A' },
 };
 
-module.exports = { effusion };
+const fonts = {
+  display: "'Anton', sans-serif",             // titres (REVIENS, EFFUSION)
+  body: "'Archivo', sans-serif",              // texte, boutons, navigation
+  script: "'Permanent Marker', cursive",      // mot d'accent manuscrit ("attendu.")
+};
+
+module.exports = { effusion, fonts };
