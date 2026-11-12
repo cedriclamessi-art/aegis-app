@@ -4,6 +4,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Preset colorimetrique AEGIS (miroir de color-preset.js) */
+:root {
+  --aegis-bg-base: #0f172a;
+  --aegis-bg-surface: #1e293b;
+  --aegis-bg-elevated: #334155;
+  --aegis-text-primary: #e2e8f0;
+  --aegis-text-secondary: #94a3b8;
+  --aegis-text-muted: #64748b;
+  --aegis-border-subtle: #334155;
+  --aegis-border-strong: #475569;
+  --aegis-brand-400: #818cf8;
+  --aegis-brand-500: #6366f1;
+  --aegis-brand-600: #4f46e5;
+  --aegis-accent-500: #8b5cf6;
+  --aegis-success-500: #10b981;
+  --aegis-warning-500: #f59e0b;
+  --aegis-danger-500: #f43f5e;
+  --aegis-info-500: #0ea5e9;
+}
+
 * {
   margin: 0;
   padding: 0;

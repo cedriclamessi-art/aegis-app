@@ -1,3 +1,5 @@
+const { aegis } = require('./color-preset');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -19,6 +21,18 @@ module.exports = {
         },
         rose: {
           500: '#f43f5e',
+        },
+        // Preset AEGIS : bg-aegis-bg-base, text-aegis-brand-500, etc.
+        aegis: {
+          bg: aegis.bg,
+          text: aegis.text,
+          border: aegis.border,
+          brand: aegis.brand,
+          accent: aegis.accent,
+          success: aegis.success,
+          warning: aegis.warning,
+          danger: aegis.danger,
+          info: aegis.info,
         },
       },
       fontFamily: {
