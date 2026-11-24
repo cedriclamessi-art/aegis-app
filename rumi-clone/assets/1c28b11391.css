@@ -1,0 +1,3067 @@
+/* ==========================================================================
+   QuizLanding storefront styles (v2)
+
+   Every visual token comes from CSS custom properties set inline on
+   #quizlanding-root by app-embed.liquid (palette, fonts, radius), so the
+   merchant's theme choices apply without extra CSS.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Hide the theme header/footer on quiz pages with "fullscreen" enabled.
+   Triggered by EITHER the .quizlanding-hide-chrome marker (in the page
+   body_html, present on a correctly-published page) OR #quizlanding-root
+   .qk--fullscreen (rendered by the app embed at <body> end on every fullscreen
+   quiz page, so it still fires when the page template drops the page content and
+   the marker never renders). Loaded in <head>: the marker case applies with no
+   flash; the root case applies as soon as the quiz markup is parsed (at </body>),
+   which is earlier than the deferred quiz.js that would otherwise hide the chrome.
+   -------------------------------------------------------------------------- */
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) .shopify-section-group-header-group,
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) .shopify-section-group-footer-group,
+/* Pipeline names its section groups "group-header"/"group-footer", so the group
+   wrapper class comes out as shopify-section-group-group-header — NOT the Dawn
+   …-header-group pattern above. Safe to drop the whole group: Pipeline renders
+   the cart/nav drawers in a separate "group-overlay" group. */
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) .shopify-section-group-group-header,
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) .shopify-section-group-group-footer,
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) .header-section,
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) header.shopify-section,
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) footer.shopify-section,
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) header[class*="header"],
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) footer[class*="footer"],
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) [id*="header_section"],
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) [id*="footer"],
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) [id*="header_announcements"],
+/* Vintage themes (Impulse, Debut, Brooklyn, Warehouse…) render the header as a
+   standalone <div id="shopify-section-header"> with the announcement bar as a
+   <div> sibling of the <header> element, so header[class*="header"] above only
+   hides the nav and leaves the announcement bar visible. Target the bar itself
+   rather than the whole #shopify-section-header — that section also holds the
+   cart/nav drawers, and display:none on the section would hide the cart drawer
+   too, silently breaking add-to-cart feedback (you can't un-hide a descendant
+   of a display:none ancestor). A standalone announcement *section* is safe to
+   drop whole because it contains nothing but the bar. */
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) [id^="shopify-section-announcement"],
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) .announcement-bar,
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) [class*="announcement-bar"],
+/* Sticky-header themes (Impulse and the Archetype family) reserve the header's
+   height on a .header-sticky-wrapper via inline JS so the page doesn't jump when
+   the header goes position:fixed. Hiding only the <header> leaves that wrapper
+   behind as an empty band, so hide the wrapper too. The cart/nav drawers live
+   outside it (siblings at the section root), so this doesn't touch them. */
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) .header-sticky-wrapper,
+/* Pipeline reserves the sticky header's height on a .header__backfill spacer div
+   that is a SIBLING of the header wrapper, so hiding the <header> element (or
+   collapsing its ancestors, as quiz.js's sweep does) never reaches it — it
+   survives as an empty band pinned to the top. */
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) .header__backfill {
+  display: none !important;
+}
+
+/* Dawn's "Reveal sections on scroll" wraps the page content in
+   .rte.scroll-trigger.animate--slide-in, whose slideIn animation ends
+   (`forwards`) on transform: translateY(0). That's an identity matrix, but
+   still a transform — which makes the wrapper the containing block for our
+   position: fixed Continue bar, so the bar sits at the bottom of the quiz
+   instead of the screen (below the fold on long slides). quiz.js neutralises
+   any such ancestor generically (freeFixedAncestors); this covers the known
+   pattern before quiz.js runs so the wrapper never animates at all. */
+html:has(#quizlanding-root) .scroll-trigger:has(#quizlanding-root) {
+  animation: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* Some themes reserve the fixed/sticky header's height as top padding (or margin)
+   on <body> ITSELF — e.g. `body { padding-top: var(--header-height) }` — so page
+   content doesn't sit under the fixed header. Hiding the header doesn't reclaim
+   that reserved space: it stays as an empty band pinned to the very top, and the
+   body background paints through it above the quiz (looks like a stray "top bar").
+   Zero it. Gated identically to the header-hide above, so it only fires on a
+   fullscreen quiz page where the header is actually gone. */
+html:has(.quizlanding-hide-chrome, #quizlanding-root.qk--fullscreen) body {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  padding-block-start: 0 !important;
+}
+
+/* Broken-template fallback: when the page template stops rendering the page
+   content, the #quizlanding-quiz anchor never appears and quiz.js self-mounts the
+   quiz (#quizlanding-root, which the app embed renders at <body> end no matter the
+   template) into #MainContent. Hide the leftover theme/page content in the main
+   region so it doesn't flash behind the quiz before that JS runs. Keyed off
+   #quizlanding-root.qk--fullscreen so it fires as the quiz markup is parsed —
+   earlier than the deferred JS. The :has() guard preserves the wrapper that holds
+   the anchor on a normal page; the self-mounted anchor is excluded so the quiz
+   stays visible. (#MainContent is the OS-2.0/Dawn standard; quiz.js handles other
+   containers as a backstop.) */
+html:has(#quizlanding-root.qk--fullscreen)
+  #MainContent > *:not(#quizlanding-quiz):not(:has(#quizlanding-quiz)) {
+  display: none !important;
+}
+
+/* Hide the theme-rendered page title on all quiz pages (the quiz's own headings
+   carry .qk-heading; Pipeline renders the page title as an <h2
+   class="standard__heading"> inside its page section, so the h1 rules miss it) */
+html:has(#quizlanding-quiz) .text-block h1,
+html:has(#quizlanding-quiz) main h1:not(.qk-heading):first-of-type,
+html:has(#quizlanding-quiz) .page__template .standard__heading {
+  display: none !important;
+}
+
+/* Remove gaps from theme page wrappers on quiz pages. Themes wrap page content
+   in a padded container (Dawn: .section-wrapper; Impulse/Archetype: .page-content
+   / .page-width--narrow, ~75px top padding) that pushes the quiz down and leaves
+   an empty band once the header is hidden. The JS ancestor-zero in quiz.js is the
+   theme-agnostic backstop; these cover the common cases with no flash. */
+html:has(#quizlanding-quiz) .section-wrapper,
+html:has(#quizlanding-quiz) [class*="section-wrapper"],
+html:has(#quizlanding-quiz) [id*="template"],
+html:has(#quizlanding-quiz) .page-content,
+html:has(#quizlanding-quiz) [class*="page-content"] {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  padding-block-start: 0 !important;
+}
+html:has(#quizlanding-quiz) .section-content-wrapper,
+html:has(#quizlanding-quiz) .layout-panel-flex {
+  --padding-block-start: 0px !important;
+  --gap: 0px !important;
+  padding-block-start: 0 !important;
+  padding-block-end: 0 !important;
+  gap: 0 !important;
+}
+/* Impact (Maestrooo) lays a page section out as a CSS grid — .section-stack with
+   a ~48px row gap — inside a color-schemed .section-spacing wrapper. On a
+   fullscreen quiz that grid gap (plus the wrapper's block spacing) leaves an empty
+   strip above the quiz canvas, and the section's light color scheme paints it, so
+   it reads as a stray top bar. Zero the gap/spacing (.section-content-wrapper /
+   .layout-panel-flex above already handle Impact's inner column wrapper). These
+   classes are Impact-specific, so they're inert on other themes. */
+html:has(#quizlanding-quiz) .section-stack,
+html:has(#quizlanding-quiz) .section-spacing {
+  --gap: 0px !important;
+  --grid-gap: 0px !important;
+  gap: 0 !important;
+  padding-block-start: 0 !important;
+  padding-block-end: 0 !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+/* Belt-and-suspenders for the strip above: a fullscreen quiz paints its own
+   background, so the theme section/color-scheme wrapper AROUND it shouldn't paint
+   one. When it does (e.g. Impact's light color scheme on .section-spacing), any
+   theme spacing zeroing can't fully reach leaves a colored sliver at the top.
+   Make ONLY the wrapper(s) that actually contain the quiz transparent — scoped by
+   :has(#quizlanding-quiz) so it never touches the quiz's own background or any
+   other section — and gate on fullscreen so inline (non-fullscreen) embeds keep
+   their theme background. Theme-agnostic: fixes the sliver whatever paints it. */
+html:has(#quizlanding-root.qk--fullscreen) .shopify-section:has(#quizlanding-quiz),
+html:has(#quizlanding-root.qk--fullscreen) .section-spacing:has(#quizlanding-quiz),
+html:has(#quizlanding-root.qk--fullscreen) .color-scheme:has(#quizlanding-quiz) {
+  background: transparent !important;
+}
+html:has(#quizlanding-quiz) #quizlanding-quiz {
+  min-height: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Root container
+   -------------------------------------------------------------------------- */
+.qk {
+  --qk-bg: #ffffff;
+  --qk-surface: #f6f6f7;
+  --qk-text: #1a1a1a;
+  --qk-subdued: #6b7177;
+  --qk-accent: #1a1a1a;
+  --qk-accent-text: #ffffff;
+  --qk-border: #e1e3e5;
+  --qk-radius: 10px;
+  --qk-heading-font: inherit;
+  --qk-body-font: inherit;
+
+  background: var(--qk-bg);
+  color: var(--qk-text);
+  font-family: var(--qk-body-font);
+  font-weight: var(--qk-body-weight, 400);
+  min-height: 60vh;
+  padding-bottom: 140px;
+  /* Avoid FOUC: revealed by quiz.js once it has booted */
+  opacity: 0;
+  transition: opacity 0.25s ease-in;
+}
+.qk.qk--ready {
+  opacity: 1;
+}
+.qk--fullscreen {
+  min-height: 100vh;
+  /* Break out of the theme's centered page container so the quiz background
+     fills the whole viewport width instead of just the content column. */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  overflow-x: clip;
+}
+.qk *,
+.qk *::before,
+.qk *::after {
+  box-sizing: border-box;
+}
+.qk img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Header: announcement + logo
+   -------------------------------------------------------------------------- */
+.qk-announcement {
+  background: var(--qk-accent);
+  color: var(--qk-accent-text);
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  padding: 8px 16px;
+}
+.qk-logo {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  /* Header/nav strip color grabbed from the store theme; falls back to the page
+     background for quizzes published before headerBackground existed. */
+  background: var(--qk-header-bg, var(--qk-bg));
+  /* Divider under the logo. Hidden by default — the editor's Theme tab sets
+     these vars only when "Show logo border" is on (width 0 = invisible). */
+  border-bottom: var(--qk-logo-border-width, 0px) solid
+    var(--qk-logo-border-color, transparent);
+}
+.qk-logo img {
+  width: 120px;
+  height: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Progress bar
+   -------------------------------------------------------------------------- */
+.qk-progress {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 20px 0;
+}
+.qk-progress__track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--qk-surface);
+  border: 1px solid var(--qk-border);
+  overflow: hidden;
+}
+.qk-progress__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.qk-progress__row .qk-progress__track {
+  flex: 1;
+}
+.qk-progress__fill {
+  height: 100%;
+  width: 4%;
+  border-radius: 3px;
+  background: var(--qk-accent);
+  transition: width 0.35s ease;
+  /* The fill is intentionally an empty <div>; the JS only animates its width.
+     Some Dawn-derived themes ship `div:empty { display: none }` in base.css,
+     whose specificity (0,1,1) beats our class and collapses the fill so the
+     bar shows its track but never fills. Force it visible (matches the
+     theme-defeating !important convention used in the hide-chrome rules).
+     The segment/dot spans below are empty too — same guard.
+
+     This is the canonical note for a hazard that applies to EVERY childless
+     element we render with one of the tags that rule names (a, article, div,
+     dl, h1-h6, p, section, ul — spans and <li> are not listed, which is why
+     the checklist spinner survives). Anything purely decorative — a bar fill,
+     a slider thumb, a spacer — needs this guard; the other sites carry a short
+     comment pointing back here. */
+  display: block !important;
+}
+/* Step counter / percent next to the indicator ("3/14", "21%"). */
+.qk-progress__label {
+  flex: none;
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--qk-subdued);
+  white-space: nowrap;
+}
+/* Segments: one pill per visible step, filled up to the current one. */
+.qk-progress--segments .qk-progress__track,
+.qk-progress--dots .qk-progress__track {
+  display: flex;
+  align-items: center;
+  height: auto;
+  background: transparent;
+  border: none;
+  overflow: visible;
+  border-radius: 0;
+}
+.qk-progress--segments .qk-progress__track {
+  gap: 4px;
+}
+.qk-progress__seg {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--qk-surface);
+  border: 1px solid var(--qk-border);
+  display: block !important;
+  transition: background 0.35s ease;
+}
+.qk-progress__seg.is-done {
+  background: var(--qk-accent);
+  border-color: transparent;
+}
+/* Dots: one dot per step; the current one stretches into a short pill. */
+.qk-progress--dots .qk-progress__track {
+  gap: 6px;
+  justify-content: center;
+}
+.qk-progress__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--qk-surface);
+  border: 1px solid var(--qk-border);
+  display: block !important;
+  transition:
+    background 0.35s ease,
+    width 0.35s ease;
+}
+.qk-progress__dot.is-done {
+  background: var(--qk-accent);
+  border-color: transparent;
+}
+.qk-progress__dot.is-current {
+  width: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   Slides
+   -------------------------------------------------------------------------- */
+.qk-slides {
+  max-width: 640px;
+  margin: 0 auto;
+  /* No top padding — the first block supplies its own (editable) top padding,
+     so the content sits tight under the progress bar / top of the quiz. */
+  padding: 0 20px;
+}
+.qk-slide {
+  display: flex;
+  flex-direction: column;
+  /* No gap — spacing between components comes from each block's top/bottom
+     padding (default 10px each → the old 20px gap), editable down to 0. */
+  gap: 0;
+  animation: qk-slide-in 0.3s ease;
+}
+.qk-slide[hidden] {
+  display: none;
+}
+@keyframes qk-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qk-slide {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Blocks
+   -------------------------------------------------------------------------- */
+/* Inline rich-text authored in the editor (bold/italic/underline/strike are
+   their own tags; colored text uses inline-styled spans). Links get the accent
+   color. Applies on the storefront and, since this sheet is loaded by the
+   editor, in the preview too. */
+.qk a:not(.qk-btn) {
+  color: var(--qk-accent);
+  text-decoration: underline;
+}
+.qk a:not(.qk-btn):hover {
+  text-decoration: none;
+}
+.qk-heading {
+  font-family: var(--qk-heading-font);
+  color: var(--qk-text);
+  margin: 0;
+  line-height: 1.15;
+}
+/* The chosen heading weight (--qk-heading-weight) applies to every level; when
+   unset, each level keeps its own default so the H1 > H2 > H3 hierarchy holds. */
+.qk-heading--1 {
+  font-size: calc(var(--qk-font-scale, 1) * clamp(30px, 6vw, 42px));
+  font-weight: var(--qk-heading-weight, 800);
+  letter-spacing: -0.02em;
+}
+.qk-heading--2 {
+  font-size: calc(var(--qk-font-scale, 1) * clamp(22px, 4.5vw, 28px));
+  font-weight: var(--qk-heading-weight, 700);
+}
+.qk-heading--3 {
+  font-size: calc(var(--qk-font-scale, 1) * 18px);
+  font-weight: var(--qk-heading-weight, 600);
+}
+
+.qk-text p {
+  margin: 0 0 0.6em;
+  line-height: 1.6;
+  color: var(--qk-text);
+}
+.qk-text p:last-child {
+  margin-bottom: 0;
+}
+/* Font size lives on the container so a per-block px override (inline style on
+   .qk-text) cascades to the paragraphs. The size classes are the defaults. */
+.qk-text--small {
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+}
+.qk-text--base {
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+}
+.qk-text--large {
+  font-size: calc(var(--qk-font-scale, 1) * 19px);
+}
+.qk-text p {
+  font-size: inherit;
+}
+.qk-text--muted p {
+  color: var(--qk-subdued);
+}
+
+.qk-image {
+  margin: 0 auto;
+  width: 100%;
+}
+.qk-image img {
+  display: block;
+  width: 100%;
+}
+
+/* Question — the question's text is a separate heading block above it; this
+   block holds only the answer options. */
+.qk-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.qk-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--qk-border);
+  border-radius: var(--qk-radius);
+  background: var(--qk-surface);
+  color: var(--qk-text);
+  font-family: var(--qk-body-font);
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  /* On the storefront each option is a <button>, and some merchant themes
+     (e.g. Pipeline) apply `button { white-space: nowrap }`. Without this reset
+     a longer answer stays on one line and spills out of the option box on
+     narrow/mobile widths. white-space/overflow-wrap/word-break are inherited,
+     so this also covers .qk-option__text and .qk-option__subtext. */
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  transition: border-color 0.15s ease, transform 0.1s ease, background 0.15s ease;
+}
+.qk-option:hover {
+  border-color: var(--qk-accent);
+}
+.qk-option:active {
+  transform: scale(0.99);
+}
+.qk-option:focus-visible {
+  outline: 2px solid var(--qk-accent);
+  outline-offset: 2px;
+}
+.qk-option.is-selected {
+  border-color: var(--qk-accent);
+  box-shadow: inset 0 0 0 1px var(--qk-accent);
+}
+.qk-option__emoji {
+  font-size: calc(var(--qk-font-scale, 1) * 20px);
+  flex-shrink: 0;
+}
+.qk-option__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.qk-option__text {
+  font-weight: 500;
+}
+.qk-option__subtext {
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  color: var(--qk-subdued);
+}
+.qk-option__img {
+  flex-shrink: 0;
+}
+.qk-option__img img {
+  display: block;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: calc(var(--qk-radius) - 2px);
+}
+.qk-option__check {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--qk-border);
+  background: var(--qk-bg);
+  color: transparent;
+  transition: all 0.15s ease;
+}
+.qk-option__check svg {
+  width: 12px;
+  height: 12px;
+}
+.qk-option.is-selected .qk-option__check {
+  background: var(--qk-accent);
+  border-color: var(--qk-accent);
+  color: var(--qk-accent-text);
+}
+
+/* Grid layout: option cards with the image on top and centered text */
+.qk-options--grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.qk-options--grid .qk-option {
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 16px;
+}
+.qk-options--grid .qk-option__img {
+  width: 100%;
+}
+.qk-options--grid .qk-option__img img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+}
+.qk-options--grid .qk-option__emoji {
+  font-size: calc(var(--qk-font-scale, 1) * 30px);
+}
+.qk-options--grid .qk-option__body {
+  flex: none;
+  align-items: center;
+}
+.qk-options--grid .qk-option__check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+/* Answer indicator on the left instead of the right. */
+.qk-options--dot-left .qk-option__check {
+  order: -1;
+}
+.qk-options--grid.qk-options--dot-left .qk-option__check {
+  left: 10px;
+  right: auto;
+}
+
+/* Full-width option images: stack the image on top of a vertical card with the
+   answer indicator pinned to the corner (works for list + grid layouts). */
+.qk-options--img-full .qk-option {
+  position: relative;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.qk-options--img-full .qk-option__img {
+  width: 100%;
+}
+.qk-options--img-full .qk-option__img img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+.qk-options--img-full .qk-option__check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+.qk-options--img-full.qk-options--dot-left .qk-option__check {
+  left: 12px;
+  right: auto;
+}
+
+/* Buttons */
+.qk-button-wrap {
+  display: flex;
+  justify-content: center;
+}
+.qk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 14px 28px;
+  border-radius: var(--qk-radius);
+  border: 1.5px solid var(--qk-accent);
+  font-family: var(--qk-body-font);
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.qk-btn:active {
+  transform: scale(0.98);
+}
+.qk-btn:focus-visible {
+  outline: 2px solid var(--qk-accent);
+  outline-offset: 2px;
+}
+.qk-btn--primary {
+  background: var(--qk-accent);
+  color: var(--qk-accent-text);
+}
+.qk-btn--primary:hover {
+  filter: brightness(1.05);
+}
+.qk-btn--secondary {
+  background: transparent;
+  color: var(--qk-text);
+  border-color: var(--qk-border);
+}
+.qk-btn--secondary:hover {
+  border-color: var(--qk-accent);
+}
+.qk-btn__icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Feature list */
+.qk-features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+/* Inline layout: items flow in a centered row. */
+.qk-features--inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 24px;
+}
+.qk-features__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: calc(var(--qk-font-scale, 1) * 15px);
+  line-height: 1.5;
+}
+/* Icon above the text (stacked), aligned per the block's text-align. */
+.qk-features--icon-top .qk-features__item {
+  flex-direction: column;
+  align-items: inherit;
+  text-align: inherit;
+  gap: 8px;
+}
+.qk-features--inline .qk-features__item {
+  flex: 0 1 auto;
+  max-width: 220px;
+}
+.qk-features__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--qk-accent);
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+}
+/* Icon container with a background gets a fixed box. */
+.qk-features--icon-bg .qk-features__icon {
+  width: 40px;
+  height: 40px;
+}
+.qk-features__svg {
+  display: inline-flex;
+}
+.qk-features__svg svg {
+  width: 22px;
+  height: 22px;
+}
+.qk-features--noicon-bg .qk-features__svg svg {
+  width: 24px;
+  height: 24px;
+}
+.qk-features__text {
+  min-width: 0;
+}
+/* Alignment of the icon+text group within each item (works for both the
+   icon-beside row and the icon-above column). */
+.qk-features--align-center .qk-features__item {
+  justify-content: center;
+  align-items: center;
+}
+.qk-features--align-end .qk-features__item {
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+/* Keep icon-above items aligned on the cross axis per the chosen alignment. */
+.qk-features--icon-top.qk-features--align-center .qk-features__item {
+  align-items: center;
+}
+.qk-features--icon-top.qk-features--align-end .qk-features__item {
+  align-items: flex-end;
+}
+
+/* Input (lead-capture) field. Same surface/border/radius language as options;
+   the typed value never leaves the lead endpoint (zero-PII analytics). */
+.qk-input {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+}
+.qk-input__label {
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+  font-weight: 600;
+  color: var(--qk-text);
+  font-family: var(--qk-body-font);
+}
+.qk-input__field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 1.5px solid var(--qk-border);
+  border-radius: var(--qk-radius);
+  background: var(--qk-surface);
+  color: var(--qk-text);
+  font-family: var(--qk-body-font);
+  font-size: calc(var(--qk-font-scale, 1) * 16px); /* ≥16px so iOS Safari doesn't zoom on focus */
+  line-height: 1.4;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s ease;
+}
+.qk-input__field::placeholder {
+  color: var(--qk-subdued);
+  opacity: 1;
+}
+.qk-input__field:focus {
+  outline: none;
+  border-color: var(--qk-accent);
+}
+.qk-input__field:focus-visible {
+  outline: 2px solid var(--qk-accent);
+  outline-offset: 2px;
+}
+.qk-input__field.is-invalid {
+  border-color: #d92c20;
+}
+.qk-input__error {
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  color: #d92c20;
+}
+.qk-input__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: calc(var(--qk-font-scale, 1) * 13.5px);
+  color: var(--qk-subdued);
+  cursor: pointer;
+}
+.qk-input__consent input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0;
+  accent-color: var(--qk-accent);
+  cursor: pointer;
+}
+
+/* Testimonial */
+.qk-testimonial {
+  margin: 0;
+  padding: 18px 20px;
+  border-radius: var(--qk-radius);
+  background: var(--qk-surface);
+  border: 1px solid var(--qk-border);
+  text-align: center;
+}
+.qk-testimonial__stars {
+  color: var(--qk-accent);
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.qk-testimonial blockquote {
+  margin: 0;
+  font-size: calc(var(--qk-font-scale, 1) * 15.5px);
+  line-height: 1.55;
+  font-style: italic;
+}
+.qk-testimonial figcaption {
+  margin-top: 8px;
+  font-size: calc(var(--qk-font-scale, 1) * 13.5px);
+  color: var(--qk-subdued);
+}
+
+/* Badge */
+.qk-badge-wrap {
+  display: flex;
+  justify-content: center;
+}
+.qk-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--qk-accent);
+  color: var(--qk-accent-text);
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Offer callout. border-style / border-radius / padding / background come from
+   the block's inline style; the rules below are defaults + structure. */
+.qk-offer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-width: 2px;
+  border-style: dashed;
+  border-color: var(--qk-offer-accent, #c0398a);
+  border-radius: 16px;
+  text-align: left;
+}
+.qk-offer__badge {
+  flex: none;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--qk-offer-accent, #c0398a);
+  color: #fff;
+}
+.qk-offer__icon {
+  display: inline-flex;
+}
+.qk-offer__icon svg {
+  width: 20px;
+  height: 20px;
+}
+.qk-offer__badge--ring::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--qk-bg, #fff);
+}
+.qk-offer__body {
+  flex: 1;
+  min-width: 0;
+  font-size: calc(var(--qk-font-scale, 1) * 15px);
+  line-height: 1.5;
+  color: var(--qk-text);
+}
+
+/* "Why we ask" callout — an accent eyebrow over reassuring body copy in a
+   rounded surface box. Eyebrow color follows the theme accent unless the block
+   overrides --qk-whyask-accent; background follows the theme surface unless the
+   block sets its own. */
+.qk-whyask {
+  padding: 20px 22px;
+  border-radius: 16px;
+  background: var(--qk-surface);
+  border: 1px solid var(--qk-border);
+  text-align: left;
+}
+.qk-whyask__label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--qk-whyask-accent, var(--qk-accent));
+}
+.qk-whyask__body {
+  font-size: calc(var(--qk-font-scale, 1) * 15px);
+  line-height: 1.55;
+  color: var(--qk-text);
+}
+.qk-whyask__body p {
+  margin: 0 0 0.6em;
+}
+.qk-whyask__body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Product card */
+.qk-product {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-radius: var(--qk-radius);
+  background: var(--qk-surface);
+  border: 1px solid var(--qk-border);
+  text-align: center;
+}
+.qk-product__image {
+  width: 100%;
+  max-width: 320px;
+}
+.qk-product__image img {
+  border-radius: var(--qk-radius);
+  display: block;
+}
+.qk-product__title {
+  font-family: var(--qk-heading-font);
+  font-size: calc(var(--qk-font-scale, 1) * 19px);
+  font-weight: 700;
+}
+.qk-product__price {
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+  color: var(--qk-subdued);
+}
+.qk-product__cta {
+  width: 100%;
+  max-width: 320px;
+}
+
+/* Divider — an empty spacer <div>; without the guard a Dawn-derived
+   `div:empty { display: none }` collapses it and the spacing disappears
+   (see .qk-progress__fill). */
+.qk-divider {
+  display: block !important;
+}
+.qk-divider--small {
+  height: 8px;
+}
+.qk-divider--base {
+  height: 20px;
+}
+.qk-divider--large {
+  height: 40px;
+}
+
+/* --------------------------------------------------------------------------
+   Sticky navigation
+   -------------------------------------------------------------------------- */
+.qk-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: var(--qk-bg);
+  border-top: 1px solid var(--qk-border);
+  /* Own compositor layer: without it iOS Safari repaints the fixed bar late
+     during toolbar show/hide, visibly detaching it from the viewport edge. */
+  transform: translateZ(0);
+}
+/* Paint past the viewport bottom: iOS Safari's toolbar-collapse transition and
+   rubber-band overscroll expose a strip below `bottom: 0`, showing the page
+   content behind the bar. */
+.qk-nav::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 140px;
+  background: var(--qk-bg);
+}
+.qk-nav[hidden] {
+  display: none;
+}
+.qk-nav__next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  width: 100%;
+  max-width: 360px;
+  padding: 14px 28px;
+  border-radius: var(--qk-radius);
+  border: none;
+  background: var(--qk-accent);
+  color: var(--qk-accent-text);
+  font-family: var(--qk-body-font);
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.qk-nav__next svg {
+  width: 16px;
+  height: 16px;
+}
+.qk-nav__next-icon {
+  display: inline-flex;
+  align-items: center;
+}
+.qk-nav__next--secondary {
+  background: transparent;
+  color: var(--qk-text);
+  border: 1px solid var(--qk-border);
+}
+.qk-nav__next--secondary:hover {
+  border-color: var(--qk-accent);
+}
+.qk-nav__next:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.qk-nav__next[hidden] {
+  display: none;
+}
+
+@media (min-width: 720px) {
+  .qk-slides {
+    padding-top: 20px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Spinner / "analyzing your answers" loader. Lives on an auto-advancing
+   slide: quiz.js shows it for data-duration ms, then navigates onward.
+   -------------------------------------------------------------------------- */
+.qk-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 40px 0;
+  text-align: center;
+}
+.qk-spinner__ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 4px solid var(--qk-border);
+  border-top-color: var(--qk-accent);
+  animation: qk-spin 0.9s linear infinite;
+  /* Empty by design (the ring is pure border), so Dawn-derived themes collapse
+     it with `div:empty { display: none }` — the shopper gets the "Analyzing your
+     answers…" label with no spinner above it. See .qk-progress__fill. */
+  display: block !important;
+}
+.qk-spinner__label {
+  color: var(--qk-subdued);
+  font-family: var(--qk-body-font);
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+}
+@keyframes qk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qk-spinner__ring {
+    animation-duration: 2.4s;
+  }
+}
+
+/* Stepped spinner themes (checklist + bars). quiz.js (storefront) and
+   SpinnerPreview (editor) both toggle .is-active / .is-done on each step as time
+   passes; the rules below are purely class-driven so the two stay identical. */
+.qk-spinner__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* --- Checklist: rows that dim → highlight, with a spinner that becomes a tick. */
+.qk-spinner--checklist .qk-spinner__step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--qk-surface);
+  border: 1px solid var(--qk-border);
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+.qk-spinner--checklist .qk-spinner__step.is-active,
+.qk-spinner--checklist .qk-spinner__step.is-done {
+  opacity: 1;
+}
+.qk-spinner--checklist .qk-spinner__step-label {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  font-family: var(--qk-body-font);
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+  color: var(--qk-text);
+}
+.qk-spinner__step-mark {
+  position: relative;
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+/* pending: faint hollow ring */
+.qk-spinner__step-mark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--qk-border);
+  box-sizing: border-box;
+}
+/* active: the ring spins */
+.qk-spinner__step.is-active .qk-spinner__step-mark::before {
+  border-top-color: var(--qk-accent);
+  animation: qk-spin 0.9s linear infinite;
+}
+/* done: filled accent disc + a check mark */
+.qk-spinner__step.is-done .qk-spinner__step-mark::before {
+  border-color: var(--qk-accent);
+  background: var(--qk-accent);
+  animation: none;
+}
+.qk-spinner__step.is-done .qk-spinner__step-mark::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 9px;
+  border: solid var(--qk-accent-text, #fff);
+  border-width: 0 2px 2px 0;
+  /* Center the tick in the disc; the extra -10% on Y lifts it so the checkmark's
+     low vertex sits on the optical center rather than below it. */
+  transform: translate(-50%, -60%) rotate(45deg);
+}
+
+/* --- Bars: a labelled track per step that fills over one time slice. */
+.qk-spinner--bars .qk-spinner__steps {
+  gap: 16px;
+}
+.qk-spinner--bars .qk-spinner__step {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+}
+.qk-spinner--bars .qk-spinner__step.is-active,
+.qk-spinner--bars .qk-spinner__step.is-done {
+  opacity: 1;
+}
+.qk-spinner--bars .qk-spinner__step-label {
+  text-align: left;
+  font-family: var(--qk-body-font);
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+  color: var(--qk-text);
+}
+.qk-spinner__bar {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--qk-border);
+  overflow: hidden;
+}
+.qk-spinner__bar-fill {
+  display: block;
+  height: 100%;
+  width: 8%;
+  border-radius: inherit;
+  background: var(--qk-accent);
+}
+.qk-spinner__step.is-active .qk-spinner__bar-fill {
+  animation: qk-bar-fill var(--qk-slice, 700ms) linear forwards;
+}
+.qk-spinner__step.is-done .qk-spinner__bar-fill {
+  width: 100%;
+  animation: none;
+}
+@keyframes qk-bar-fill {
+  from {
+    width: 8%;
+  }
+  to {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qk-spinner__step.is-active .qk-spinner__step-mark::before,
+  .qk-spinner__step.is-active .qk-spinner__bar-fill {
+    animation: none;
+  }
+  .qk-spinner__step.is-active .qk-spinner__bar-fill {
+    width: 60%;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Goal graph — a "progress to goal" line chart in two self-contained styles
+   (light card / dark dashboard). The geometry (curve path, dot/pill coords,
+   bands) is pre-computed (see graphGoal.ts) into percent coordinates so the
+   curve, gridlines, dots, and pills share one space and stay aligned at any
+   size. Everything except the curve + fill is HTML positioned by percentage;
+   the curve is one SVG path with a non-scaling stroke + normalized pathLength,
+   so it draws in with no geometry measurement.
+
+   Base styles are the FINAL (visible) state, so the chart shows even if JS
+   never runs; quiz.js adds .is-playing on slide entry to play the draw-in +
+   idle pulse (the editor preview keeps .is-playing on and replays on edit).
+   -------------------------------------------------------------------------- */
+.qk-graphgoal {
+  --qk-gg-accent: #e0a83e;
+  --qk-gg-yw: 56px;
+  position: relative;
+  box-sizing: border-box;
+  border-radius: 16px;
+  padding: 22px 20px 16px;
+  font-family: var(--qk-body-font);
+  text-align: left;
+}
+.qk-graphgoal *,
+.qk-graphgoal *::before,
+.qk-graphgoal *::after {
+  box-sizing: border-box;
+}
+.qk-graphgoal--light {
+  --qk-gg-surface: #ffffff;
+  --qk-gg-ink: #1a1a1a;
+  --qk-gg-muted: #8a9099;
+  --qk-gg-grid: #e4e6e9;
+  --qk-gg-goal-text: #1a1a1a;
+  background: #ffffff;
+  border: 1px solid #ececee;
+  box-shadow: 0 6px 26px rgba(17, 17, 17, 0.07);
+}
+.qk-graphgoal--dark {
+  --qk-gg-surface: #1f1f22;
+  --qk-gg-ink: #f2f2f2;
+  --qk-gg-muted: #818187;
+  --qk-gg-grid: rgba(255, 255, 255, 0.13);
+  --qk-gg-goal-text: #ffffff;
+  background: #1b1b1d;
+  border: 1px solid #2a2a2d;
+}
+
+/* Dark header strip: STATUS / PROJECTED LIFT / ETA with vertical dividers. */
+.qk-graphgoal__header {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 18px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--qk-gg-grid);
+}
+.qk-graphgoal__stat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 16px;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.qk-graphgoal__stat + .qk-graphgoal__stat {
+  padding-left: 16px;
+  border-left: 1px solid var(--qk-gg-grid);
+}
+.qk-graphgoal__stat-label {
+  font-size: calc(var(--qk-font-scale, 1) * 11px);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--qk-gg-muted);
+}
+.qk-graphgoal__stat-value {
+  font-size: calc(var(--qk-font-scale, 1) * 17px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--qk-gg-ink);
+}
+.qk-graphgoal__stat-value--accent {
+  color: var(--qk-gg-accent);
+}
+
+/* Chart = y-axis label column + plot; x-axis labels sit in their own row. */
+.qk-graphgoal__chart {
+  position: relative;
+  display: flex;
+  gap: 8px;
+}
+.qk-graphgoal__yaxis {
+  position: relative;
+  flex: none;
+  width: var(--qk-gg-yw);
+}
+.qk-graphgoal__ylabel {
+  position: absolute;
+  right: 8px;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+  transform: translateY(-50%);
+  text-align: right;
+}
+.qk-graphgoal__yword {
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--qk-gg-ink);
+}
+.qk-graphgoal__yunit {
+  font-size: calc(var(--qk-font-scale, 1) * 9px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-style: normal;
+  color: var(--qk-gg-muted);
+}
+.qk-graphgoal__plot {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 240px;
+}
+
+/* Horizontal bands: the goal (high) reads stronger, normal/low are dashed. */
+.qk-graphgoal__grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  transform: translateY(-50%);
+  border-top: 1px dashed var(--qk-gg-grid);
+}
+.qk-graphgoal__grid--high {
+  border-top-style: solid;
+}
+
+/* The curve. pathLength="1" lets the draw-in animate stroke-dashoffset 1→0. */
+.qk-graphgoal__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.qk-graphgoal__line {
+  fill: none;
+  stroke: var(--qk-gg-accent);
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.qk-graphgoal__area {
+  opacity: 1;
+}
+
+/* Dark vertical drop line from the goal down to the axis. */
+.qk-graphgoal__drop {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed rgba(255, 255, 255, 0.22);
+  transform: translateX(-0.5px);
+}
+
+/* Dark HUD corner brackets on the plot (top-left + bottom-right). */
+.qk-graphgoal--dark .qk-graphgoal__plot::before,
+.qk-graphgoal--dark .qk-graphgoal__plot::after {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--qk-gg-accent);
+  opacity: 0.55;
+}
+.qk-graphgoal--dark .qk-graphgoal__plot::before {
+  top: -5px;
+  left: -5px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.qk-graphgoal--dark .qk-graphgoal__plot::after {
+  right: -5px;
+  bottom: -5px;
+  border-left: 0;
+  border-top: 0;
+}
+
+/* Dots. Hollow donut by default + for the "here" marker; the goal is filled. */
+.qk-graphgoal__dot {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--qk-gg-surface);
+  border: 2.5px solid var(--qk-gg-accent);
+  transform: translate(-50%, -50%);
+}
+.qk-graphgoal__dot--here {
+  width: 14px;
+  height: 14px;
+  border-width: 3px;
+  z-index: 2;
+}
+.qk-graphgoal__dot--goal {
+  width: 15px;
+  height: 15px;
+  background: var(--qk-gg-accent);
+  z-index: 2;
+}
+.qk-graphgoal--light .qk-graphgoal__dot--goal {
+  box-shadow: 0 0 0 4px rgba(224, 168, 62, 0.18);
+}
+.qk-graphgoal--dark .qk-graphgoal__dot--goal {
+  border-color: var(--qk-gg-surface);
+  box-shadow:
+    0 0 0 5px rgba(240, 84, 10, 0.18),
+    0 0 18px 3px rgba(240, 84, 10, 0.55);
+}
+/* Pulse ring shared by the markers (the "you are here" dot always, the goal
+   dot in the light style — see the white-card mockup). */
+.qk-graphgoal__dot--here::after,
+.qk-graphgoal__dot--goal::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 2px solid var(--qk-gg-accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Pills. The "here" marker floats above its dot with a downward caret; the goal
+   pill is pinned to the plot's top-right (its level, where the curve plateaus). */
+.qk-graphgoal__pill {
+  position: absolute;
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  z-index: 3;
+}
+.qk-graphgoal__pill--here {
+  background: #111111;
+  color: #ffffff;
+  transform: translate(-50%, calc(-100% - 16px));
+}
+.qk-graphgoal__pill--here::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #111111;
+  border-bottom: 0;
+}
+.qk-graphgoal__pill--goal {
+  top: -6px;
+  right: 0;
+  background: var(--qk-gg-accent);
+  color: var(--qk-gg-goal-text);
+}
+
+/* X-axis labels — offset by the y-axis column so 0–100% spans the plot width. */
+.qk-graphgoal__xaxis {
+  position: relative;
+  height: 16px;
+  margin-top: 10px;
+  margin-left: calc(var(--qk-gg-yw) + 8px);
+}
+.qk-graphgoal__xlabel {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: calc(var(--qk-font-scale, 1) * 11px);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--qk-gg-muted);
+}
+
+/* --- Entry + idle animation, gated on .is-playing (added on slide entry). --- */
+.qk-graphgoal.is-playing .qk-graphgoal__line {
+  animation: qk-gg-draw 1.1s cubic-bezier(0.42, 0, 0.2, 1) forwards;
+}
+.qk-graphgoal.is-playing .qk-graphgoal__area {
+  animation: qk-gg-fade 0.7s ease 0.5s both;
+}
+.qk-graphgoal.is-playing .qk-graphgoal__dot {
+  animation: qk-gg-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) var(--qk-gg-delay, 0.5s) both;
+}
+.qk-graphgoal.is-playing .qk-graphgoal__pill,
+.qk-graphgoal.is-playing .qk-graphgoal__drop {
+  animation: qk-gg-fade 0.5s ease both;
+}
+.qk-graphgoal.is-playing .qk-graphgoal__pill--here {
+  animation-delay: 0.8s;
+}
+.qk-graphgoal.is-playing .qk-graphgoal__pill--goal {
+  animation-delay: 1.05s;
+}
+.qk-graphgoal.is-playing .qk-graphgoal__dot--here::after {
+  animation: qk-gg-pulse 2.2s ease-out 1.1s infinite;
+}
+.qk-graphgoal--light.is-playing .qk-graphgoal__dot--goal::after {
+  animation: qk-gg-pulse 2.2s ease-out 1.3s infinite;
+}
+@keyframes qk-gg-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes qk-gg-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes qk-gg-pop {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes qk-gg-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 440px) {
+  .qk-graphgoal {
+    --qk-gg-yw: 46px;
+    padding: 18px 14px 12px;
+  }
+  .qk-graphgoal__plot {
+    height: 200px;
+  }
+  .qk-graphgoal__header {
+    gap: 8px;
+  }
+  .qk-graphgoal__stat {
+    padding-right: 8px;
+  }
+  .qk-graphgoal__stat + .qk-graphgoal__stat {
+    padding-left: 8px;
+  }
+  .qk-graphgoal__stat-value {
+    font-size: calc(var(--qk-font-scale, 1) * 14px);
+  }
+  .qk-graphgoal__pill,
+  .qk-graphgoal__xlabel,
+  .qk-graphgoal__yword {
+    font-size: calc(var(--qk-font-scale, 1) * 10px);
+  }
+}
+
+/* Reduced motion: skip the draw-in + pulse; show the final chart immediately. */
+@media (prefers-reduced-motion: reduce) {
+  .qk-graphgoal.is-playing .qk-graphgoal__line,
+  .qk-graphgoal.is-playing .qk-graphgoal__area,
+  .qk-graphgoal.is-playing .qk-graphgoal__dot,
+  .qk-graphgoal.is-playing .qk-graphgoal__pill,
+  .qk-graphgoal.is-playing .qk-graphgoal__drop,
+  .qk-graphgoal.is-playing .qk-graphgoal__dot--here::after,
+  .qk-graphgoal.is-playing .qk-graphgoal__dot--goal::after {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Pick-a-Card game (block type "pickcard").
+   The same markup + classes render in the editor canvas (BlockRenderer's
+   PickCardView) and the storefront, so these styles are shared. quiz.js drives
+   the flips, counter, win state, and confetti; finishing advances the quiz
+   through the slide's routing (an Exit node leaves to the product).
+   ------------------------------------------------------------------------- */
+.qk-pickcard {
+  /* The whole component is a card panel: theme surface by default, overridable
+     via --qk-pc-bg / --qk-pc-bgimg, with the decorative strip flush at the top. */
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background-color: var(--qk-pc-bg, var(--qk-surface));
+  background-image: var(--qk-pc-bgimg, none);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--qk-border);
+}
+.qk-pickcard__body {
+  padding: 24px 20px 28px;
+  text-align: center;
+}
+/* Top decorative strip — a 2-row checkerboard, flush to the panel edges. */
+.qk-pickcard__pattern {
+  height: 28px;
+}
+.qk-pickcard__pattern--checkerboard {
+  /* A true axis-aligned checkerboard: one 28px tile = a 2×2 grid of 14px
+     squares (accent / transparent), repeated across the strip. */
+  background-image: conic-gradient(
+    var(--qk-pc-pat, var(--qk-accent)) 0 25%,
+    transparent 0 50%,
+    var(--qk-pc-pat, var(--qk-accent)) 0 75%,
+    transparent 0
+  );
+  background-size: 28px 28px;
+}
+.qk-pickcard__title {
+  font-family: var(--qk-heading-font, inherit);
+  font-weight: 800;
+  font-size: calc(var(--qk-font-scale, 1) * clamp(28px, 7vw, 44px));
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  color: var(--qk-accent);
+  margin: 0 0 8px;
+}
+.qk-pickcard__subtitle {
+  font-weight: 700;
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+  color: var(--qk-text);
+  margin: 0 0 18px;
+}
+.qk-pickcard__subtitle-won {
+  display: none;
+}
+.qk-pickcard.is-won .qk-pickcard__subtitle-default {
+  display: none;
+}
+.qk-pickcard.is-won .qk-pickcard__subtitle-won {
+  display: inline;
+}
+
+.qk-pickcard__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--qk-pc-cols, 3), 1fr);
+  gap: 12px;
+  margin: 0 auto;
+}
+.qk-pickcard__card {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  perspective: 800px;
+  -webkit-tap-highlight-color: transparent;
+}
+.qk-pickcard__card:focus-visible {
+  outline: 2px solid var(--qk-accent);
+  outline-offset: 3px;
+  border-radius: 14px;
+}
+.qk-pickcard__inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+.qk-pickcard__card.is-flipped .qk-pickcard__inner {
+  transform: rotateY(180deg);
+}
+.qk-pickcard__back,
+.qk-pickcard__front {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 14px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+.qk-pickcard__back {
+  background: var(--qk-surface);
+  border: 2px solid var(--qk-accent);
+}
+/* Inset frame echoing the printed-card look. */
+.qk-pickcard__back::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid color-mix(in srgb, var(--qk-accent) 45%, transparent);
+  border-radius: 9px;
+  pointer-events: none;
+}
+.qk-pickcard__back-emoji {
+  font-size: calc(var(--qk-font-scale, 1) * clamp(30px, 9vw, 52px));
+  line-height: 1;
+}
+.qk-pickcard__back img {
+  width: 64%;
+  height: 64%;
+  object-fit: contain;
+}
+.qk-pickcard__front {
+  transform: rotateY(180deg);
+  background: var(--qk-accent);
+  color: var(--qk-accent-text);
+  border: 2px solid var(--qk-accent);
+}
+.qk-pickcard__prize-img {
+  display: block;
+  width: 70%;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.qk-pickcard__prize-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.qk-pickcard__prize-label {
+  font-weight: 800;
+  font-size: calc(var(--qk-font-scale, 1) * clamp(10px, 2.6vw, 13px));
+  line-height: 1.15;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  flex: 0 0 auto;
+}
+/* After winning, fade the cards the shopper didn't pick. */
+.qk-pickcard.is-won .qk-pickcard__card:not(.is-flipped) {
+  cursor: default;
+  pointer-events: none;
+}
+.qk-pickcard.is-won .qk-pickcard__card:not(.is-flipped) .qk-pickcard__back {
+  opacity: 0.4;
+  filter: grayscale(0.7);
+}
+
+.qk-pickcard__continue {
+  margin: 20px auto 0;
+}
+/* Locked state: the Continue button sits disabled, counting down how many cards
+   are left to flip, until the final pick unlocks it (mirrors the Gruns flow). */
+.qk-pickcard__continue.is-locked {
+  background: var(--qk-surface);
+  color: var(--qk-text);
+  border-color: var(--qk-border);
+  opacity: 0.55;
+  cursor: default;
+  pointer-events: none;
+}
+.qk-pickcard__counter {
+  margin-top: 14px;
+  font-weight: 700;
+  font-size: calc(var(--qk-font-scale, 1) * 15px);
+  color: var(--qk-text);
+}
+.qk-pickcard__pill {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 2px 9px;
+  border-radius: 8px;
+  background: var(--qk-accent);
+  color: var(--qk-accent-text);
+  font-weight: 800;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qk-pickcard__inner {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   "As seen on" logo marquee (logos block).
+   A pure-CSS scroller: the track holds the logo list twice, and translating it
+   -50% loops seamlessly. Hover (or reduced-motion) pauses it. Shared by the
+   editor preview and the storefront.
+--------------------------------------------------------------------------- */
+.qk-logos {
+  --qk-logos-h: 30px;
+  --qk-logos-dur: 22s;
+  width: 100%;
+  border-radius: 16px;
+  padding: 18px 0;
+  overflow: hidden;
+}
+.qk-logos__eyebrow {
+  text-align: center;
+  font-size: calc(var(--qk-font-scale, 1) * 11px);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: color-mix(in srgb, currentColor 55%, transparent);
+  margin-bottom: 14px;
+}
+.qk-logos--mono .qk-logos__eyebrow,
+.qk-logos[style*="background"] .qk-logos__eyebrow {
+  color: rgba(255, 255, 255, 0.6);
+}
+.qk-logos__wrap {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 72px, #000 calc(100% - 72px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 72px, #000 calc(100% - 72px), transparent);
+}
+.qk-logos__track {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  width: max-content;
+  animation: qk-logos-scroll var(--qk-logos-dur) linear infinite;
+}
+.qk-logos__track:hover {
+  animation-play-state: paused;
+}
+@keyframes qk-logos-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.qk-logos__item {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: var(--qk-logos-h);
+}
+.qk-logos__item img {
+  height: 100%;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+.qk-logos--mono .qk-logos__item img {
+  filter: brightness(0) invert(1);
+  opacity: 0.82;
+}
+.qk-logos__placeholder {
+  display: inline-flex;
+  align-items: center;
+  height: var(--qk-logos-h);
+  padding: 0 16px;
+  border: 1px dashed var(--qk-border, #d0d3d8);
+  border-radius: 8px;
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--qk-subdued, #8a8f98);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qk-logos__track {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 32px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reviews marquee (reviews block). A scrolling wall of review cards; shared by
+   the editor preview and storefront. Follows the theme unless the accent /
+   background overrides are set.
+--------------------------------------------------------------------------- */
+.qk-reviews {
+  --qk-reviews-dur: 22s;
+  --qk-reviews-accent: var(--qk-accent);
+  width: 100%;
+  padding: 20px 16px;
+  border-radius: 18px;
+  background: var(--qk-surface);
+  overflow: hidden;
+}
+.qk-reviews__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.qk-reviews__title {
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--qk-reviews-accent);
+}
+.qk-reviews__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  font-weight: 600;
+  color: var(--qk-subdued);
+  white-space: nowrap;
+}
+.qk-reviews__badge-stars {
+  color: var(--qk-reviews-accent);
+  letter-spacing: 1px;
+}
+.qk-reviews__wrap {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+}
+.qk-reviews__track {
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  animation: qk-reviews-scroll var(--qk-reviews-dur) linear infinite;
+}
+.qk-reviews__track:hover {
+  animation-play-state: paused;
+}
+@keyframes qk-reviews-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.qk-reviews__card {
+  flex: 0 0 auto;
+  width: 232px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 16px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--qk-text) 5%, transparent);
+  border: 1px solid var(--qk-border);
+}
+.qk-reviews__stars {
+  color: var(--qk-reviews-accent);
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.qk-reviews__text {
+  margin: 0 0 12px;
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  line-height: 1.5;
+  color: var(--qk-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.qk-reviews__author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.qk-reviews__avatar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  font-weight: 700;
+  color: var(--qk-accent-text);
+  background: var(--qk-reviews-accent);
+}
+.qk-reviews__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.qk-reviews__name {
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  font-weight: 600;
+  color: var(--qk-text);
+}
+.qk-reviews__verified {
+  font-size: calc(var(--qk-font-scale, 1) * 10px);
+  color: var(--qk-subdued);
+}
+.qk-reviews__check {
+  color: var(--qk-reviews-accent);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qk-reviews__track {
+    animation: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .qk-reviews__track::-webkit-scrollbar { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   With/without comparison bars (barcompare block). Base CSS is the finished
+   state (fills full, numbers shown); .is-playing replays the grow + count-up
+   on slide entry. Shared by editor preview + storefront.
+--------------------------------------------------------------------------- */
+.qk-barcompare {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 28px 22px;
+  border-radius: 22px;
+  background: var(--qk-surface);
+}
+.qk-barcompare__bars {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.qk-barcompare__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 130px;
+}
+.qk-barcompare__value {
+  font-size: calc(var(--qk-font-scale, 1) * 26px);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--qk-text);
+}
+.qk-barcompare__col--right .qk-barcompare__value {
+  color: var(--qk-accent);
+}
+.qk-barcompare__track {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--qk-text) 6%, transparent);
+  overflow: hidden;
+}
+.qk-barcompare__fill {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  border-radius: 14px;
+  background: #d7d9dd;
+  transform-origin: bottom;
+  /* Empty by design — see .qk-progress__fill. */
+  display: block !important;
+}
+.qk-barcompare__col--right .qk-barcompare__fill {
+  background: var(--qk-accent);
+}
+.qk-barcompare.is-playing .qk-barcompare__fill {
+  animation: qk-bar-grow 0.9s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+@keyframes qk-bar-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+.qk-barcompare__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--qk-text);
+}
+.qk-barcompare__caption {
+  text-align: center;
+  font-size: calc(var(--qk-font-scale, 1) * 15px);
+  line-height: 1.5;
+  color: var(--qk-subdued);
+}
+.qk-barcompare__caption strong {
+  color: var(--qk-text);
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------------------
+   Us-vs-them two-line chart (versus block). Base CSS is the finished chart;
+   .is-playing draws the lines in and fades the fills/dots/stat. Coordinates are
+   percentages (viewBox 0 0 100 100, preserveAspectRatio none).
+--------------------------------------------------------------------------- */
+.qk-versus {
+  --qk-versus-brand: var(--qk-text);
+  --qk-versus-rival: #e07460;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 22px;
+  border-radius: 20px;
+  background: var(--qk-surface);
+}
+.qk-versus__title {
+  font-size: calc(var(--qk-font-scale, 1) * 18px);
+  font-weight: 700;
+  color: var(--qk-text);
+  margin-bottom: 16px;
+}
+.qk-versus__legend {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  font-weight: 600;
+}
+.qk-versus__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.qk-versus__legend-item--brand { color: var(--qk-text); }
+.qk-versus__legend-item--rival { color: var(--qk-versus-rival); }
+.qk-versus__swatch {
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+}
+.qk-versus__legend-item--brand .qk-versus__swatch { background: var(--qk-versus-brand); }
+.qk-versus__legend-item--rival .qk-versus__swatch { background: var(--qk-versus-rival); }
+.qk-versus__chart {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+.qk-versus__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.qk-versus__grid {
+  stroke: color-mix(in srgb, var(--qk-text) 12%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+.qk-versus__line {
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.qk-versus__line--brand { stroke: var(--qk-versus-brand); }
+.qk-versus__line--rival { stroke: var(--qk-versus-rival); }
+.qk-versus__area { opacity: 1; }
+.qk-versus__area--brand { fill: color-mix(in srgb, var(--qk-versus-brand) 8%, transparent); }
+.qk-versus__area--rival { fill: color-mix(in srgb, var(--qk-versus-rival) 15%, transparent); }
+.qk-versus__dot {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+.qk-versus__dot--brand { border: 3px solid var(--qk-versus-brand); }
+.qk-versus__dot--rival { border: 3px solid var(--qk-versus-rival); }
+.qk-versus__axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  color: var(--qk-subdued);
+}
+.qk-versus__stat {
+  text-align: center;
+  margin-top: 18px;
+  font-size: calc(var(--qk-font-scale, 1) * 15px);
+  line-height: 1.5;
+  color: var(--qk-subdued);
+}
+.qk-versus__stat strong { color: var(--qk-text); font-weight: 700; }
+
+/* Draw-in: only when .is-playing (so the editor shows the finished chart). */
+.qk-versus.is-playing .qk-versus__line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: qk-versus-draw 1.4s ease-out forwards;
+}
+.qk-versus.is-playing .qk-versus__line--rival { animation-delay: 0.25s; }
+.qk-versus.is-playing .qk-versus__area,
+.qk-versus.is-playing .qk-versus__dot,
+.qk-versus.is-playing .qk-versus__stat {
+  opacity: 0;
+  animation: qk-versus-fade 0.5s ease-out forwards;
+  animation-delay: 1.5s;
+}
+.qk-versus.is-playing .qk-versus__stat { animation-delay: 1.9s; }
+@keyframes qk-versus-draw { to { stroke-dashoffset: 0; } }
+@keyframes qk-versus-fade { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .qk-barcompare.is-playing .qk-barcompare__fill,
+  .qk-versus.is-playing .qk-versus__line,
+  .qk-versus.is-playing .qk-versus__area,
+  .qk-versus.is-playing .qk-versus__dot,
+  .qk-versus.is-playing .qk-versus__stat {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+    transform: none;
+  }
+  .qk-barcompare.is-playing .qk-barcompare__fill { transform: scaleY(1); }
+}
+
+/* ---------------------------------------------------------------------------
+   Target-timeline slider (timeslider block). Interactive on the storefront
+   (quiz.js binds drag); the editor renders it static at the default stop.
+--------------------------------------------------------------------------- */
+.qk-timeslider {
+  --qk-ts-accent: var(--qk-accent);
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 18px;
+  padding: 4px 2px;
+}
+.qk-timeslider__title {
+  text-align: center;
+  font-size: calc(var(--qk-font-scale, 1) * 17px);
+  font-weight: 500;
+  color: var(--qk-text);
+  margin-bottom: 10px;
+}
+.qk-timeslider__value {
+  text-align: center;
+  margin-bottom: 20px;
+  min-height: 48px;
+}
+.qk-timeslider__val {
+  font-size: calc(var(--qk-font-scale, 1) * 40px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--qk-text);
+}
+.qk-timeslider__icons {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 2px;
+  margin-bottom: 10px;
+}
+.qk-timeslider__icon {
+  font-size: calc(var(--qk-font-scale, 1) * 28px);
+  opacity: 0.4;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.qk-timeslider__icon.is-active {
+  opacity: 1;
+  transform: scale(1.15);
+}
+.qk-timeslider__track-wrap {
+  position: relative;
+  padding: 12px 0;
+  touch-action: none;
+}
+.qk-timeslider__track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--qk-text) 12%, transparent);
+  cursor: pointer;
+}
+.qk-timeslider__fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 50%;
+  border-radius: 3px;
+  background: var(--qk-ts-accent);
+  pointer-events: none;
+  /* Empty by design — see .qk-progress__fill. */
+  display: block !important;
+}
+.qk-timeslider__thumb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  /* Empty by design — see .qk-progress__fill. Losing the thumb would leave the
+     slider draggable but invisible. */
+  display: block !important;
+}
+.qk-timeslider__thumb:active { cursor: grabbing; }
+.qk-timeslider__thumb:focus-visible { outline: 2px solid var(--qk-ts-accent); outline-offset: 3px; }
+.qk-timeslider__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 0 2px;
+}
+.qk-timeslider__label {
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  font-weight: 500;
+  color: var(--qk-subdued);
+  transition: color 0.2s ease;
+}
+.qk-timeslider__label.is-active { color: var(--qk-text); font-weight: 600; }
+.qk-timeslider__badges {
+  margin-top: 22px;
+}
+.qk-timeslider__badge {
+  text-align: center;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-size: calc(var(--qk-font-scale, 1) * 15px);
+  font-weight: 600;
+  color: var(--qk-text);
+  background: color-mix(in srgb, var(--qk-ts-accent) 10%, transparent);
+}
+.qk-timeslider__badge:empty { display: none; }
+
+/* ---------------------------------------------------------------------------
+   Before/after compare slider (compare block). Interactive on the storefront;
+   the editor renders it static at the start position.
+--------------------------------------------------------------------------- */
+.qk-compare {
+  --qk-compare-radius: 16px;
+  width: 100%;
+}
+.qk-compare__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--qk-compare-radius);
+  overflow: hidden;
+  cursor: ew-resize;
+  touch-action: none;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  user-select: none;
+}
+.qk-compare__frame--empty {
+  aspect-ratio: 16 / 10;
+  box-shadow: none;
+  border: 1px dashed var(--qk-border);
+}
+.qk-compare__after,
+.qk-compare__before {
+  position: absolute;
+  inset: 0;
+}
+.qk-compare__before { clip-path: inset(0 50% 0 0); }
+.qk-compare__after img,
+.qk-compare__before img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  display: block;
+}
+.qk-compare__ph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  font-weight: 600;
+  color: var(--qk-subdued);
+  background: color-mix(in srgb, var(--qk-text) 5%, transparent);
+}
+.qk-compare__before .qk-compare__ph {
+  background: color-mix(in srgb, var(--qk-text) 10%, transparent);
+}
+.qk-compare__divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  background: #fff;
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+.qk-compare__divider:focus-visible { outline: 2px solid var(--qk-accent); }
+.qk-compare__handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #fff;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  cursor: grab;
+}
+.qk-compare__handle svg { width: 20px; height: 20px; }
+.qk-compare__label {
+  position: absolute;
+  bottom: 14px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  font-weight: 600;
+  color: #fff;
+  pointer-events: none;
+}
+.qk-compare__label--before { left: 12px; }
+.qk-compare__label--after { right: 12px; }
+.qk-compare__hint {
+  text-align: center;
+  margin: 12px 0 0;
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  color: var(--qk-subdued);
+}
+
+/* ---------------------------------------------------------------------------
+   Scratch-to-reveal offer (scratch block). The reward is real DOM; quiz.js
+   overlays a <canvas> foil on the storefront. The editor shows the reward
+   uncovered with a small overlay chip.
+--------------------------------------------------------------------------- */
+.qk-scratch { width: 100%; }
+.qk-scratch__header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.qk-scratch__title {
+  font-size: calc(var(--qk-font-scale, 1) * 22px);
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--qk-text);
+}
+.qk-scratch__subtitle {
+  margin: 8px 0 0;
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+  color: var(--qk-subdued);
+}
+.qk-scratch__area-wrap { position: relative; }
+.qk-scratch__area {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px dashed color-mix(in srgb, var(--qk-accent) 35%, transparent);
+}
+.qk-scratch__reward {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px;
+  text-align: center;
+  background: var(--qk-surface);
+}
+.qk-scratch__eyebrow {
+  font-size: calc(var(--qk-font-scale, 1) * 10px);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--qk-accent);
+}
+.qk-scratch__value {
+  font-size: calc(var(--qk-font-scale, 1) * 44px);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--qk-text);
+}
+.qk-scratch__item {
+  font-size: calc(var(--qk-font-scale, 1) * 16px);
+  font-weight: 700;
+  color: var(--qk-text);
+}
+.qk-scratch__desc {
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  color: var(--qk-subdued);
+}
+.qk-scratch__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+  border-radius: 12px;
+}
+.qk-scratch__canvas:active { cursor: grabbing; }
+.qk-scratch__instruction {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.qk-scratch__instruction.is-hidden { opacity: 0; }
+.qk-scratch__instruction-icon {
+  display: block;
+  font-size: calc(var(--qk-font-scale, 1) * 26px);
+  margin-bottom: 6px;
+  animation: qk-scratch-pulse 2s ease-in-out infinite;
+}
+.qk-scratch__instruction-text {
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+  font-weight: 600;
+}
+@keyframes qk-scratch-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+.qk-scratch__progress {
+  margin-top: 10px;
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--qk-text) 12%, transparent);
+  overflow: hidden;
+}
+.qk-scratch__progress-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  background: var(--qk-accent);
+  transition: width 0.2s ease;
+  /* Empty by design — see .qk-progress__fill. */
+  display: block !important;
+}
+/* Editor-only overlay chip (no canvas in the editor preview). */
+.qk-scratch__editor-note {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: calc(var(--qk-font-scale, 1) * 11px);
+  font-weight: 600;
+}
+.qk-scratch__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+@media (prefers-reduced-motion: reduce) {
+  .qk-scratch__instruction-icon { animation: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   Tap-the-areas diagram (zonemap block). Interactive on the storefront (tap
+   zones → insight carousel); the editor renders it static with nothing chosen.
+--------------------------------------------------------------------------- */
+.qk-zonemap {
+  --qk-zonemap-accent: var(--qk-accent);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+.qk-zonemap__diagram {
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto 10px;
+}
+.qk-zonemap__svg { width: 100%; height: auto; display: block; }
+.qk-zonemap__zone { cursor: pointer; }
+.qk-zonemap__area {
+  fill: #fff;
+  stroke: #e0d5cc;
+  stroke-width: 1.5;
+  transition: fill 0.2s ease, stroke 0.2s ease;
+}
+.qk-zonemap__zone:hover .qk-zonemap__area { fill: #faf5f1; stroke: #cfc2b8; }
+.qk-zonemap__zone.is-selected .qk-zonemap__area {
+  fill: color-mix(in srgb, var(--qk-zonemap-accent) 14%, transparent);
+  stroke: var(--qk-zonemap-accent);
+  stroke-width: 2;
+}
+.qk-zonemap__label {
+  font-size: calc(var(--qk-font-scale, 1) * 10px);
+  font-weight: 700;
+  fill: #b5a79a;
+  text-anchor: middle;
+  pointer-events: none;
+  letter-spacing: 0.05em;
+  transition: fill 0.2s ease;
+}
+.qk-zonemap__zone.is-selected .qk-zonemap__label { fill: var(--qk-zonemap-accent); }
+.qk-zonemap__check { opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
+.qk-zonemap__zone.is-selected .qk-zonemap__check { opacity: 1; }
+.qk-zonemap__check-bg { fill: var(--qk-zonemap-accent); }
+.qk-zonemap__instruction {
+  text-align: center;
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+  color: var(--qk-subdued);
+  margin: 0 0 18px;
+}
+.qk-zonemap__results { position: relative; }
+.qk-zonemap__empty {
+  text-align: center;
+  padding: 26px 20px;
+  border-radius: 14px;
+  border: 1px dashed var(--qk-border);
+  color: var(--qk-subdued);
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+}
+.qk-zonemap__cards {
+  display: none;
+  overflow: hidden;
+  border-radius: 14px;
+}
+.qk-zonemap__track {
+  display: flex;
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.qk-zonemap__card {
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--qk-zonemap-accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--qk-zonemap-accent) 18%, transparent);
+}
+.qk-zonemap__card-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--qk-font-scale, 1) * 15px);
+  font-weight: 700;
+  color: var(--qk-accent-text);
+  background: var(--qk-zonemap-accent);
+}
+.qk-zonemap__card-heading {
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  font-weight: 700;
+  color: var(--qk-zonemap-accent);
+  margin-bottom: 4px;
+}
+.qk-zonemap__card-text {
+  font-size: calc(var(--qk-font-scale, 1) * 13px);
+  line-height: 1.5;
+  color: var(--qk-text);
+}
+.qk-zonemap__nav {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 12px;
+}
+.qk-zonemap__arrow {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--qk-text) 6%, transparent);
+  color: var(--qk-text);
+  font-size: calc(var(--qk-font-scale, 1) * 18px);
+  line-height: 1;
+  cursor: pointer;
+}
+.qk-zonemap__arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+.qk-zonemap__dots { display: flex; gap: 6px; }
+.qk-zonemap__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: color-mix(in srgb, var(--qk-text) 18%, transparent);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.qk-zonemap__dot.is-active {
+  width: 20px;
+  border-radius: 4px;
+  background: var(--qk-zonemap-accent);
+}
+.qk-zonemap__counter {
+  text-align: center;
+  margin-top: 16px;
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+  color: var(--qk-subdued);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.qk-zonemap__counter.is-active { opacity: 1; }
+.qk-zonemap__counter strong { color: var(--qk-zonemap-accent); font-weight: 700; }
+
+/* ---------------------------------------------------------------------------
+   Swipe deck (swipe block). Interactive on the storefront; the editor shows
+   the top of the stack. Cards are stacked first-on-top (last child = visual
+   top) so nth-last-child styles the ones behind.
+--------------------------------------------------------------------------- */
+.qk-swipe {
+  --qk-swipe-accent: var(--qk-accent);
+  --qk-swipe-yes: #22c55e;
+  --qk-swipe-no: #ef4444;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.qk-swipe__header { text-align: center; margin-bottom: 18px; }
+.qk-swipe__title {
+  font-size: calc(var(--qk-font-scale, 1) * 20px);
+  font-weight: 700;
+  color: var(--qk-text);
+}
+.qk-swipe__subtitle {
+  margin: 6px 0 0;
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+  color: var(--qk-subdued);
+}
+.qk-swipe__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.qk-swipe__progress-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--qk-text) 12%, transparent);
+  overflow: hidden;
+}
+.qk-swipe__progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  background: var(--qk-swipe-accent);
+  transition: width 0.3s ease;
+  /* Empty by design — see .qk-progress__fill. */
+  display: block !important;
+}
+.qk-swipe__progress-text {
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  font-weight: 600;
+  color: var(--qk-subdued);
+  white-space: nowrap;
+}
+.qk-swipe__stack {
+  position: relative;
+  height: 320px;
+  margin-bottom: 20px;
+  touch-action: pan-y;
+}
+.qk-swipe__card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--qk-surface);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.qk-swipe__card.is-dragging { cursor: grabbing; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); }
+.qk-swipe__card:nth-last-child(2) { transform: scale(0.95) translateY(10px); z-index: -1; }
+.qk-swipe__card:nth-last-child(3) { transform: scale(0.9) translateY(20px); z-index: -2; }
+.qk-swipe__card:nth-last-child(n + 4) { display: none; }
+.qk-swipe__card.is-swiping { z-index: 10 !important; pointer-events: none !important; }
+.qk-swipe__card-image {
+  height: 155px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--qk-font-scale, 1) * 62px);
+  background: color-mix(in srgb, var(--qk-text) 5%, transparent);
+}
+.qk-swipe__card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+.qk-swipe__card-text {
+  margin: 0;
+  font-size: calc(var(--qk-font-scale, 1) * 18px);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--qk-text);
+}
+.qk-swipe__card-hint {
+  margin: 10px 0 0;
+  font-size: calc(var(--qk-font-scale, 1) * 12px);
+  color: var(--qk-subdued);
+}
+.qk-swipe__indicator {
+  position: absolute;
+  top: 18px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: calc(var(--qk-font-scale, 1) * 17px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+.qk-swipe__indicator--yes {
+  right: 18px;
+  color: var(--qk-swipe-yes);
+  border: 3px solid var(--qk-swipe-yes);
+  background: color-mix(in srgb, var(--qk-swipe-yes) 15%, transparent);
+  transform: rotate(15deg);
+}
+.qk-swipe__indicator--no {
+  left: 18px;
+  color: var(--qk-swipe-no);
+  border: 3px solid var(--qk-swipe-no);
+  background: color-mix(in srgb, var(--qk-swipe-no) 15%, transparent);
+  transform: rotate(-15deg);
+}
+.qk-swipe__buttons {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+}
+.qk-swipe__btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.qk-swipe__btn:hover { transform: scale(1.08); }
+.qk-swipe__btn:active { transform: scale(0.95); }
+.qk-swipe__btn svg { width: 26px; height: 26px; }
+.qk-swipe__btn--no {
+  color: var(--qk-swipe-no);
+  background: color-mix(in srgb, var(--qk-swipe-no) 16%, transparent);
+}
+.qk-swipe__btn--yes {
+  color: var(--qk-swipe-yes);
+  background: color-mix(in srgb, var(--qk-swipe-yes) 16%, transparent);
+}
+.qk-swipe__complete {
+  text-align: center;
+  padding: 36px 20px;
+}
+.qk-swipe__complete-icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--qk-accent-text);
+  background: var(--qk-swipe-accent);
+}
+.qk-swipe__complete-icon svg { width: 38px; height: 38px; }
+.qk-swipe__complete-title {
+  font-size: calc(var(--qk-font-scale, 1) * 22px);
+  font-weight: 700;
+  color: var(--qk-text);
+  margin-bottom: 8px;
+}
+.qk-swipe__complete-sub {
+  margin: 0;
+  font-size: calc(var(--qk-font-scale, 1) * 14px);
+  color: var(--qk-subdued);
+}
+.qk-swipe__complete-sub strong { color: var(--qk-swipe-accent); font-weight: 700; }
+
+/* Custom-HTML block: a sandboxed iframe (see app-embed.liquid). Full width; its
+   height is set by quiz.js from the frame's posted content height. The min-height
+   is just a pre-measure placeholder so the layout doesn't jump to 0. */
+.qk-customhtml {
+  display: block;
+  width: 100%;
+  min-height: 24px;
+  border: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   Theme-proofing (storefront only — the editor preview has no #quizlanding-root)
+
+   Merchant themes ship global CSS that outguns our class selectors: e.g.
+   `button:not([class^="shopify"]) { border-radius: 30px }` (specificity 0,1,1
+   beats .qk-option's 0,1,0), `[class*="btn-"] { … }` (matches .qk-btn--primary),
+   or `h2 { font-family: X !important }` / bare `span { font-family: X !important }`.
+   The rules below re-assert the quiz's own tokens under the #quizlanding-root
+   id with !important — (1,x,x)+important beats any class/attribute theme rule,
+   important or not. Three cascade layers, weakest to strongest:
+
+     1. the :where(*) blanket (1,0,0) defaults every descendant font to inherit;
+     2. the component rules (1,1,0) re-pin the fonts/radii the base rules above
+        assign — keep them mirroring those base rules;
+     3. per-block overrides beat both: the Liquid emits inline font-family with
+        !important, and quiz.js sets its continue-radius override with
+        setProperty(…, "important") (inline+important outranks stylesheet).
+
+   "Inherit store theme" fonts survive: with no quiz font chosen the var is
+   unset, the declaration is invalid at computed-value time, and font-family
+   falls back to the inherited (theme) font — exactly what "inherit" means.
+   Merchant customCss that needs to fight these rules must use the same
+   pattern (#quizlanding-root … !important).
+   -------------------------------------------------------------------------- */
+#quizlanding-root :where(*) {
+  font-family: inherit !important;
+}
+#quizlanding-root {
+  font-family: var(--qk-body-font) !important;
+}
+#quizlanding-root .qk-option,
+#quizlanding-root .qk-btn,
+#quizlanding-root .qk-input__label,
+#quizlanding-root .qk-input__field,
+#quizlanding-root .qk-nav__next,
+#quizlanding-root .qk-spinner__label,
+#quizlanding-root .qk-spinner__step-label,
+#quizlanding-root .qk-graphgoal {
+  font-family: var(--qk-body-font) !important;
+}
+#quizlanding-root .qk-heading,
+#quizlanding-root .qk-product__title {
+  font-family: var(--qk-heading-font) !important;
+}
+#quizlanding-root .qk-pickcard__title {
+  font-family: var(--qk-heading-font, inherit) !important;
+}
+#quizlanding-root .qk-option,
+#quizlanding-root .qk-btn,
+#quizlanding-root .qk-nav__next,
+#quizlanding-root .qk-input__field {
+  border-radius: var(--qk-radius) !important;
+}
+#quizlanding-root .qk-swipe__btn,
+#quizlanding-root .qk-zonemap__arrow {
+  border-radius: 50% !important;
+}
+/* Logo image: the quiz sits inside the page's rich-text wrapper on Dawn-family
+   themes, whose `.rte img { border: var(--media-border-width) solid …;
+   border-radius: var(--media-radius); box-shadow: … }` applies the theme's
+   "media" border/radius/shadow settings to our logo (seen on triitmnt, whose
+   theme CSS already hand-zeroes the radius). A logo is not theme media — pin
+   it clean. */
+#quizlanding-root .qk-logo img {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+/* Text color: theme link/button rules (`a { color: … !important }`,
+   `[class*="btn-"] { color: … }`) repaint the qk-btns — most visibly the
+   product CTA, the only qk-btn rendered as an <a>. Richtext label spans keep
+   their pinned inline colors (the pin targets the button element, descendants
+   inherit). .qk-nav__next stays unpinned: its per-slide color override is
+   plain inline style in quiz.js, which a stylesheet !important would beat. */
+#quizlanding-root .qk-btn--primary {
+  color: var(--qk-accent-text) !important;
+}
+#quizlanding-root .qk-btn--secondary {
+  color: var(--qk-text) !important;
+}
+#quizlanding-root a.qk-btn {
+  text-decoration: none !important;
+}
