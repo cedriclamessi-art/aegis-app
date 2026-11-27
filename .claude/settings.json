@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "sumi-marketplace": {
+      "source": { "source": "github", "repo": "phazurlabs/sumi" }
+    }
+  },
+  "enabledPlugins": {
+    "sumi@sumi-marketplace": true
+  }
+}
